@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ihlauncher</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--isz:86px;--font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Inter','Segoe UI',Roboto,system-ui,sans-serif;--accent:#0A84FF;--accent-soft:rgba(10,132,255,.22);--ok:#30D158;--bad:#FF453A;--warn:#FF9F0A;--info:#64D2FF}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);overflow:hidden;user-select:none;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+[data-theme=dark]{--t1:#fff;--t2:rgba(235,235,245,.62);--t3:rgba(235,235,245,.32);--glass:rgba(60,60,67,.52);--glass2:rgba(90,90,100,.62);--stroke:rgba(255,255,255,.12);--panel:rgba(28,28,32,.95);--sep:rgba(255,255,255,.09);--bg:#000;--shadow:rgba(0,0,0,.5);--topbg:rgba(20,20,24,.55)}
+[data-theme=midnight]{--t1:#fff;--t2:rgba(220,230,255,.65);--t3:rgba(220,230,255,.32);--glass:rgba(40,60,110,.42);--glass2:rgba(70,100,170,.55);--stroke:rgba(150,180,255,.16);--panel:rgba(10,20,45,.95);--sep:rgba(150,180,255,.12);--bg:#02050d;--shadow:rgba(0,0,10,.6);--topbg:rgba(8,18,40,.55)}
+[data-theme=aurora]{--t1:#fff;--t2:rgba(240,235,255,.64);--t3:rgba(240,235,255,.32);--glass:rgba(70,60,110,.40);--glass2:rgba(110,95,170,.55);--stroke:rgba(200,180,255,.16);--panel:rgba(20,16,36,.95);--sep:rgba(200,180,255,.10);--bg:#06060c;--shadow:rgba(0,0,0,.55);--topbg:rgba(16,12,30,.55)}
+[data-theme=light]{--t1:#111114;--t2:rgba(60,60,67,.72);--t3:rgba(60,60,67,.38);--glass:rgba(255,255,255,.62);--glass2:rgba(255,255,255,.9);--stroke:rgba(0,0,0,.08);--panel:rgba(246,246,250,.97);--sep:rgba(0,0,0,.08);--bg:#eceff5;--shadow:rgba(30,30,60,.22);--topbg:rgba(255,255,255,.6)}
+.noblur{--glass:rgba(48,48,54,.94);--glass2:rgba(76,76,84,.97);--topbg:rgba(20,20,24,.97)}
+.noblur[data-theme=light]{--glass:rgba(250,250,253,.97);--glass2:#fff;--topbg:rgba(250,250,253,.98)}
+.noblur *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.bg{position:fixed;inset:0;z-index:1;background-size:cover;background-position:center}
+[data-theme=dark] .bg.def{background:radial-gradient(120% 90% at 12% 0%,#2a2a40 0%,transparent 55%),radial-gradient(100% 80% at 100% 100%,#122440 0%,transparent 55%),#050507}
+[data-theme=light] .bg.def{background:radial-gradient(120% 90% at 10% 0%,#fff,transparent 55%),radial-gradient(100% 80% at 100% 100%,#cfe3ff,transparent 60%),#eceff5}
+[data-theme=midnight] .bg.def{background:radial-gradient(90% 70% at 80% 10%,rgba(10,132,255,.35),transparent 60%),linear-gradient(160deg,#0b1d3a,#050b1a 60%,#02050d)}
+[data-theme=aurora] .bg.def{background:radial-gradient(90% 70% at 20% 15%,rgba(94,92,230,.55),transparent 60%),radial-gradient(80% 60% at 88% 85%,rgba(48,209,88,.32),transparent 60%),#06060c}
+:focus{outline:none}
+[tabindex],button{cursor:pointer}
+.topbar{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:16px 44px;background:var(--topbg);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-bottom:1px solid var(--stroke);z-index:100}
+.tl{display:flex;align-items:baseline;gap:18px}.tr{display:flex;align-items:center;gap:14px}
+#clock{font-size:40px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#date{font-size:16px;color:var(--t2);font-weight:500}
+.ib,.wifi,.search{background:var(--glass);border:1px solid var(--stroke);transition:.18s;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ib{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;position:relative}
+.ib:focus,.ib:hover,.wifi:focus,.wifi:hover{background:var(--glass2);box-shadow:0 0 0 3px var(--accent);transform:scale(1.08)}
+.badge{position:absolute;top:-4px;right:-4px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:12px}
+.wifi{display:flex;align-items:center;gap:8px;padding:0 16px;height:48px;border-radius:24px;font-size:15px;font-weight:500}
+.search{display:flex;align-items:center;gap:10px;padding:0 18px;height:48px;border-radius:24px;width:300px}
+.search input{flex:1;background:transparent;border:none;color:var(--t1);font-size:16px;outline:none;font-family:inherit}.search input::placeholder{color:var(--t3)}
+.search:focus-within{box-shadow:0 0 0 3px var(--accent);background:var(--glass2)}
+#content{padding:104px 44px 70px;position:relative;z-index:10;height:100vh;overflow-y:auto}
+#content::-webkit-scrollbar{width:0}
+.row{margin-bottom:30px}
+.rt{display:inline-flex;align-items:center;font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 12px 6px;padding:6px 14px;border-radius:14px;transition:.18s}
+.rt:focus{background:var(--glass2);box-shadow:0 0 0 3px var(--accent)}
+.rs{display:flex;gap:20px;overflow-x:auto;padding:12px 8px 20px}.rs::-webkit-scrollbar{height:0}
+.card{flex-shrink:0;background:var(--glass);border:1px solid var(--stroke);border-radius:24px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+.card:focus,.card:hover{transform:scale(1.06);box-shadow:0 0 0 4px var(--accent),0 24px 44px var(--shadow)}
+.hd{width:240px;height:124px;display:flex;flex-direction:column;justify-content:space-between}
+.hd .l{font-size:13px;font-weight:600;letter-spacing:.4px;color:var(--t2)}.hd .d{font-size:22px;font-weight:600}.hd.on .l{color:var(--ok)}.hd.off{opacity:.5}
+.wg{width:290px;height:150px}.wg.big{width:430px}
+.wt{font-size:13px;font-weight:600;letter-spacing:.5px;color:var(--t2);margin-bottom:10px}
+.wv{font-size:34px;font-weight:600;letter-spacing:-.02em}.wv.big{font-size:54px;font-weight:700;font-variant-numeric:tabular-nums}.ws{font-size:14px;color:var(--t2);margin-top:6px}
+.wn{font-size:17px;line-height:1.35;max-height:84px;overflow:hidden;white-space:pre-wrap}
+.wsc{display:flex;align-items:center;gap:16px;height:100px}.wsc .ico{width:72px;height:72px}.wsc div:last-child{font-size:20px;font-weight:600}
+.bar{height:8px;background:var(--sep);border-radius:4px;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px;transition:width 1s}
+.addw{width:190px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--t2);border-style:dashed;background:transparent}.addw b{font-size:40px;font-weight:300;line-height:1}
+.fav{width:210px;height:124px;padding:0;background:var(--glass)}
+.fav .th{position:absolute;inset:0;background-size:cover;background-position:center}.fav .th.ic{background-size:60px;background-repeat:no-repeat;background-position:center 34%}
+.fav .nm{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.78));color:#fff;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--isz) + 50px),1fr));gap:14px 10px;padding:8px 6px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 6px 10px;border-radius:26px;transition:transform .2s,box-shadow .2s,background .2s}
+.iw{position:relative}.tile .ico{width:var(--isz);height:var(--isz);border-radius:22.5%;overflow:hidden;background:var(--glass);box-shadow:0 8px 18px var(--shadow)}
+.ico{border-radius:22.5%;overflow:hidden;background:var(--glass);flex-shrink:0}
+.ico img{width:100%;height:100%;object-fit:cover;display:block}
+.tl2{font-size:14px;font-weight:500;text-align:center;max-width:calc(var(--isz) + 40px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tile:focus,.tile:hover{background:var(--glass2);transform:scale(1.09);box-shadow:0 0 0 4px var(--accent),0 20px 36px var(--shadow)}
+.tile .fi{width:var(--isz);height:var(--isz);border-radius:22.5%;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:9px;background:var(--glass);box-shadow:0 8px 18px var(--shadow)}
+.fi img{width:100%;height:100%;border-radius:22%;object-fit:cover}.fi .em{grid-column:1/3;grid-row:1/3;display:flex;align-items:center;justify-content:center;font-size:40px}
+.bdg{position:absolute;top:-6px;right:-6px;min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:var(--bad);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.45);z-index:2}.fav .bdg{top:8px;right:8px}
+.nw{position:absolute;top:-6px;left:-6px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:10px;z-index:2;letter-spacing:.4px;box-shadow:0 2px 8px rgba(0,0,0,.4)}.fav .nw{top:8px;left:8px}
+.tile.hid{opacity:.45}
+.qh{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:16px}.qh .ico{width:56px;height:56px}.qh .qn{font-size:21px;font-weight:700;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.qa{width:94px;padding:14px 4px 12px;border-radius:20px;background:var(--glass);border:1px solid var(--stroke);text-align:center;font-size:13px;font-weight:600;transition:.15s}.qa b{display:block;font-size:30px;font-weight:400;margin-bottom:6px}
+.qa:focus,.qa:hover{background:var(--accent);color:#fff;transform:scale(1.07);box-shadow:0 8px 24px var(--shadow)}
+.vr{display:flex;align-items:center;gap:14px}.vr img{width:44px;height:44px;border-radius:22%;object-fit:cover;flex-shrink:0}.vr .vi{width:44px;height:44px;border-radius:22%;background:var(--glass2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.cd{width:22px;height:22px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:10px;box-shadow:0 0 0 2px var(--stroke)}
+.empty{color:var(--t2);padding:20px;font-size:15px}
+.side{position:fixed;top:0;right:-520px;width:470px;height:100vh;background:var(--panel);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-left:1px solid var(--stroke);z-index:9000;transition:right .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;overflow-y:auto;padding:30px 24px;visibility:hidden}
+.side.open{right:0;visibility:visible;transition:right .32s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.side::-webkit-scrollbar{width:0}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.pt{font-size:32px;font-weight:700;letter-spacing:-.02em}
+.pi{background:var(--glass);border:1px solid var(--stroke);border-radius:20px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:.18s}
+.pi:focus,.pi:hover{background:var(--glass2);box-shadow:0 0 0 3px var(--accent)}
+.pi .ic{width:46px;height:46px;border-radius:22%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.pi .t{font-size:18px;font-weight:600;margin-bottom:2px}.pi .s{font-size:13px;color:var(--t2);line-height:1.35}.pi .c{flex:1;min-width:0}
+.nt{border-left:4px solid var(--accent)}
+.ov2{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:9500;display:none;align-items:center;justify-content:center}.ov2.show{display:flex}
+#dlg{z-index:9800}
+.modal{width:94%;max-width:1140px;max-height:90vh;background:var(--panel);border:1px solid var(--stroke);border-radius:32px;padding:30px 34px;overflow-y:auto;position:relative;box-shadow:0 30px 80px var(--shadow)}
+.modal::-webkit-scrollbar{width:0}
+.mt{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:10px 0 18px}
+.sec{font-size:13px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--t2);margin:20px 0 10px 4px}
+.dlgbox{width:90%;max-width:540px;max-height:84vh;overflow-y:auto;background:var(--panel);border:1px solid var(--stroke);border-radius:28px;padding:22px;box-shadow:0 30px 80px var(--shadow)}
+.dlgbox::-webkit-scrollbar{width:0}
+.dt{font-size:21px;font-weight:700;margin-bottom:12px;word-break:break-word;text-align:center}.dm{font-size:15px;color:var(--t2);margin-bottom:14px;line-height:1.5;white-space:pre-wrap}
+.ditem{padding:14px 18px;border-radius:14px;font-size:17px;font-weight:500;transition:.12s}.ditem:focus,.ditem:hover{background:var(--accent);color:#fff}
+.dsep{font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);padding:12px 18px 4px}
+.drow{display:flex;gap:10px;margin-top:14px;justify-content:center}
+.dlgbox input,.modal input.tx{width:100%;padding:13px 16px;background:var(--glass);border:1px solid var(--stroke);border-radius:14px;color:var(--t1);font-size:17px;outline:none;font-family:inherit}
+.dlgbox input:focus,.modal input.tx:focus{box-shadow:0 0 0 3px var(--accent)}
+.btn{display:inline-block;padding:11px 22px;border-radius:999px;border:1px solid var(--stroke);background:var(--glass2);font-size:15px;font-weight:600;margin:0 8px 8px 0;transition:.15s}
+.btn:focus,.btn:hover{box-shadow:0 0 0 3px var(--accent);transform:scale(1.05)}
+.btn.g{background:rgba(48,209,88,.22);color:var(--ok);border-color:rgba(48,209,88,.4)}.btn.r{background:rgba(255,69,58,.2);color:var(--bad);border-color:rgba(255,69,58,.4)}.btn.b{background:var(--accent);color:#fff;border-color:transparent}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sc{background:var(--glass);border:1px solid var(--stroke);border-radius:22px;padding:16px;display:flex;gap:14px;align-items:center;transition:.18s}
+.sc:focus,.sc:hover{background:var(--glass2);box-shadow:0 0 0 3px var(--accent);transform:scale(1.03)}
+.sic{width:50px;height:50px;border-radius:22%;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.sc .t{font-size:16px;font-weight:600;margin-bottom:2px}.sc .s{font-size:12px;color:var(--t2);line-height:1.3}
+.hero{background:var(--glass);border:1px solid var(--stroke);border-radius:24px;padding:20px 22px;margin-bottom:6px}
+.hero .h1{font-size:22px;font-weight:700}.hero .h2{font-size:14px;color:var(--t2);margin-top:4px;line-height:1.5}
+.r2{background:var(--glass);border:1px solid var(--stroke);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.15s}
+.r2:focus,.r2:hover{background:var(--glass2);box-shadow:0 0 0 3px var(--accent)}.r2 .n{font-size:16px;font-weight:500}.r2 .p{font-size:11px;color:var(--t3);font-family:ui-monospace,Menlo,monospace;word-break:break-all;margin-top:2px}.r2 .s2{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.35}
+.bd{padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;vertical-align:middle}.bd.a{background:rgba(48,209,88,.2);color:var(--ok)}.bd.f{background:rgba(100,210,255,.18);color:var(--info)}.bd.u{background:rgba(255,69,58,.2);color:var(--bad)}.bd.w{background:rgba(255,159,10,.2);color:var(--warn)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.chip{padding:8px 18px;border-radius:20px;border:1px solid var(--stroke);background:var(--glass);font-size:14px;font-weight:500}.chip:focus{box-shadow:0 0 0 3px var(--accent)}.chip.on{background:var(--accent);color:#fff;border-color:transparent}
+.tog{width:52px;height:30px;border-radius:15px;background:var(--sep);position:relative;flex-shrink:0;transition:.2s}.tog:after{content:'';position:absolute;width:26px;height:26px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 2px 4px rgba(0,0,0,.3)}.tog.on{background:var(--ok)}.tog.on:after{left:24px}
+#term{background:#000;color:#e8e8ed;border:1px solid var(--stroke);border-radius:16px;padding:16px;font-family:ui-monospace,Menlo,monospace;font-size:13px;height:220px;overflow-y:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--ok)}.nf{color:var(--t2);font-size:14px;margin-bottom:12px;line-height:1.5}
+.kv{display:flex;justify-content:space-between;padding:13px 4px;border-bottom:1px solid var(--sep);font-size:16px;gap:20px}.kv span:first-child{color:var(--t2)}
+.toast{position:fixed;bottom:34px;left:50%;transform:translateX(-50%) translateY(140px);background:var(--panel);border:1px solid var(--stroke);padding:14px 26px;border-radius:999px;box-shadow:0 14px 40px var(--shadow);z-index:99999;transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;gap:12px;font-size:16px;font-weight:500;max-width:80%;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.ts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.to{padding:14px;border-radius:22px;border:1px solid var(--stroke);background:var(--glass);text-align:center;font-size:15px;font-weight:600;transition:.18s}.to.on{box-shadow:0 0 0 3px var(--accent)}.to:focus{box-shadow:0 0 0 4px var(--accent);transform:scale(1.04)}
+.pv{display:block;height:70px;border-radius:14px;margin:0 0 10px;border:1px solid var(--stroke)}.pv.dark{background:linear-gradient(135deg,#2a2a40,#050507)}.pv.light{background:linear-gradient(135deg,#fff,#cfe3ff)}.pv.midnight{background:linear-gradient(135deg,#1d3f7a,#050b1a)}.pv.aurora{background:linear-gradient(135deg,#5E5CE6,#30D158 140%)}
+.acs{display:flex;gap:14px;flex-wrap:wrap}.ac{width:84px;height:54px;border-radius:16px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font-size:12px;font-weight:700;color:#fff;transition:.15s;text-shadow:0 1px 3px rgba(0,0,0,.4)}.ac.on{box-shadow:0 0 0 3px var(--t1)}.ac:focus{box-shadow:0 0 0 4px var(--t1);transform:scale(1.08)}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}.wi{aspect-ratio:16/9;border-radius:18px;border:3px solid transparent;position:relative;overflow:hidden;transition:.15s}.wi.on,.wi:focus{border-color:var(--accent)}
+.wi b{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;padding:6px;border-radius:10px;font-size:12px;text-align:center;font-weight:500}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}.sm{background:var(--glass);border:1px solid var(--stroke);border-radius:18px;padding:14px;text-align:center}.sm b{display:block;font-size:30px;font-weight:700}.sm span{font-size:12px;color:var(--t2)}
+.wide{display:block;width:100%}
+</style></head>
+<body data-theme="dark">
+<div class="bg def" id="bg"></div>
+<div class="topbar">
+ <div class="tl"><div id="clock">--:--</div><div id="date"></div></div>
+ <div class="tr">
+  <div class="search"><span>🔍</span><input id="q" placeholder="Uygulama ara" oninput="renderGrid()" data-submit="searchEnter"></div>
+  <div class="wifi" onclick="N('openSettings',{k:'net'})"><span id="wsig">📶</span><span id="wname">…</span></div>
+  <div class="ib" onclick="openPanel('notif')">🔔<span class="badge" id="nb" style="display:none">0</span></div>
+  <div class="ib" id="mic" onclick="voice()">🎤</div>
+  <div class="ib" onclick="openPanel('settings')">⚙️</div>
+ </div>
+</div>
+<div class="side" id="notifPanel"></div>
+<div class="side" id="settingsPanel"></div>
+<div id="content">
+ <div class="row" id="row-in"><div class="rt" data-f="1" data-row="in">Giriş Kaynakları</div><div class="rs" id="inRow"></div></div>
+ <div class="row" id="row-wg"><div class="rt" data-f="1" data-row="wg">Kartlar</div><div class="rs" id="wgRow"></div></div>
+ <div class="row" id="row-fav"><div class="rt" data-f="1" data-row="fav">Favoriler</div><div class="rs" id="favRow"></div></div>
+ <div class="row" id="row-apps"><div class="rt" data-f="1" data-row="apps">Tüm Uygulamalar</div><div class="grid" id="grid"></div></div>
+</div>
+<div class="ov2" id="modal"><div class="modal"><div id="mbody"></div></div></div>
+<div class="ov2" id="dlg"><div class="dlgbox" id="dlgbox"></div></div>
+<div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
+<script src="db.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const q=s=>JSON.stringify(String(s)).replace(/"/g,'&quot;');   /* HTML attribute içine güvenli JS string */
+const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'};
+const THEMES={dark:'iOS Koyu',light:'iOS Açık',midnight:'Gece Mavisi',aurora:'Aurora'};
+const ACC={blue:['#0A84FF','Mavi'],green:['#30D158','Yeşil'],orange:['#FF9F0A','Turuncu'],pink:['#FF375F','Pembe'],purple:['#BF5AF2','Mor'],teal:['#40C8E0','Turkuaz']};
+const SIZES={s:['Küçük',72],m:['Orta',86],l:['Büyük',104]};
+const ROWS={in:'Giriş Kaynakları',wg:'Kartlar',fav:'Favoriler',apps:'Tüm Uygulamalar'},ROWI={in:'📺',wg:'🧩',fav:'⭐',apps:'🔲'};
+const DEF={fav:[],hidden:[],order:[],folders:{},theme:'dark',accent:'blue',wall:'',blur:true,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
+ rmlog:{},updRepo:'',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'m',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
+let S=JSON.parse(JSON.stringify(DEF));
+if(typeof Native==='undefined'){window.Native={sync:()=>'{}',call:(id,m)=>setTimeout(()=>window.__res(id,m==='apps'?'[]':'{}'),10)}}
+const pend={};let seq=0;
+function N(m,a){return new Promise(r=>{const id='c'+(++seq);pend[id]=r;try{Native.call(id,m,JSON.stringify(a||{}))}catch(e){delete pend[id];r({error:String(e)})}})}
+window.__res=(id,s)=>{const r=pend[id];delete pend[id];let o;try{o=JSON.parse(s)}catch(e){o={error:s}}if(r)r(o)};
+function NS(m,a){try{return JSON.parse(Native.sync(m,JSON.stringify(a||{})))}catch(e){return {}}}
+function saveNow(){clearTimeout(svT);Native.sync('setState',JSON.stringify({s:JSON.stringify(S)}))}
+let svT;function save(){clearTimeout(svT);svT=setTimeout(()=>Native.sync('setState',JSON.stringify({s:JSON.stringify(S)})),250)}
+function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Object.assign(S,s);
+ ['nightAuto','nightOn','clock','removed'].forEach(k=>delete S[k]);              /* eski sürüm alanları */
+ if(!THEMES[S.theme])S.theme='dark';if(!SIZES[S.iconSize])S.iconSize='m';S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
+ for(const k of ['keymap','keyNames','cecNames','folders','labels','rmlog'])S[k]=S[k]||{};
+ for(const k of ['fav','hidden','order','bootApps','hist','inOrder','widgets'])if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(DEF[k]));
+ if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
+ for(const r of DEF.rows)if(!S.rows.some(x=>x.id===r.id))S.rows.push({id:r.id,on:true});
+ if(!S.wseq)S.wseq=S.widgets.length+3}
+let tt;function toast(i,m){$('#ti').textContent=i;$('#tm').textContent=m;$('#toast').classList.add('show');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('show'),3300)}
+window.__toast=toast;
+/* ===== Tema ===== */
+function applyTheme(){document.body.dataset.theme=S.theme;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--isz',SIZES[S.iconSize][1]+'px');document.body.classList.toggle('noblur',!S.blur)}
+/* ===== Saat ===== */
+function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+ $('#clock').textContent=t;$('#date').textContent=d;setB('time',t);setB('date2',d)}
+function setB(k,v){$$('[data-b="'+k+'"]').forEach(e=>e.textContent=v)}
+/* ===== Odak / D-pad ===== */
+const SEL='[onclick],button,input,[data-f]';
+function fx(){document.querySelectorAll(SEL).forEach(e=>{if(e.tagName!=='INPUT'&&e.tagName!=='BUTTON'&&!e.hasAttribute('tabindex'))e.setAttribute('tabindex','0')})}
+new MutationObserver(()=>requestAnimationFrame(fx)).observe(document.body,{childList:true,subtree:true});
+let panel=null,opener=null;
+function layer(){if($('#dlg').classList.contains('show'))return $('#dlg');if($('#modal').classList.contains('show'))return $('#modal');if(panel)return $('#'+panel+'Panel');return null}
+function focusables(){const L=layer();let els=[...(L||document.body).querySelectorAll(SEL)];if(!L)els=els.filter(e=>!e.closest('.side,.ov2'));return els.filter(e=>!e.disabled&&e.getClientRects().length>0)}
+function focusEl(e){e.focus({preventScroll:true});e.scrollIntoView({block:'center',inline:'center'})}
+function focusFirst(){fx();const l=focusables();if(l.length)focusEl(l.find(e=>e.tagName!=='INPUT'&&!e.classList.contains('rt'))||l[0])}
+let fkeep=null;function keepNext(){const i=focusables().indexOf(document.activeElement);fkeep=i<0?null:i}
+function afterOpen(){if(fkeep!=null){fx();const l=focusables();const i=fkeep;fkeep=null;if(l[i]){focusEl(l[i]);return}}focusFirst()}
+function navigate(dir){const cur=document.activeElement,l=focusables();if(!cur||!l.includes(cur)){focusFirst();return}
+ const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let best=null,bs=1e9;
+ for(const e of l){if(e===cur)continue;const b=e.getBoundingClientRect(),x=b.left+b.width/2-cx,y=b.top+b.height/2-cy;let p,s;
+  if(dir==='r'){if(x<=4)continue;p=x;s=Math.abs(y)}else if(dir==='l'){if(x>=-4)continue;p=-x;s=Math.abs(y)}else if(dir==='d'){if(y<=4)continue;p=y;s=Math.abs(x)}else{if(y>=-4)continue;p=-y;s=Math.abs(x)}
+  const sc=p+s*((dir==='l'||dir==='r')?3:1.5);if(sc<bs){bs=sc;best=e}}
+ if(best)focusEl(best)}
+let lp=false;
+const CK={183:'red',403:'red',184:'green',404:'green',185:'yellow',405:'yellow',186:'blue',406:'blue'},CKN={ColorF0Red:'red',ColorF1Green:'green',ColorF2Yellow:'yellow',ColorF3Blue:'blue'};
+document.addEventListener('keydown',e=>{const a=document.activeElement,inp=a&&a.tagName==='INPUT',k=e.key;
+ const ck=CK[e.keyCode]||CKN[k];if(ck&&!inp){e.preventDefault();if(!e.repeat&&!layer())runAct(S.colorKeys[ck]);return}
+ const D={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r'}[k];
+ if(D){if(inp&&(D==='l'||D==='r'))return;e.preventDefault();navigate(D);return}
+ if(k==='Enter'){if(inp){const f=a.dataset.submit;if(f&&window[f]){e.preventDefault();window[f]()}return}
+  e.preventDefault();if(!e.repeat)lp=false;else if(!lp){lp=true;longPress(a)}return}
+ if(k==='ContextMenu'&&!inp){e.preventDefault();longPress(a);return}     /* (eski sürümde keyCode 82 = 'R' harfi yazmayı engelliyordu) */
+ if(k==='Escape'||(k==='Backspace'&&!inp)){e.preventDefault();window.__back()}
+});
+document.addEventListener('keyup',e=>{if(e.key==='Enter'){const a=document.activeElement;if(a&&a!==document.body&&a.tagName!=='INPUT'&&!lp)a.click();lp=false}});
+/* dokunmatik / fare ile uzun basma */
+const LPSEL='[data-p],[data-fold],[data-nk],[data-in],[data-w],[data-row],[data-addw]';
+let lpT=null,lpFired=false;
+document.addEventListener('touchstart',e=>{lpFired=false;clearTimeout(lpT);const t=e.target.closest(LPSEL);if(!t)return;lpT=setTimeout(()=>{lpFired=true;longPress(t)},550)},{passive:true});
+['touchend','touchmove','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(lpT),{passive:true}));
+document.addEventListener('click',e=>{if(lpFired){e.stopPropagation();e.preventDefault();lpFired=false}},true);
+document.addEventListener('contextmenu',e=>{e.preventDefault();longPress(e.target)});
+function longPress(a){if(!a||!a.closest)return;let t;const rid=(a.closest('.row')||{id:''}).id.slice(4);
+ if(t=a.closest('[data-p]')){if(S.quickBar)quickBar(t.dataset.p,rid);else appMenu(t.dataset.p,rid);return}
+ if(t=a.closest('[data-fold]')){folderMenu(t.dataset.fold);return}
+ if(t=a.closest('[data-nk]')){N('notifCancel',{k:t.dataset.nk}).then(loadNotifs);return}
+ if(t=a.closest('[data-in]')){inputMenu(+t.dataset.in);return}
+ if(t=a.closest('[data-w]')){widgetMenu(t.dataset.w);return}
+ if(t=a.closest('[data-addw]')){addWidgetMenu();return}
+ if(t=a.closest('[data-row]')){rowMenu(t.dataset.row)}}
+/* ===== Diyalog / modal ===== */
+function showDlg(){$('#dlg').classList.add('show');setTimeout(focusFirst,30)}
+function closeDlg(){$('#dlg').classList.remove('show');$('#dlgbox').style.maxWidth=''}
+let menuActs=[],qActs=[];
+function quickBar(p,rid){const isF=S.fav.includes(p),hid=S.hidden.includes(p),a=APPS.find(x=>x.p===p),sys=a?a.s:false;
+ const it=[['▶️','Aç',()=>launch(p)],[isF?'⭐':'☆',isF?'Favoriden çıkar':'Favori',()=>toggleFav(p)],[hid?'👁️':'🙈',hid?'Göster':'Gizle',()=>toggleHide(p)],['🧊','Dondur',()=>pmDo('freeze',p)],['🗑️','Kaldır',()=>uninstallApp(p,sys)],['⋯','Daha fazla',()=>appMenu(p,rid)]];
+ qActs=it.map(i=>i[2]);
+ $('#dlgbox').style.maxWidth='680px';
+ $('#dlgbox').innerHTML='<div class="qh"><div class="ico"><img src="'+icon(p)+'" alt=""></div><div class="qn">'+esc(lab(p))+'</div></div><div class="qb">'+it.map((i,k)=>'<div class="qa" onclick="qaPick('+k+')"><b>'+i[0]+'</b>'+i[1]+'</div>').join('')+'</div>';showDlg()}
+function qaPick(k){closeDlg();qActs[k]()}
+function menu(title,items){menuActs=items.map(i=>typeof i==='string'?null:i[1]);
+ $('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div>'+items.map((i,k)=>typeof i==='string'?'<div class="dsep">'+esc(i)+'</div>':'<div class="ditem" onclick="menuPick('+k+')">'+i[0]+'</div>').join('');showDlg()}
+function menuPick(k){closeDlg();menuActs[k]()}
+let askRes=null;
+function ask(t,def){return new Promise(r=>{askRes=r;$('#dlgbox').innerHTML='<div class="dt">'+esc(t)+'</div><input id="ain" value="'+esc(def||'')+'" data-submit="askOk"><div class="drow"><div class="btn b" onclick="askDone(true)">Tamam</div><div class="btn" onclick="askDone(false)">İptal</div></div>';$('#dlg').classList.add('show');setTimeout(()=>{const i=$('#ain');i.focus();i.select()},40)})}
+function askOk(){askDone(true)}
+function askDone(ok){const v=$('#ain')?$('#ain').value:'';closeDlg();if(askRes)askRes(ok?v:null);askRes=null}
+function conf(msg){return new Promise(r=>{askRes=r;$('#dlgbox').innerHTML='<div class="dm">'+esc(msg)+'</div><div class="drow"><div class="btn g" onclick="confDone(true)">Evet</div><div class="btn r" onclick="confDone(false)">Hayır</div></div>';showDlg()})}
+function confDone(v){closeDlg();if(askRes)askRes(v);askRes=null}
+function info(title,text){$('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div><div class="dm">'+esc(text)+'</div><div class="drow"><div class="btn b" onclick="closeDlg()">Tamam</div></div>';showDlg()}
+let modalBack=null;
+function mset(title,html,back){if(!$('#modal').classList.contains('show'))opener=document.activeElement;modalBack=back||null;
+ const nav=back?'<div class="btn" onclick="modalBackGo()">‹ Geri</div>':'<div class="btn" onclick="closeModal()">✕ Kapat</div>';
+ $('#mbody').innerHTML='<div>'+nav+'</div><div class="mt">'+title+'</div><div>'+html+'</div>';$('#modal').classList.add('show');setTimeout(afterOpen,40)}
+function modalBackGo(){const b=modalBack;if(b)b();else closeModal()}
+function closeModal(){$('#modal').classList.remove('show');modalBack=null;curView='';$('#mbody').innerHTML='';if(opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}opener=null}
+let curView='';
+window.__back=function(){if($('#dlg').classList.contains('show')){closeDlg();if(askRes){askRes(null);askRes=null}return true}
+ if($('#modal').classList.contains('show')){if(modalBack)modalBack();else closeModal();return true}
+ if(panel){closePanels();return true}
+ const c=$('#content');if($('#q').value){$('#q').value='';renderGrid();return true}
+ if(c.scrollTop>10){c.scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}
+ return true};
+window.__home=function(){closeDlg();closeModal();closePanels();$('#content').scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)};
+function openPanel(n){closePanels();opener=document.activeElement;panel=n;$('#'+n+'Panel').classList.add('open');if(n==='notif')loadNotifs();else renderSettings();setTimeout(focusFirst,80)}
+function closePanels(){const had=panel;$$('.side').forEach(s=>s.classList.remove('open'));panel=null;if(had&&opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}}
+/* ===== Uygulamalar ===== */
+let APPS=[],ALL=[],INP=[];
+const baseLab=p=>(APPS.find(a=>a.p===p)||ALL.find(a=>a.p===p)||{l:p}).l;
+const lab=p=>S.labels[p]||baseLab(p);
+const icon=(p,b)=>'https://appicon.local/'+(b?'banner':'icon')+'/'+p;
+function sortedApps(){const o=S.order||[];return [...APPS].sort((a,b)=>{const ia=o.indexOf(a.p),ib=o.indexOf(b.p);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return -1;if(ib>=0)return 1;return lab(a.p).localeCompare(lab(b.p),'tr')})}
+async function loadApps(){const r=await N('apps');APPS=Array.isArray(r)?r:[];detectNew();renderAll()}
+function detectNew(){if(!APPS.length)return;if(!S.seen.length){S.seen=APPS.map(a=>a.p);save();return}
+ const seen=new Set(S.seen),now=Date.now();for(const k in S.newApps)if(now-S.newApps[k]>6048e5||!APPS.some(a=>a.p===k))delete S.newApps[k];
+ const fresh=APPS.filter(a=>!seen.has(a.p));if(fresh.length){fresh.forEach(a=>{S.seen.push(a.p);S.newApps[a.p]=now});toast('🆕',fresh.length===1?'Yeni uygulama: '+lab(fresh[0].p):fresh.length+' yeni uygulama eklendi')}save()}
+function renderAll(){renderFavs();renderGrid();updateRowVis()}
+function launch(p){if(S.newApps[p]){delete S.newApps[p];save();applyBadges()}N('launch',{p}).then(r=>{if(!r.ok)toast('❌',lab(p)+' açılamadı')})}
+function tile(a){return '<div class="tile'+(S.hidden.includes(a.p)?' hid':'')+'" data-p="'+esc(a.p)+'" onclick="launch('+q(a.p)+')"><div class="iw"><div class="ico"><img src="'+icon(a.p)+'" alt=""></div></div><div class="tl2">'+esc(lab(a.p))+'</div></div>'}
+function renderGrid(){const qq=($('#q').value||'').toLowerCase().trim(),inF=new Set(Object.values(S.folders).flat());let h='',list;
+ const vis=a=>S.showHidden||!S.hidden.includes(a.p);
+ if(qq)list=APPS.filter(a=>(lab(a.p).toLowerCase().includes(qq)||a.l.toLowerCase().includes(qq))&&vis(a));
+ else{list=sortedApps().filter(a=>vis(a)&&!inF.has(a.p));
+  for(const n in S.folders)h+='<div class="tile" data-fold="'+esc(n)+'" onclick="openFolder(this.dataset.fold)"><div class="fi">'+(S.folders[n].slice(0,4).map(p=>'<img src="'+icon(p)+'" alt="">').join('')||'<span class="em">📁</span>')+'</div><div class="tl2">'+esc(n)+' ('+S.folders[n].length+')</div></div>'}
+ h+=list.map(tile).join('');$('#grid').innerHTML=h||'<div class="empty">Uygulama bulunamadı</div>';applyBadges()}
+function searchEnter(){const qq=($('#q').value||'').toLowerCase().trim();const a=APPS.find(x=>lab(x.p).toLowerCase().includes(qq)&&(S.showHidden||!S.hidden.includes(x.p)));if(a&&qq)launch(a.p);else focusFirst()}
+function renderFavs(){const f=S.fav.map(p=>APPS.find(a=>a.p===p)).filter(Boolean);
+ $('#favRow').innerHTML=f.map(a=>'<div class="card fav" data-p="'+esc(a.p)+'" onclick="launch('+q(a.p)+')"><div class="th'+(a.b?'':' ic')+'" style="background-image:url('+icon(a.p,a.b)+')"></div><div class="nm">'+esc(lab(a.p))+'</div></div>').join('');applyBadges()}
+function toggleFav(p){const i=S.fav.indexOf(p);if(i>=0)S.fav.splice(i,1);else S.fav.push(p);save();renderFavs();updateRowVis();toast('⭐',lab(p)+(i>=0?' favorilerden çıkarıldı':' favorilere eklendi'))}
+function toggleHide(p){const i=S.hidden.indexOf(p);if(i>=0)S.hidden.splice(i,1);else S.hidden.push(p);save();renderGrid();toast('👁️',lab(p)+(i>=0?' gösterildi':' gizlendi (Launcher Ayarları’ndan geri getirilir)'))}
+function toggleBoot(p){const i=S.bootApps.indexOf(p);if(i>=0)S.bootApps.splice(i,1);else S.bootApps.push(p);save();toast('🚀',lab(p)+(i>=0?': açılışta başlatma kapalı':': açılışta başlayacak'))}
+async function renameApp(p){const v=await ask('Yeni ad (boş bırak = orijinal ad)',lab(p));if(v===null)return;if(v.trim()&&v.trim()!==baseLab(p))S.labels[p]=v.trim();else delete S.labels[p];save();renderAll()}
+function moveApp(p,d){S.order=sortedApps().map(a=>a.p);const i=S.order.indexOf(p),j=i+d;if(i<0||j<0||j>=S.order.length)return;S.order.splice(j,0,S.order.splice(i,1)[0]);save();renderGrid();const e=$('#grid [data-p="'+p+'"]');if(e)focusEl(e)}
+function appMenu(p,rid){const isF=S.fav.includes(p),hid=S.hidden.includes(p),a=APPS.find(x=>x.p===p),sys=a?a.s:false,boot=S.bootApps.includes(p);
+ const it=[['▶️  Aç',()=>launch(p)],'Düzenle',
+  [isF?'⭐  Favorilerden çıkar':'⭐  Favorilere ekle',()=>toggleFav(p)],
+  [hid?'👁️  Göster':'🙈  Gizle',()=>toggleHide(p)],
+  ['📁  Klasöre ekle / çıkar',()=>addToFolder(p)],
+  ['✏️  Adı değiştir',()=>renameApp(p)],
+  ['⬆️  Öne al',()=>moveApp(p,-1)],['⬇️  Geriye al',()=>moveApp(p,1)],
+  [boot?'🚀  Açılışta başlatmayı kapat':'🚀  Açılışta başlat',()=>toggleBoot(p)]];
+ if(rid&&ROWS[rid])it.push(['🧩  Bu bölümü taşı…',()=>rowMenu(rid)]);
+ it.push('Bilgi',['ℹ️  Ayrıntılar',()=>appDetail(p)],['⚙️  Android uygulama bilgisi',()=>N('appSettings',{p})],['🔐  İzinler',()=>permsFor(p)],['🛒  Mağazada aç',()=>N('market',{p})],
+  'Yönet (ADB)',['🧊  Dondur (devre dışı bırak)',()=>pmDo('freeze',p)],['⛔  Zorla durdur',()=>pmDo('stop',p)],['🔋  Arka planı kısıtla',()=>pmDo('bgRestrict',p)],['🔋  Arka plan kısıtını kaldır',()=>pmDo('bgAllow',p)],['🧹  Verileri temizle',()=>pmDo('clear',p)],['🗑️  Kaldır',()=>uninstallApp(p,sys)]);
+ menu(lab(p),it)}
+async function appDetail(p){const r=await N('appInfo',{p});if(r.error){toast('❌',String(r.error).slice(0,80));return}const d=t=>t?new Date(t).toLocaleDateString('tr-TR'):'-';
+ info(lab(p),['Paket: '+r.p,'Sürüm: '+r.v+' ('+r.c+')','Tür: '+(r.sys?'Sistem uygulaması':'Kullanıcı uygulaması'),'Hedef SDK: '+r.sdk,'Kurulum: '+d(r.first),'Güncelleme: '+d(r.upd),'Durum: '+(r.enabled?'Aktif':'Dondurulmuş'),'APK: '+r.apk].join('\n'))}
+async function uninstallApp(p,sys){if(isProt(p)){toast('⛔','Kritik paket korunuyor');return}
+ const st=await N('adbStatus');
+ if(!st.ready){if(sys){info('ADB gerekli','Sistem uygulamaları yalnızca ADB / Shizuku ile kaldırılabilir. Sistem Merkezi → ADB Terminal’den bağlan.');return}
+  if(await conf(lab(p)+' kaldırılsın mı?'))N('uninstallUi',{p});return}
+ pmDo('uninstall',p,sys)}
+async function addToFolder(p){const names=Object.keys(S.folders);
+ menu('Klasör seç',[...names.map(n=>['📁  '+n,()=>{removeFromFolders(p);S.folders[n].push(p);save();renderGrid()}]),['➕  Yeni klasör',async()=>{const n=await ask('Klasör adı','');if(n&&n.trim()){removeFromFolders(p);S.folders[n.trim()]=(S.folders[n.trim()]||[]).concat([p]);save();renderGrid()}}],['↩️  Klasörden çıkar',()=>{removeFromFolders(p);save();renderGrid()}]])}
+function removeFromFolders(p){for(const n in S.folders){S.folders[n]=S.folders[n].filter(x=>x!==p);if(!S.folders[n].length)delete S.folders[n]}}
+function openFolder(n){const l=(S.folders[n]||[]).map(p=>APPS.find(a=>a.p===p)).filter(Boolean);mset('📁 '+esc(n),'<div class="grid">'+l.map(tile).join('')+'</div>',null)}
+function folderMenu(n){menu('📁 '+n,[['✏️  Yeniden adlandır',async()=>{const v=await ask('Yeni ad',n);if(v&&v.trim()&&v!==n){S.folders[v.trim()]=S.folders[n];delete S.folders[n];save();renderGrid()}}],['🗑️  Klasörü sil (uygulamalar kalır)',()=>{delete S.folders[n];save();renderGrid()}],...rowItems('apps')])}
+let PICK=[],pickRes=null;
+function pickApp(title){return new Promise(res=>{pickRes=res;PICK=sortedApps();$('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div>'+PICK.map((a,k)=>'<div class="ditem" onclick="pickDone('+k+')">'+esc(lab(a.p))+'</div>').join('')+'<div class="ditem" onclick="pickDone(-1)">İptal</div>';showDlg()})}
+function pickDone(k){closeDlg();if(pickRes)pickRes(k>=0?PICK[k].p:null);pickRes=null}
+/* ===== Bölümler: sırala / gizle ===== */
+function applyRows(){const c=$('#content');for(const r of S.rows)c.appendChild($('#row-'+r.id));updateRowVis()}
+function updateRowVis(){for(const r of S.rows){const e=$('#row-'+r.id);if(!e)continue;e.style.display=(!r.on||(r.id==='in'&&!INP.length)||(r.id==='fav'&&!S.fav.length))?'none':''}}
+function moveRow(id,dir,lay){const a=S.rows,i=a.findIndex(r=>r.id===id);if(i<0)return;const j=dir==='up'?i-1:dir==='down'?i+1:dir==='top'?0:a.length-1;if(j<0||j>=a.length||j===i){toast('↕️','Bölüm zaten orada');return}
+ const r=a.splice(i,1)[0];a.splice(j,0,r);save();applyRows();toast('↕️',ROWS[id]+' taşındı');
+ if(lay){keepNext();layoutView()}else{const h=$('#row-'+id+' .rt');if(h)focusEl(h)}}
+function rowToggle(id,lay){const r=S.rows.find(x=>x.id===id);r.on=!r.on;save();updateRowVis();if(lay){keepNext();layoutView()}else toast('👁️',ROWS[id]+(r.on?' gösterildi':' gizlendi (Ana Ekran Düzeni’nden geri getirilir)'))}
+function rowItems(id){return ['Bölüm: '+ROWS[id],['⬆️  Yukarı taşı',()=>moveRow(id,'up')],['⬇️  Aşağı taşı',()=>moveRow(id,'down')],['⏫  En üste al',()=>moveRow(id,'top')],['⏬  En alta al',()=>moveRow(id,'bottom')],['🙈  Bölümü gizle',()=>rowToggle(id)],['🧩  Ana ekran düzeni…',layoutView]]}
+function rowMenu(id){const x=[];
+ if(id==='wg')x.push('Kartlar',['➕  Kart ekle',addWidgetMenu],['♻️  Varsayılan kartlara dön',resetWidgets]);
+ if(id==='fav')x.push('Favoriler',['➕  Favori ekle',async()=>{const p=await pickApp('Favorilere eklenecek uygulama');if(p&&!S.fav.includes(p))toggleFav(p)}]);
+ if(id==='apps')x.push('Uygulamalar',[S.showHidden?'🙈  Gizlileri sakla':'👁️  Gizlileri göster',()=>{S.showHidden=!S.showHidden;save();renderGrid()}],['🔤  Sıralamayı A–Z’ye sıfırla',()=>{S.order=[];save();renderGrid()}]);
+ menu(ROWS[id],[...x,...rowItems(id)])}
+function layoutView(){curView='layout';mset('🧩 Ana Ekran Düzeni','<div class="nf">Bölümleri sırala veya gizle. Ana ekranda bir bölüm başlığına (ör. “Kartlar”) uzun basarak da taşıyabilirsin.</div>'+
+ S.rows.map(r=>'<div class="r2"><div class="n">'+ROWI[r.id]+'  '+ROWS[r.id]+'</div><div><span class="btn" onclick="moveRow(\''+r.id+'\',\'up\',1)">▲ Yukarı</span><span class="btn" onclick="moveRow(\''+r.id+'\',\'down\',1)">▼ Aşağı</span><span class="btn '+(r.on?'g':'')+'" onclick="rowToggle(\''+r.id+'\',1)">'+(r.on?'Görünür':'Gizli')+'</span></div></div>').join('')+
+ '<div class="sec">Kartlar</div>'+(S.widgets.map(w=>'<div class="r2"><div class="n">'+WT[w.t].i+'  '+WT[w.t].n+(w.t==='weather'&&w.city?' • '+esc(w.city):'')+'</div><div><span class="btn" onclick="moveW(\''+w.id+'\',-1,1)">‹</span><span class="btn" onclick="moveW(\''+w.id+'\',1,1)">›</span><span class="btn r" onclick="delW(\''+w.id+'\',1)">Sil</span></div></div>').join('')||'<div class="empty">Kart yok</div>')+
+ '<div style="margin-top:8px"><span class="btn b" onclick="addWidgetMenu()">➕ Kart ekle</span><span class="btn" onclick="resetWidgets()">♻️ Varsayılan kartlar</span></div>',null)}
+/* ===== Giriş kaynakları (HDMI/CEC) ===== */
+let INPS=[];
+async function loadInputs(){const r=await N('inputs');INP=Array.isArray(r)?r:[];const o=S.inOrder;INPS=[...INP].sort((a,b)=>{const x=o.indexOf(a.id),y=o.indexOf(b.id);return(x<0?999:x)-(y<0?999:y)});updateRowVis();
+ const st=['BAĞLI','BEKLEMEDE','BAĞLI DEĞİL'];
+ $('#inRow').innerHTML=INPS.map((i,k)=>'<div class="card hd '+(i.state===2?'off':(i.state===0?'on':''))+'" data-in="'+k+'" onclick="goInput('+k+')"><div class="l">'+esc(i.type===1007?'HDMI'+(i.port>0?' '+i.port:''):'GİRİŞ')+' • '+(st[i.state]||'')+'</div><div class="d">'+esc(S.cecNames[i.id]||i.cec||i.label)+'</div></div>').join('')}
+function goInput(k){N('switchInput',{id:INPS[k].id});toast('📺','Giriş: '+(S.cecNames[INPS[k].id]||INPS[k].label))}
+async function renameInput(k){const i=INPS[k];const v=await ask('Giriş adı',S.cecNames[i.id]||i.cec||i.label);if(v!==null){if(v.trim())S.cecNames[i.id]=v.trim();else delete S.cecNames[i.id];save();loadInputs()}}
+function moveInput(k,d){const ids=INPS.map(i=>i.id),j=k+d;if(j<0||j>=ids.length)return;ids.splice(j,0,ids.splice(k,1)[0]);S.inOrder=ids;save();loadInputs().then(()=>{const e=$('#inRow [data-in="'+j+'"]');if(e)focusEl(e)})}
+async function cecState(){if(!(await adbReady()))return null;const r=await N('adb',{c:'echo A:$(settings get global hdmi_control_auto_device_off_enabled); echo E:$(settings get global hdmi_control_enabled)'});const m={};(r.out||'').split('\n').forEach(l=>{const x=l.indexOf(':');if(x>0)m[l.slice(0,x).trim()]=l.slice(x+1).trim()});return m}
+const cecOff=v=>'settings put global hdmi_control_auto_device_off_enabled '+v;
+const cecEn=v=>'cmd hdmi_control cec_setting set hdmi_cec_enabled '+v+' || settings put global hdmi_control_enabled '+v;
+async function cecRun(c,okMsg){const r=await N('adb',{c});const bad=r.code!==0||/Exception|Error|Unknown/i.test(r.out||'');toast(bad?'❌':'✅',bad?String(r.out||r.error||'ADB bağlı değil').slice(0,90):okMsg);return !bad}
+async function cecRestart(){toast('⏳','CEC yeniden başlatılıyor…');await cecRun(cecEn(0)+'; sleep 2; '+cecEn(1),'CEC yeniden başlatıldı')}
+async function inputMenu(k){const st=await cecState(),A=st&&st.A==='1';
+ menu(S.cecNames[INPS[k].id]||INPS[k].cec||INPS[k].label,[['📺  Bu girişe geç (CEC cihazı çoğu zaman uyanır)',()=>goInput(k)],['✏️  Adı değiştir',()=>renameInput(k)],['◀️  Sola taşı',()=>moveInput(k,-1)],['▶️  Sağa taşı',()=>moveInput(k,1)],
+  'CEC (ADB)',[A?'💤  TV uyurken cihazları kapatma: AÇIK → kapat':'💤  TV uyurken bağlı cihazları da kapat',async()=>{if(await cecRun(cecOff(A?0:1),A?'Otomatik cihaz kapatma kapatıldı':'TV uyuyunca bağlı cihazlara kapanma komutu gider'));}],['🔄  CEC’i yeniden başlat (cihaz tanınmıyorsa)',cecRestart],...rowItems('in')])}
+/* ===== Kartlar / widget ===== */
+const WT={sys:{i:'🖥️',n:'Sistem',d:'CPU ve RAM'},storage:{i:'💾',n:'Depolama',d:'Dolu alan'},net:{i:'🌐',n:'Ağ & Sıcaklık',d:'İndirme hızı, ısı'},clock:{i:'🕐',n:'Saat',d:'Büyük saat ve tarih'},weather:{i:'⛅',n:'Hava Durumu',d:'Şehre göre'},note:{i:'📝',n:'Not',d:'Hızlı not'},shortcut:{i:'🚀',n:'Uygulama Kısayolu',d:'Tek tuşla aç'},notif:{i:'🔔',n:'Bildirimler',d:'Sayı ve son bildirim'}};
+const WX={};
+const WMO=c=>c===0?['☀️','Açık']:c<=2?['⛅','Parçalı bulutlu']:c===3?['☁️','Kapalı']:c<=48?['🌫️','Sisli']:c<=57?['🌦️','Çiseleme']:c<=67?['🌧️','Yağmurlu']:c<=77?['🌨️','Karlı']:c<=82?['🌦️','Sağanak']:c<=86?['🌨️','Kar sağanağı']:['⛈️','Fırtına'];
+function wHtml(w){const c='card wg'+(w.big?' big':''),at='data-w="'+w.id+'" onclick="wClick(\''+w.id+'\')"';
+ switch(w.t){
+ case 'sys':return '<div class="'+c+'" '+at+'><div class="wt">🖥️ SİSTEM</div><div class="wv">CPU <span data-b="cpu">–</span></div><div class="bar"><i data-b="cpuB"></i></div><div class="ws" data-b="ram"></div></div>';
+ case 'storage':return '<div class="'+c+'" '+at+'><div class="wt">💾 DEPOLAMA</div><div class="wv" data-b="st">–</div><div class="bar"><i data-b="stB"></i></div><div class="ws" data-b="stS"></div></div>';
+ case 'net':return '<div class="'+c+'" '+at+'><div class="wt">🌐 AĞ / SICAKLIK</div><div class="wv" data-b="dl">–</div><div class="ws" data-b="temp"></div></div>';
+ case 'clock':return '<div class="'+c+'" '+at+'><div class="wv big" data-b="time"></div><div class="ws" data-b="date2"></div></div>';
+ case 'weather':return '<div class="'+c+'" '+at+'><div class="wt">⛅ HAVA DURUMU</div><div data-wx="'+w.id+'"></div></div>';
+ case 'note':return '<div class="'+c+'" '+at+'><div class="wt">📝 NOT</div><div class="wn">'+esc(w.text||'Not eklemek için tıkla')+'</div></div>';
+ case 'shortcut':return '<div class="'+c+'" '+at+'>'+(w.p?'<div class="wsc"><div class="ico"><img src="'+icon(w.p)+'" alt=""></div><div>'+esc(lab(w.p))+'</div></div>':'<div class="wt">🚀 KISAYOL</div><div class="ws">Uygulama seçmek için tıkla</div>')+'</div>';
+ case 'notif':return '<div class="'+c+'" '+at+'><div class="wt">🔔 BİLDİRİMLER</div><div class="wv" data-b="ncount">0</div><div class="ws" data-b="nlast"></div></div>'}
+ return ''}
+function renderWidgets(){$('#wgRow').innerHTML=S.widgets.map(wHtml).join('')+'<div class="card addw" data-addw="1" onclick="addWidgetMenu()"><b>+</b><span>Kart ekle</span></div>';
+ for(const w of S.widgets)if(w.t==='weather'){renderWx(w);const d=WX[w.id];if(!d||Date.now()-d.t>900000)loadWx(w)}
+ tick();pollN();poll()}
+async function loadWx(w){WX[w.id]=WX[w.id]||{t:0};WX[w.id].t=Date.now();
+ try{if(!w.lat){const g=await(await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(w.city)+'&count=1&language=tr')).json();if(!g.results||!g.results.length)throw new Error('Şehir bulunamadı');w.lat=g.results[0].latitude;w.lon=g.results[0].longitude;w.cname=g.results[0].name;save()}
+  const r=await(await fetch('https://api.open-meteo.com/v1/forecast?latitude='+w.lat+'&longitude='+w.lon+'&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto')).json();const c=r.current;
+  WX[w.id]={t:Date.now(),temp:c.temperature_2m,code:c.weather_code,wind:c.wind_speed_10m}}
+ catch(e){WX[w.id]={t:Date.now(),err:(e&&e.message)||'Bağlantı hatası'}}
+ renderWx(w)}
+function renderWx(w){const e=$('[data-wx="'+w.id+'"]');if(!e)return;const d=WX[w.id];
+ if(!d||(!d.err&&d.temp==null)){e.innerHTML='<div class="ws">Yükleniyor…</div>';return}
+ if(d.err){e.innerHTML='<div class="ws">⚠️ '+esc(d.err)+'</div>';return}
+ const m=WMO(d.code);e.innerHTML='<div class="wv">'+m[0]+' '+Math.round(d.temp)+'°</div><div class="ws">'+esc(w.cname||w.city)+' • '+m[1]+' • '+Math.round(d.wind)+' km/sa</div>'}
+const wget=id=>S.widgets.find(w=>w.id===id);
+async function wEdit(id){const w=wget(id);if(!w)return;
+ if(w.t==='note'){const v=await ask('Not metni',w.text||'');if(v!==null){w.text=v;save();renderWidgets()}}
+ else if(w.t==='weather'){const v=await ask('Şehir adı',w.city||'');if(v&&v.trim()){w.city=v.trim();delete w.lat;delete w.lon;delete w.cname;delete WX[w.id];save();renderWidgets()}}
+ else if(w.t==='shortcut'){const p=await pickApp('Hangi uygulama?');if(p){w.p=p;save();renderWidgets()}}}
+function wClick(id){const w=wget(id);if(!w)return;
+ if(w.t==='note'||w.t==='shortcut'&&!w.p)wEdit(id);else if(w.t==='shortcut')launch(w.p);
+ else if(w.t==='weather'){delete WX[w.id];renderWx(w);loadWx(w)}
+ else if(w.t==='notif')openPanel('notif');
+ else if(w.t==='storage')N('openSettings',{k:'storage'});else if(w.t==='net')N('openSettings',{k:'net'});else if(w.t==='sys')surgeonHome()}
+function focusW(id){const e=$('#wgRow [data-w="'+id+'"]');if(e)focusEl(e)}
+function moveW(id,d,lay){const a=S.widgets,i=a.findIndex(w=>w.id===id),j=i+d;if(i<0||j<0||j>=a.length)return;a.splice(j,0,a.splice(i,1)[0]);save();renderWidgets();if(lay){keepNext();layoutView()}else focusW(id)}
+async function delW(id,lay){const w=wget(id);if(!w||!(await conf('“'+WT[w.t].n+'” kartı silinsin mi?')))return;S.widgets=S.widgets.filter(x=>x.id!==id);save();renderWidgets();if(lay){keepNext();layoutView()}else{const e=$('#wgRow .card');if(e)focusEl(e)}toast('🗑️','Kart silindi')}
+async function resetWidgets(){if(!(await conf('Kartlar varsayılana (Sistem, Depolama, Ağ) döndürülsün mü?')))return;S.widgets=JSON.parse(JSON.stringify(DEF.widgets));S.wseq=3;save();renderWidgets();if(curView==='layout')layoutView()}
+function addWidgetMenu(){menu('Kart ekle',Object.keys(WT).map(t=>[WT[t].i+'  '+WT[t].n+' — '+WT[t].d,()=>addWidget(t)]))}
+async function addWidget(t){const w={id:'w'+(++S.wseq),t};
+ if(t==='weather'){const c=await ask('Şehir adı (ör. İstanbul)','');if(!c||!c.trim())return;w.city=c.trim()}
+ if(t==='note'){const c=await ask('Not metni','');if(c===null)return;w.text=c}
+ if(t==='shortcut'){const p=await pickApp('Hangi uygulama?');if(!p)return;w.p=p}
+ S.widgets.push(w);save();renderWidgets();setTimeout(()=>focusW(w.id),60);toast('✅','Kart eklendi: '+WT[t].n);if(curView==='layout'){keepNext();layoutView()}}
+function widgetMenu(id){const w=wget(id);if(!w)return;const x=[];
+ if(['note','weather','shortcut'].includes(w.t))x.push(['✏️  Düzenle',()=>wEdit(id)]);
+ if(w.t==='weather')x.push(['🔄  Yenile',()=>wClick(id)]);
+ x.push([w.big?'↔️  Küçült':'↔️  Genişlet',()=>{w.big=!w.big;save();renderWidgets();focusW(id)}],['◀️  Sola taşı',()=>moveW(id,-1)],['▶️  Sağa taşı',()=>moveW(id,1)],['🗑️  Kartı sil',()=>delW(id)],['➕  Kart ekle',addWidgetMenu],...rowItems('wg'));
+ menu(WT[w.t].n,x)}
+const gb=b=>(b/1073741824).toFixed(1)+' GB';
+const spd=b=>b>1048576?(b/1048576).toFixed(1)+' MB/s':Math.round(b/1024)+' KB/s';
+const needStats=()=>S.widgets.some(w=>['sys','storage','net'].includes(w.t));
+async function poll(){if(document.hidden)return;const r=await N('stats',{full:needStats()});if(!r||r.error)return;
+ $('#wname').textContent=r.net;$('#wsig').textContent=r.lvl<0?'🚫':'📶';if(!needStats())return;
+ const c=r.cpu;setB('cpu',c>=0?Math.round(c)+'%':(c===-2?'…':'ADB?'));$$('[data-b="cpuB"]').forEach(e=>e.style.width=(c>=0?c:0)+'%');
+ const ru=r.ramT-r.ramF;setB('ram','RAM: '+gb(ru)+' / '+gb(r.ramT));
+ const su=r.stT-r.stF;setB('st',Math.round(su/r.stT*100)+'%');$$('[data-b="stB"]').forEach(e=>e.style.width=(su/r.stT*100)+'%');setB('stS',gb(su)+' / '+gb(r.stT));
+ setB('dl','↓ '+spd(r.rxBps));setB('temp',r.temp>0?'Sıcaklık: '+Math.round(r.temp)+'°C':'Sıcaklık: ADB gerekli')}
+let NOTIFS=[];
+function applyBadges(){const c={};NOTIFS.forEach(n=>{c[n.p]=(c[n.p]||0)+1});
+ $$('#grid [data-p],#favRow [data-p]').forEach(e=>{const p=e.dataset.p,n=c[p]||0,host=e.classList.contains('fav')?e:e.querySelector('.iw');if(!host)return;
+  let b=host.querySelector('.bdg');if(!n){if(b)b.remove()}else{if(!b){b=document.createElement('span');b.className='bdg';host.appendChild(b)}b.textContent=n>9?'9+':String(n)}
+  let w=host.querySelector('.nw');if(S.newApps[p]){if(!w){w=document.createElement('span');w.className='nw';w.textContent='YENİ';host.appendChild(w)}}else if(w)w.remove()})}
+async function pollN(){if(document.hidden)return;const r=await N('notifs');if(!r||r.error)return;NOTIFS=r.items||[];applyBadges();const n=NOTIFS.length;$('#nb').style.display=n?'':'none';$('#nb').textContent=n;
+ setB('ncount',String(n));setB('nlast',n?NOTIFS[0].a+': '+(NOTIFS[0].t||NOTIFS[0].x):'Yeni bildirim yok')}
+function ago(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return 'şimdi';if(m<60)return m+' dk önce';const h=Math.round(m/60);if(h<24)return h+' sa önce';return Math.round(h/24)+' gün önce'}
+async function loadNotifs(){const r=await N('notifs');const p=$('#notifPanel');let h='<div class="ph"><div class="pt">Bildirimler</div><div class="ib" onclick="closePanels()">✕</div></div>';
+ if(!r.access)h+='<div class="pi"><div class="c"><div class="t">Bildirim erişimi gerekli</div><div class="s">ADB ile otomatik verilebilir.</div></div></div><span class="btn g" onclick="runSetup()">⚡ Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'notif\'})">Ayarlar</span>';
+ else if(!(r.items||[]).length)h+='<div class="empty">Bildirim yok</div>';
+ else h+='<span class="btn r" onclick="N(\'notifCancel\',{k:\'\'}).then(loadNotifs)">Hepsini temizle</span>'+r.items.map(n=>'<div class="pi nt" data-nk="'+esc(n.k)+'" onclick="launch('+q(n.p)+')"><div class="c"><div class="s">'+esc(n.a)+' • '+ago(n.w)+'</div><div class="t">'+esc(n.t)+'</div><div class="s">'+esc(n.x)+'</div></div></div>').join('');
+ p.innerHTML=h;if(panel==='notif')setTimeout(focusFirst,50);pollN()}
+/* ===== Ayarlar paneli / tema / duvar kağıdı ===== */
+let panelActs=[];
+function renderSettings(){const items=[
+ ['📱','#8E8E93','Android Ayarları','Cihazın gerçek ayarlarını aç',()=>N('openSettings',{k:'android'})],
+ ['🎨','#BF5AF2','Tema & Görünüm',THEMES[S.theme]+' • '+ACC[S.accent][1],openTheme],
+ ['🖼️','#0A84FF','Duvar Kağıdı','Galeriden veya hazır',openWall],
+ ['🧩','#FF9F0A','Ana Ekran Düzeni','Bölümleri sırala, kartları yönet',layoutView],
+ ['🏠','#30D158','Launcher Ayarları','Gizli uygulamalar, varsayılan yap, açılış',launcherSettings],
+ ['🛠️','#FF453A','Sistem Merkezi','Debloat, telemetri, güvenlik, ADB…',surgeonHome]];
+ panelActs=items.map(i=>i[4]);
+ $('#settingsPanel').innerHTML='<div class="ph"><div class="pt">Ayarlar</div><div class="ib" onclick="closePanels()">✕</div></div>'+items.map((i,k)=>'<div class="pi" onclick="panelPick('+k+')"><div class="ic" style="background:'+i[1]+'">'+i[0]+'</div><div class="c"><div class="t">'+i[2]+'</div><div class="s">'+esc(i[3])+'</div></div></div>').join('')}
+function panelPick(k){const f=panelActs[k];closePanels();f()}
+function tg(on){return '<div class="tog'+(on?' on':'')+'"></div>'}
+function openTheme(){curView='theme';mset('🎨 Tema & Görünüm','<div class="sec">Görünüm</div><div class="ts">'+Object.keys(THEMES).map(k=>'<div class="to'+(S.theme===k?' on':'')+'" onclick="setTheme(\''+k+'\')"><i class="pv '+k+'"></i>'+THEMES[k]+'</div>').join('')+'</div>'+
+ '<div class="sec">Vurgu rengi</div><div class="acs">'+Object.keys(ACC).map(k=>'<div class="ac'+(S.accent===k?' on':'')+'" style="background:'+ACC[k][0]+'" onclick="setAccent(\''+k+'\')">'+ACC[k][1]+'</div>').join('')+'</div>'+
+ '<div class="sec">İkon boyutu</div><div class="chips">'+Object.keys(SIZES).map(k=>'<div class="chip'+(S.iconSize===k?' on':'')+'" onclick="setIsz(\''+k+'\')">'+SIZES[k][0]+'</div>').join('')+'</div>'+
+ '<div class="sec">Efektler</div><div class="r2" onclick="toggleBlur()"><div><div class="n">Bulanıklık (cam) efekti</div><div class="s2">Eski/yavaş TV kutularında takılma olursa kapat.</div></div>'+tg(S.blur)+'</div>',null)}
+function setTheme(t){S.theme=t;applyTheme();save();keepNext();openTheme();toast('🎨','Tema: '+THEMES[t])}
+function setAccent(a){S.accent=a;applyTheme();save();keepNext();openTheme()}
+function setIsz(k){S.iconSize=k;applyTheme();save();keepNext();openTheme()}
+function toggleBlur(){S.blur=!S.blur;applyTheme();save();keepNext();openTheme()}
+const WP=[['Cosmic','linear-gradient(135deg,#667eea,#764ba2)'],['Sunset','linear-gradient(135deg,#f093fb,#f5576c)'],['Ocean','linear-gradient(135deg,#4facfe,#00f2fe)'],['Forest','linear-gradient(135deg,#43e97b,#38f9d7)'],['Peach','linear-gradient(135deg,#fa709a,#fee140)'],['Deep Space','linear-gradient(135deg,#30cfd0,#330867)'],['Graphite','linear-gradient(135deg,#434343,#000000)'],['Mist','linear-gradient(135deg,#e0eafc,#cfdef3)']];
+function openWall(){curView='wall';mset('🖼️ Duvar Kağıdı','<span class="btn b" onclick="N(\'pickWallpaper\')">📂 Galeriden seç</span><span class="btn" onclick="setWall(\'\')">Temaya göre varsayılan</span><div class="wgrid">'+WP.map((w,k)=>'<div class="wi'+(S.wall===w[1]?' on':'')+'" style="background:'+w[1]+'" onclick="setWall(WP['+k+'][1])"><b>'+w[0]+'</b></div>').join('')+'</div>',null)}
+function setWall(v){S.wall=v;save();applyWall();toast('🖼️','Duvar kağıdı güncellendi');keepNext();openWall()}
+function applyWall(){const b=$('#bg');if(S.wall&&(S.wall.indexOf('file')===0||S.wall.indexOf('linear')===0)){b.className='bg';b.style.background=S.wall.indexOf('file')===0?'url("'+S.wall+'") center/cover':S.wall}else{b.className='bg def';b.style.background=''}}
+window.__wall=u=>{S.wall=u;save();applyWall();toast('🖼️','Duvar kağıdı ayarlandı')};
+function launcherSettings(){curView='ls';mset('🏠 Launcher Ayarları',
+ '<div class="r2" onclick="S.showHidden=!S.showHidden;save();renderGrid();keepNext();launcherSettings()"><div class="n">Gizli uygulamaları göster</div>'+tg(S.showHidden)+'</div>'+
+ '<div class="r2" onclick="toggleBlur2()"><div class="n">Bulanıklık (cam) efekti</div>'+tg(S.blur)+'</div>'+
+ '<div class="r2" onclick="S.quickBar=!S.quickBar;save();keepNext();launcherSettings()"><div><div class="n">Uzun basınca hızlı eylem çubuğu</div><div class="s2">Kapalıysa uzun basma doğrudan tam menüyü açar.</div></div>'+tg(S.quickBar)+'</div>'+
+ '<div class="r2" onclick="sgColor()"><div class="n">🎮 Kumanda renkli tuş kısayolları</div></div>'+
+ '<div class="r2" onclick="runSetup()"><div class="n">⚡ Tek tuş kurulum (bildirim, erişilebilirlik, konum — ADB)</div></div>'+
+ '<div class="r2" onclick="setHome()"><div class="n">🏠 Varsayılan ana ekran yap (ADB)</div></div>'+
+ '<div class="r2" onclick="setSaver()"><div class="n">🌌 Ekran koruyucu: ihlauncher saat (ADB)</div></div>'+
+ '<div class="r2" onclick="sgBoot()"><div class="n">🚀 Açılışta başlayacak uygulamalar</div></div>'+
+ '<div class="r2" onclick="updView()"><div class="n">⬆️ Güncelleme kontrolü</div></div>'+
+ '<div class="r2" onclick="N(\'openSettings\',{k:\'dream\'})"><div class="n">Ekran koruyucu ayarlarını aç</div></div>'+
+ '<div class="r2" onclick="resetLayout()"><div class="n">♻️ Ana ekran düzenini sıfırla (bölümler + kartlar)</div></div>',null)}
+function toggleBlur2(){S.blur=!S.blur;applyTheme();save();keepNext();launcherSettings()}
+async function resetLayout(){if(!(await conf('Bölüm sırası ve kartlar varsayılana dönsün mü?')))return;S.rows=JSON.parse(JSON.stringify(DEF.rows));S.widgets=JSON.parse(JSON.stringify(DEF.widgets));S.wseq=3;save();applyRows();renderWidgets();toast('♻️','Düzen sıfırlandı')}
+async function setSaver(){const r=await N('screensaver');toast(r.code===0?'✅':'❌',r.code===0?'Ekran koruyucu ayarlandı':(r.out||r.error||'ADB bağlı değil').slice(0,80))}
+async function setHome(){const r=await N('setHome');toast(r.code===0?'✅':'❌',r.code===0?'Varsayılan ana ekran ayarlandı':(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+async function runSetup(){if(!(await conf('ADB ile şunlar verilecek: konum izni, kullanım istatistiği (kullanılmayan uygulama önerisi), bildirim erişimi, erişilebilirlik (kumanda remap). Devam?')))return;toast('⏳','Kurulum çalışıyor…');const r=await N('setup');
+ if(r.error||!Array.isArray(r)){info('Kurulum başarısız',r.error||'ADB bağlı değil. Sistem Merkezi → ADB Terminal’den bağlan.');return}
+ info('Kurulum sonucu',r.map(x=>(x.code===0?'✅ ':'❌ ')+x.c+(x.out?'\n   '+x.out.slice(0,80):'')).join('\n'));pollN()}
+/* ===== Sistem Merkezi ===== */
+const adbReady=async()=>!!(await N('adbStatus')).ready;
+const NEEDADB='<div class="nf">⚠️ ADB / Shizuku bağlı değil: tarama çalışır ama uygulama işlemleri yapılamaz. <span class="btn g" onclick="sgAdb()">🔌 Bağlan</span></div>';
+const SGS=[
+ ['Analiz & Güvenlik',[['🔍','#5E5CE6','Cihaz Analizi','Cihazı tanır, paketleri sınıflandırır',()=>sgScan()],['🧼','#30D158','Akıllı Debloat','Zararlı/gereksiz paketler, risk etiketli',()=>sgDebloat()],['🛡️','#FF9F0A','Telemetri & Gizlilik','Veri toplamayı azalt',()=>sgTele()],['🔐','#FF453A','Güvenlik Denetimi','Erişilebilirlik, izin, ADB durumu',()=>sgAudit()],['♻️','#64D2FF','Geri Alma Merkezi','Dondurulan / kaldırılanları geri getir',()=>sgRecover()]]],
+ ['Uygulamalar',[['🧊','#0A84FF','Uygulama Yöneticisi','Dondur, çöz, kaldır, geri yükle',()=>sgApps()],['🔑','#BF5AF2','İzin Yöneticisi','Çalışma izinleri ver/al',()=>sgPerms()],['🚀','#FF9F0A','Açılışta Başlat','Cihaz açılınca çalışsın',()=>sgBoot()],['🧹','#30D158','Önbellek Temizle','Tüm uygulama önbellekleri',()=>trimCaches()],['⏱️','#64D2FF','Otomatik Temizlik','Zamanlı önbellek temizliği',()=>sgAuto()],['🕸️','#8E8E93','Kullanılmayan Uygulamalar','Uzun süredir açılmayanları dondur',()=>sgUnused()]]],
+ ['Ağ & Ekran',[['🌐','#0A84FF','Özel DNS','AdGuard, Cloudflare, Google',()=>sgDns()],['🔒','#5E5CE6','VPN','Kurulu VPN uygulamaları',()=>sgVpn()],['📡','#64D2FF','HDMI-CEC / Girişler','Giriş adlarını düzenle',()=>sgCec()],['🖥️','#8E8E93','Çözünürlük','wm size / density',()=>sgRes()],['⚡','#FFD60A','Performans','Animasyon, arka plan',()=>sgPerf()]]],
+ ['Araçlar',[['⌨️','#1C1C1E','ADB Terminal','Bağlantı, komutlar, geçmiş',()=>sgAdb()],['🎮','#FF375F','Kumanda Remap','Tuşları uygulamaya ata',()=>sgRemap()],['💾','#30D158','Yedekle / Geri Yükle','Ayarlar JSON',()=>sgBackup()],['ℹ️','#8E8E93','Cihaz Bilgisi','Model, Android, IP',()=>sgInfo()],['⚡','#FF9F0A','Erişim Kurulumu','Tek tuş kurulum',()=>runSetup()]]]];
+const SGF=SGS.flatMap(s=>s[1]);
+function surgeonHome(){closePanels();curView='';let k=0;
+ mset('🛠️ Sistem Merkezi','<div class="hero"><div class="h1" id="sgH1">Cihaz</div><div class="h2" id="sgH2">Yükleniyor…</div></div>'+SGS.map(s=>'<div class="sec">'+s[0]+'</div><div class="sg">'+s[1].map(x=>'<div class="sc" onclick="SGF['+(k++)+'][4]()"><div class="sic" style="background:'+x[1]+'">'+x[0]+'</div><div><div class="t">'+x[2]+'</div><div class="s">'+x[3]+'</div></div></div>').join('')+'</div>').join(''),null);
+ Promise.all([N('profile'),N('adbStatus')]).then(([p,a])=>{const h1=$('#sgH1');if(!h1)return;h1.textContent=(p.man||'')+' '+(p.model||'');
+  $('#sgH2').innerHTML='Android '+esc(p.rel||'?')+' (API '+esc(p.sdk||'?')+') • '+esc(vendorOf(p))+' • ADB: <b style="color:'+(a.ready?'var(--ok)':'var(--bad)')+'">'+(a.ready?'bağlı ('+esc(a.mode)+')':'bağlı değil')+'</b>'})}
+const backSG=()=>{curView='';surgeonHome()};
+async function pmRun(op,p,sys){const r=await N('pm',{op,p});if(r&&r.ok){if(op==='freeze'||(op==='uninstall'&&sys!==false))S.rmlog[p]=op;else if(op==='unfreeze'||op==='restore')delete S.rmlog[p];save()}return r}
+async function pmDo(op,p,sys){if(isProt(p)&&!['unfreeze','restore','stop','bgAllow'].includes(op)){toast('⛔','Kritik paket korunuyor');return false}
+ const msg={freeze:'dondurulsun (geri alınabilir)',uninstall:sys?'kaldırılsın (sistem uygulaması: kullanıcı 0’dan kalkar, Geri Alma Merkezi ile geri yüklenebilir)':'tamamen kaldırılsın (geri alınamaz)',clear:'verileri silinsin (giriş bilgileri/ayarlar gider)'}[op];
+ if(msg&&!(await conf(lab(p)+' '+msg+'?')))return false;
+ toast('⏳','İşleniyor…');const r=await pmRun(op,p,sys);toast(r.ok?'✅':'❌',r.ok?'Tamam: '+lab(p):String(r.out||r.error||'hata').slice(0,90));
+ await loadApps();if(curView==='apps'){ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];amRender()}return r.ok}
+async function trimCaches(){if(!(await conf('Tüm uygulamaların önbelleği temizlensin mi? (veri silinmez)')))return;toast('⏳','Temizleniyor…');const r=await N('trimCaches');toast(r.ok?'✅':'❌',r.ok?'Önbellekler temizlendi':String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+/* --- Launcher güncelleme kontrolü (GitHub Releases) --- */
+const verNums=v=>String(v||'').replace(/^v/i,'').split(/[^0-9]+/).filter(Boolean).map(Number);
+function verCmp(a,b){a=verNums(a);b=verNums(b);for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0}
+async function updCheck(manual){if(!S.updRepo){if(manual)updView();return null}
+ try{const me=await N('appInfo',{p:'com.ihlauncher.tv'});const cur=me.v||'0';
+  const r=await fetch('https://api.github.com/repos/'+S.updRepo+'/releases/latest',{headers:{'Accept':'application/vnd.github+json'}});
+  if(r.status===404)throw new Error('Sürüm yayını (Release) bulunamadı');if(!r.ok)throw new Error('GitHub HTTP '+r.status);
+  const j=await r.json(),tag=j.tag_name||'',ast=(j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{},apk=ast.browser_download_url||'',sha=ast.digest||'';
+  S.updAt=Date.now();save();const newer=verCmp(tag,cur)>0;
+  if(newer&&(manual||S.updSkip!==tag)){if(manual)updShow({tag,cur,apk,sha,url:j.html_url,body:j.body||''});else toast('⬆️','Yeni sürüm var: '+tag+' • Launcher Ayarları → Güncelleme kontrolü')}
+  else if(manual)toast('✅','Güncelsin ('+cur+')');
+  return newer}
+ catch(e){if(manual)toast('❌',String(e.message||e).slice(0,90));return null}}
+function updShow(r){const body=String(r.body||'').replace(/[#*`]/g,'').trim().slice(0,500);
+ $('#dlgbox').innerHTML='<div class="dt">⬆️ Yeni sürüm: '+esc(r.tag)+'</div><div class="dm">Mevcut: '+esc(r.cur)+(body?'\n\n'+esc(body):'')+'</div><div class="drow" style="flex-wrap:wrap">'+(r.apk?'<div class="btn b" onclick="updInstall()">⬇️ İndir ve kur</div>':'')+'<div class="btn" onclick="closeDlg();N(\'openUrl\',{u:updR.url})">🌐 İndirme sayfasını aç</div>'+(r.apk?'<div class="btn" onclick="updApk()">🔗 APK adresi</div>':'')+'<div class="btn" onclick="S.updSkip=updR.tag;save();closeDlg()">Bu sürümü atla</div></div>';window.updR=r;showDlg()}
+async function updInstall(){closeDlg();const r=window.updR;if(!r||!r.apk)return;
+ let c=await N('canInstall');
+ if(!c.ok){if(await adbReady()){await N('adb',{c:'appops set com.ihlauncher.tv REQUEST_INSTALL_PACKAGES allow'});c=await N('canInstall')}
+  if(!c.ok){if(await conf('Güncellemeyi kurabilmek için bu uygulamaya “Bilinmeyen uygulamaları yükle” izni vermelisin. Ayar ekranı açılsın mı?'))N('unknownSources');return}}
+ toast('⬇️','İndiriliyor…');const res=await N('installApk',{url:r.apk,sha:r.sha||''});
+ if(res.error){toast('❌',res.error==='NEED_PERM'?'Yükleme izni gerekli':String(res.error).slice(0,100));return}
+ toast('📦','Kurulum onayı açılıyor…')}
+window.__dl=p=>toast('⬇️','İndiriliyor %'+p);
+function updApk(){closeDlg();info('APK adresi','TV’de “Downloader” gibi bir uygulamayla bu adresi girip indirebilirsin:\n\n'+updR.apk)}
+function updView(){curView='upd';N('appInfo',{p:'com.ihlauncher.tv'}).then(me=>mset('⬆️ Güncelleme Kontrolü','<div class="nf">Sürümler GitHub Releases’ten kontrol edilir. Depoya <b>v2.1.0</b> gibi bir etiket gönderince derleme akışı APK’yı otomatik yayınlar.</div>'+
+ '<div class="kv"><span>Yüklü sürüm</span><span>'+esc(me.v||'?')+'</span></div><div class="kv"><span>GitHub deposu</span><span>'+esc(S.updRepo||'ayarlanmadı')+'</span></div><div class="kv"><span>Son kontrol</span><span>'+(S.updAt?new Date(S.updAt).toLocaleString('tr-TR'):'—')+'</span></div>'+
+ '<div style="margin-top:14px"><span class="btn" onclick="updRepoSet()">✏️ Depo ayarla</span><span class="btn b" onclick="updCheck(true)">🔄 Şimdi kontrol et</span></div><div class="nf">Depo ayarlıysa haftada bir otomatik kontrol edilir.</div>',launcherSettings))}
+async function updRepoSet(){const v=await ask('GitHub deposu (kullanıcı/depo)',S.updRepo||'');if(v===null)return;const t=v.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/+$/,'');
+ if(t&&!/^[\w.-]+\/[\w.-]+$/.test(t)){toast('❌','Biçim: kullanıcı/depo');return}S.updRepo=t;S.updSkip='';save();updView()}
+/* --- Kullanılmayan uygulamalar --- */
+let USAGE=[],UNSEL=new Set(),UND=60;
+const unProt=p=>S.fav.includes(p)||S.bootApps.includes(p)||Object.values(S.keymap).includes(p)||S.widgets.some(w=>w.p===p);
+function unList(){const lim=Date.now()-UND*864e5;return USAGE.filter(a=>a.ins<lim&&(!a.last||a.last<lim)&&!unProt(a.p)).sort((x,y)=>(x.last||0)-(y.last||0))}
+async function sgUnused(){curView='unused';UNSEL=new Set();mset('🕸️ Kullanılmayan Uygulamalar','<div class="nf">Taranıyor…</div>',backSG);const r=await N('usage',{days:90});if(curView!=='unused')return;adbOk=await adbReady();
+ if(r.error||!r.access){mset('🕸️ Kullanılmayan Uygulamalar','<div class="nf">Kullanım istatistiği erişimi gerekli (ADB ile otomatik verilir).</div><span class="btn g" onclick="runSetup().then(sgUnused)">⚡ Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'usage\'})">Ayarı aç</span>',backSG);return}
+ USAGE=r.items||[];unRender()}
+function unRender(){const l=unList(),d=t=>t?new Date(t).toLocaleDateString('tr-TR'):'90+ gündür';
+ mset('🕸️ Kullanılmayan Uygulamalar','<div class="nf">Seçilen süredir açılmayan, son '+UND+' günde kurulmamış kullanıcı uygulamaları. Favoriler, açılışta başlayanlar ve tuş atamaları listelenmez. Sistem kullanım verisini yaklaşık tuttuğu için önce <b>dondur</b>.</div>'+(adbOk?'':NEEDADB)+
+ '<div class="chips">'+[30,60,90].map(x=>'<div class="chip'+(UND===x?' on':'')+'" onclick="UND='+x+';UNSEL=new Set();keepNext();unRender()">'+x+'+ gün</div>').join('')+'</div>'+
+ (l.length?'<div><span class="btn" onclick="UNSEL=new Set(unList().map(a=>a.p));keepNext();unRender()">Hepsini seç</span><span class="btn" onclick="UNSEL=new Set();keepNext();unRender()">Temizle</span></div>'+l.map(a=>'<div class="r2" data-up="'+esc(a.p)+'" onclick="unTog('+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="s2">Son kullanım: '+d(a.last)+' • Kurulum: '+d(a.ins)+'</div></div>'+tg(UNSEL.has(a.p))+'</div>').join('')+
+ '<div style="margin-top:14px"><span class="btn b" onclick="unRun(\'freeze\')">🧊 Seçilenleri dondur (<span id="unc">'+UNSEL.size+'</span>)</span><span class="btn r" onclick="unRun(\'uninstall\')">🗑️ Kaldır</span></div>':'<div class="empty">Bu süredir kullanılmayan uygulama yok 👍</div>'),backSG)}
+function unTog(p){if(UNSEL.has(p))UNSEL.delete(p);else UNSEL.add(p);const e=$('[data-up="'+p+'"] .tog');if(e)e.classList.toggle('on',UNSEL.has(p));const c=$('#unc');if(c)c.textContent=UNSEL.size}
+async function unRun(op){const sel=[...UNSEL];if(!sel.length){toast('ℹ️','Önce seç');return}if(!(await adbReady())){info('ADB gerekli','İşlem için ADB / Shizuku bağlı olmalı.');return}
+ if(!(await conf(sel.length+' uygulama '+(op==='freeze'?'dondurulacak (Geri Alma Merkezi’nden çözülebilir).':'TAMAMEN kaldırılacak (geri alınamaz).')+'\n\nDevam edilsin mi?')))return;
+ let ok=0;for(let k=0;k<sel.length;k++){toast('⏳',(k+1)+' / '+sel.length);const r=await pmRun(op,sel[k],false);if(r.ok){ok++;USAGE=USAGE.filter(a=>a.p!==sel[k])}}
+ UNSEL=new Set();await loadApps();toast(ok===sel.length?'✅':'⚠️',ok+' / '+sel.length+' işlem başarılı');unRender()}
+async function unusedHint(){if(Date.now()-S.unusedAt<6048e5)return;const r=await N('usage',{days:90});if(!r||!r.access)return;USAGE=r.items||[];S.unusedAt=Date.now();save();const n=unList().length;if(n>=3)toast('🕸️',n+' uygulama '+UND+'+ gündür açılmadı • Sistem Merkezi → Kullanılmayan Uygulamalar')}
+/* --- Zamanlı otomatik temizlik --- */
+async function autoCleanRun(manual){const a=S.auto;if(!(await adbReady())){if(manual)toast('⚠️','ADB bağlı değil');return false}
+ const r=await N('trimCaches');let ok=!!r.ok;if(a.bg){const k=await N('perf',{v:'kill'});ok=ok&&!!k.ok}
+ a.last=Date.now();save();if(manual)toast(ok?'✅':'❌',ok?'Temizlik tamamlandı':String(r.out||r.error||'başarısız').slice(0,80));return ok}
+function autoCheck(){if(document.hidden)return;const a=S.auto,b=S.autoBackup;
+ if(a.on&&Date.now()-(a.last||0)>=a.h*3600000)autoCleanRun(false);
+ if(b.on&&Date.now()-(b.last||0)>=b.days*864e5)backupNow(false)}
+function sgAuto(){curView='auto';const a=S.auto,l=a.last?new Date(a.last).toLocaleString('tr-TR'):'henüz çalışmadı';
+ mset('⏱️ Otomatik Temizlik','<div class="nf">Seçtiğin aralıkta tüm uygulama önbelleklerini temizler (veri silinmez). ADB bağlı olmalı ve launcher çalışıyor olmalıdır; kontrol her 10 dakikada ve ana ekrana dönüşte yapılır.</div>'+
+ '<div class="r2" onclick="autoSet(\'on\')"><div class="n">Otomatik temizlik</div>'+tg(a.on)+'</div>'+
+ '<div class="sec">Aralık</div><div class="chips">'+[3,6,12,24].map(h=>'<div class="chip'+(a.h===h?' on':'')+'" onclick="autoSet(\'h\','+h+')">'+h+' saat</div>').join('')+'</div>'+
+ '<div class="r2" onclick="autoSet(\'bg\')"><div><div class="n">Arka plan uygulamalarını da kapat</div><div class="s2">Çalışan arka plan işlemlerini sonlandırır; bildirim bekleyen uygulamalar yeniden başlayana kadar bildirim göndermeyebilir.</div></div>'+tg(a.bg)+'</div>'+
+ '<div class="nf" style="margin-top:12px">Son çalışma: '+esc(l)+'</div><span class="btn b" onclick="autoCleanRun(true).then(()=>{keepNext();sgAuto()})">▶️ Şimdi çalıştır</span>',backSG)}
+function autoSet(k,v){const a=S.auto;if(k==='on'){a.on=!a.on;if(a.on)a.last=Date.now()}else if(k==='h')a.h=v;else if(k==='bg')a.bg=!a.bg;save();keepNext();sgAuto()}
+/* --- Tarama / sınıflandırma --- */
+let SCAN=null;
+async function scanSys(){const[p,all]=await Promise.all([N('profile'),N('allPkgs')]);ALL=Array.isArray(all)?all:[];const prof=p&&!p.error?p:{};
+ SCAN={prof,vendor:vendorOf(prof),items:ALL.filter(a=>a.s&&a.inst).map(a=>({p:a.p,l:a.l,en:a.en,c:classify(a.p,a.l)})),t:Date.now()};return SCAN}
+const cands=()=>SCAN.items.filter(i=>i.en&&i.c.cat!=='core'&&(i.c.src==='db'||i.c.src==='fam'||i.c.src==='heur')&&i.c.risk!=='critical'&&i.c.risk!=='unknown');
+async function sgScan(){curView='scan';mset('🔍 Cihaz Analizi','<div class="nf">Cihaz ve sistem paketleri taranıyor…</div>',backSG);await scanSys();if(curView!=='scan')return;
+ const P=SCAN.prof,it=SCAN.items,cnt=r=>it.filter(i=>i.c.risk===r&&i.en).length,cd=cands(),st=await N('adbStatus'),dns=await N('getDns'),tele=cd.filter(i=>i.c.cat==='tele'),safe=cd.filter(i=>i.c.risk==='safe');
+ const rec=[];const us=await N('usage',{days:90});if(us&&us.access){USAGE=us.items||[];const un=unList().length;if(un)rec.push(['🕸️',un+' uygulama '+UND+'+ gündür kullanılmadı','Dondurarak yer ve bellek kazanabilirsin.','İncele',sgUnused])}
+ if(!st.ready)rec.push(['🔌','ADB bağlı değil','Dondurma/kaldırma ve telemetri ayarları için gerekli.','Bağlan',sgAdb]);
+ if(P.home&&P.home!=='com.ihlauncher.tv')rec.push(['🏠','ihlauncher varsayılan ana ekran değil','Şu an: '+P.home,'Yap',setHome]);
+ if(tele.length)rec.push(['🛡️',tele.length+' telemetri/reklam paketi bulundu','Dondurulabilir (geri alınabilir).','Telemetri',()=>{DBF='tele';sgDebloat()}]);
+ if(safe.length)rec.push(['🧼',safe.length+' güvenli temizlenebilir paket','Kaybedeceğin bir özellik yok.','Debloat',()=>{DBF='safe';sgDebloat()}]);
+ if(dns&&dns.code===0&&(dns.out||'').split('\n')[0]==='off')rec.push(['🌐','Özel DNS kapalı','AdGuard DNS reklam/telemetri alan adlarını engeller.','Aç',()=>sgDns()]);
+ if(P.patch){const age=(Date.now()-new Date(P.patch).getTime())/2592000000;if(age>18)rec.push(['⚠️','Güvenlik yaması eski ('+P.patch+')','Üretici güncelleme yayınlamıyor olabilir; ağ ve uygulama güvenliğine dikkat.','Denetim',sgAudit])}
+ if(P.sdk&&P.sdk<28)rec.push(['⚠️','Android sürümü eski (API '+P.sdk+')','Bazı modern uygulamalar ve güvenlik özellikleri desteklenmez.','','']);
+ mset('🔍 Cihaz Analizi','<div class="hero"><div class="h1">'+esc((P.man||'')+' '+(P.model||''))+'</div><div class="h2">Üretici ailesi: <b>'+esc(SCAN.vendor)+'</b><br>Android '+esc(P.rel||'?')+' (API '+esc(P.sdk||'?')+') • '+esc(P.abi||'')+' • RAM '+gb(P.ramT||0)+' • Yama '+esc(P.patch||'-')+'<br>'+(P.tv?'TV modu':'TV modu değil')+' • '+(P.gtv?'Google TV arayüzü':(P.atv?'Android TV arayüzü':'Stok arayüz bilinmiyor'))+' • '+(P.gms?'Google servisleri var':'Google servisleri yok')+' • Yapı: '+esc(P.type||'')+'</div></div>'+
+ '<div class="sum"><div class="sm"><b>'+it.length+'</b><span>Sistem paketi</span></div><div class="sm"><b style="color:var(--ok)">'+cnt('safe')+'</b><span>Güvenli temizlik</span></div><div class="sm"><b style="color:var(--warn)">'+cnt('caution')+'</b><span>Dikkat gerektiren</span></div><div class="sm"><b style="color:var(--bad)">'+cnt('risky')+'</b><span>Riskli</span></div></div>'+
+ '<div class="nf">'+cnt('critical')+' kritik, '+cnt('unknown')+' tanımsız paket var. Tanımsız ve kritik paketlere otomatik hiçbir işlem yapılmaz.</div><div class="sec">Öneriler</div>'+
+ (rec.length?rec.map((r,k)=>'<div class="r2" onclick="SCANREC['+k+'][4]&&SCANREC['+k+'][4]()"><div><div class="n">'+r[0]+'  '+esc(r[1])+'</div><div class="s2">'+esc(r[2])+'</div></div>'+(r[3]?'<span class="btn b">'+r[3]+'</span>':'')+'</div>').join(''):'<div class="empty">Öneri yok — cihaz temiz görünüyor 👍</div>'),backSG);window.SCANREC=rec}
+/* --- Akıllı Debloat --- */
+let DBSEL=new Set(),DBF='all';
+async function sgDebloat(){curView='debloat';mset('🧼 Akıllı Debloat','<div class="nf">Cihaz taranıyor…</div>',backSG);DBSEL=new Set();await scanSys();adbOk=await adbReady();if(curView==='debloat')dbRender()}
+function dbList(){const f=DBF;return cands().filter(i=>f==='all'||i.c.risk===f||i.c.cat===f).sort((a,b)=>['safe','caution','risky'].indexOf(a.c.risk)-['safe','caution','risky'].indexOf(b.c.risk)||a.c.title.localeCompare(b.c.title,'tr'))}
+function dbRender(){const cd=cands(),l=dbList(),F=[['all','Tümü'],['safe','Güvenli'],['caution','Dikkat'],['risky','Riskli'],['tele','Telemetri & Reklam'],['vendor','Üretici'],['google','Google']];
+ const unk=SCAN.items.filter(i=>i.c.risk==='unknown'&&i.en).length,safeN=quickList().length;
+ mset('🧼 Akıllı Debloat','<div class="r2" onclick="dbQuick()"><div><div class="n">✨ Güvenli temizlik (tek tuş)</div><div class="s2">Bu cihazda bulunan, yerleşik listede “Güvenli” etiketli '+safeN+' paketi dondurur. Riskli/dikkat gerektiren ve uzak liste paketlerine dokunmaz. Geri alınabilir.</div></div><span class="btn g">Başlat</span></div>'+
+ '<div class="r2" onclick="dbUpdate(true)"><div><div class="n">🌐 Liste: '+DB.filter(d=>!d[5]).length+' yerleşik'+(S.dbRemote?' + '+S.dbRemote.n+' uzak (v'+esc(S.dbRemote.v||'?')+')':'')+'</div><div class="s2">'+(S.dbUrl?esc(S.dbUrl):'GitHub JSON adresi ayarlanmadı')+(S.dbRemote?' • Güncelleme: '+new Date(S.dbRemote.t).toLocaleDateString('tr-TR'):'')+'</div></div><span class="btn b">'+(S.dbUrl?'Güncelle':'Adres gir')+'</span></div>'+(S.dbUrl?'<div><span class="btn" onclick="dbUrlSet()">✏️ Adresi değiştir</span><span class="btn r" onclick="dbRemoteClear()">Uzak listeyi kaldır</span></div>':'')+
+ '<div class="nf"><b>'+esc(SCAN.vendor)+'</b> • '+cd.length+' aday paket bulundu. Önce <b>dondur</b> (tamamen geri alınabilir); sorun çıkmazsa kaldır. '+unk+' tanımsız sistem paketine dokunulmaz — onları Uygulama Yöneticisi’nden elle incele.</div>'+(adbOk?'':NEEDADB)+
+ '<div class="chips">'+F.map(c=>'<div class="chip'+(DBF===c[0]?' on':'')+'" onclick="DBF=\''+c[0]+'\';keepNext();dbRender()">'+c[1]+'</div>').join('')+'</div>'+
+ '<div><span class="btn g" onclick="dbPick(\'safe\')">✅ Güvenlileri seç</span><span class="btn" onclick="dbPick(\'tele\')">🛡️ Telemetri/reklamı seç</span><span class="btn" onclick="dbPick(\'none\')">Seçimi temizle</span></div>'+
+ (l.length?l.map(i=>'<div class="r2" data-dp="'+esc(i.p)+'" onclick="dbTog('+q(i.p)+')"><div style="min-width:0"><div class="n">'+esc(i.c.title)+' <span class="bd '+RISK[i.c.risk].c+'">'+RISK[i.c.risk].t+'</span> <span class="bd f">'+CATS[i.c.cat]+'</span>'+(i.c.remote?' <span class="bd w">UZAK LİSTE</span>':'')+'</div><div class="p">'+esc(i.p)+'</div>'+(i.c.note?'<div class="s2">'+esc(i.c.note)+'</div>':'')+'</div>'+tg(DBSEL.has(i.p))+'</div>').join(''):'<div class="empty">Bu filtrede aday paket yok</div>')+
+ '<div style="margin-top:14px"><span class="btn b" onclick="dbRun(\'freeze\')">🧊 Seçilenleri dondur (<span id="dbc">'+DBSEL.size+'</span>)</span><span class="btn r" onclick="dbRun(\'uninstall\')">🗑️ Seçilenleri kaldır</span></div>',backSG)}
+let adbOk=false;
+function ghRaw(u){u=u.trim();const m=u.match(/^https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/(.+)$/);return m?'https://raw.githubusercontent.com/'+m[1]+'/'+m[2]:u}
+async function dbUrlSet(){const v=await ask('Debloat listesi adresi (https://… .json, GitHub raw veya blob)',S.dbUrl||'https://raw.githubusercontent.com/KULLANICI/REPO/main/debloat-list.json');if(v===null)return;const u=ghRaw(v);
+ if(!/^https:\/\/[^\s]+$/.test(u)){toast('❌','Adres https:// ile başlamalı');return}S.dbUrl=u;save();dbUpdate(true)}
+async function dbUpdate(manual){if(!S.dbUrl){dbUrlSet();return}if(manual)toast('⏳','Liste indiriliyor…');
+ try{const r=await fetch(S.dbUrl,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const c=applyRemote(j);
+  if(!c.n&&!c.f)throw new Error('Geçerli kayıt bulunamadı');
+  S.dbRemote={v:String(j.version||''),n:c.n,f:c.f,t:Date.now(),data:{entries:j.entries,family:j.family}};save();if(manual)toast('✅',c.n+' paket + '+c.f+' üretici kuralı yüklendi');
+  if(curView==='debloat'&&SCAN){SCAN.items.forEach(i=>{i.c=classify(i.p,i.l)});DBSEL=new Set();keepNext();dbRender()}}
+ catch(e){if(manual)toast('❌',String(e.message||e).slice(0,90))}}
+function dbRemoteClear(){S.dbRemote=null;applyRemote(null);save();if(SCAN){SCAN.items.forEach(i=>{i.c=classify(i.p,i.l)});DBSEL=new Set()}toast('🗑️','Uzak liste kaldırıldı');keepNext();dbRender()}
+const quickList=()=>cands().filter(i=>!i.c.remote&&i.c.risk==='safe'&&i.c.src==='db');
+async function dbQuick(){if(!(await adbReady())){info('ADB gerekli','Temizlik için ADB veya Shizuku bağlı olmalı. Sistem Merkezi → ADB Terminal.');return}
+ const l=quickList();if(!l.length){toast('👍','Güvenle temizlenecek paket yok');return}DBSEL=new Set(l.map(i=>i.p));await dbRun('freeze')}
+function dbPick(w){if(w==='none')DBSEL=new Set();else cands().filter(i=>!i.c.remote&&(w==='safe'?(i.c.risk==='safe'&&i.c.src==='db'):(i.c.cat==='tele'&&i.c.src==='db'&&i.c.risk!=='risky'))).forEach(i=>DBSEL.add(i.p));keepNext();dbRender()}
+function dbTog(p){if(DBSEL.has(p))DBSEL.delete(p);else DBSEL.add(p);const e=$('[data-dp="'+p+'"] .tog');if(e)e.classList.toggle('on',DBSEL.has(p));const c=$('#dbc');if(c)c.textContent=DBSEL.size}
+async function dbRun(op){const sel=[...DBSEL];if(!sel.length){toast('ℹ️','Önce seç');return}
+ if(!(await adbReady())){info('ADB gerekli','Dondurma/kaldırma için ADB veya Shizuku bağlı olmalı. Sistem Merkezi → ADB Terminal.');return}
+ const its=SCAN.items.filter(i=>DBSEL.has(i.p)),risky=its.filter(i=>i.c.risk==='risky');
+ if(its.some(i=>LAUNCHERS.includes(i.p))&&SCAN.prof.home!=='com.ihlauncher.tv'){info('Önce ana ekranı değiştir','Stok launcher seçili ama ihlauncher varsayılan ana ekran değil. Launcher Ayarları → “Varsayılan ana ekran yap”.');return}
+ let msg=sel.length+' paket '+(op==='freeze'?'dondurulacak (geri alınabilir).':'kullanıcı 0’dan kaldırılacak (Geri Alma Merkezi ile geri yüklenebilir).')+'\n\n'+its.slice(0,10).map(i=>'• '+i.c.title).join('\n')+(its.length>10?'\n… +'+(its.length-10)+' paket daha':'');
+ if(risky.length)msg+='\n\n⚠️ '+risky.length+' RİSKLİ paket var: '+risky.slice(0,5).map(i=>i.c.title).join(', ')+(risky.length>5?'…':'')+'\nBunlar arayüzü veya özellikleri bozabilir.';
+ if(!(await conf(msg+'\n\nDevam edilsin mi?')))return;
+ let ok=0;const bad=[];for(let k=0;k<sel.length;k++){toast('⏳',(k+1)+' / '+sel.length+' işleniyor…');const r=await pmRun(op,sel[k],true);if(r.ok)ok++;else bad.push(sel[k]+': '+String(r.out||r.error||'hata').slice(0,60))}
+ await loadApps();DBSEL=new Set();await scanSys();adbOk=true;toast(bad.length?'⚠️':'✅',ok+' başarılı, '+bad.length+' başarısız');if(bad.length)info('Başarısız olanlar',bad.join('\n'));if(curView==='debloat')dbRender()}
+/* --- Telemetri & Gizlilik --- */
+const TELE=[
+ {i:'📡',t:'Arka plan Wi-Fi / Bluetooth taraması',d:'Konum amaçlı sürekli tarama kapatılır.',get:'$(settings get global wifi_scan_always_enabled)/$(settings get global ble_scan_always_enabled)',on:v=>v==='0/0',cOn:'settings put global wifi_scan_always_enabled 0; settings put global ble_scan_always_enabled 0',cOff:'settings put global wifi_scan_always_enabled 1; settings put global ble_scan_always_enabled 1',risk:'safe'},
+ {i:'🐞',t:'Uygulama hata raporu gönderimi',d:'Çöken uygulamaların “hata bildir” akışını kapatır.',get:'$(settings get global send_action_app_error)',on:v=>v==='0',cOn:'settings put global send_action_app_error 0',cOff:'settings put global send_action_app_error 1',risk:'safe'},
+ {i:'🌍',t:'Bağlantı denetimi (captive portal) kapat',d:'Sistem, internet var mı diye periyodik sunucu isteği atmaz. Bazı TV’lerde “internet yok” uyarısı çıkarabilir.',get:'$(settings get global captive_portal_mode)',on:v=>v==='0',cOn:'settings put global captive_portal_mode 0',cOff:'settings put global captive_portal_mode 1',risk:'caution'}];
+const GMS_COMP=['com.google.android.gms.analytics.AnalyticsService','com.google.android.gms.analytics.AnalyticsReceiver','com.google.android.gms.analytics.AnalyticsJobService','com.google.android.gms.analytics.CampaignTrackingService'];
+async function sgTele(){curView='tele';mset('🛡️ Telemetri & Gizlilik','<div class="nf">Durum okunuyor…</div>',backSG);
+ adbOk=await adbReady();let vals=[];
+ if(adbOk){const r=await N('adb',{c:TELE.map((t,k)=>'echo T'+k+':'+t.get).join('; ')+'; echo D:$(settings get global private_dns_mode)/$(settings get global private_dns_specifier)'});const m={};(r.out||'').split('\n').forEach(l=>{const x=l.indexOf(':');if(x>0)m[l.slice(0,x).trim()]=l.slice(x+1).trim()});vals=TELE.map((t,k)=>m['T'+k]);window.__dnsNow=m.D||''}
+ if(curView!=='tele')return;await scanSys();if(curView!=='tele')return;
+ const tc=cands().filter(i=>i.c.cat==='tele');
+ mset('🛡️ Telemetri & Gizlilik','<div class="nf">Hiçbir ayar kalıcı değildir; hepsi geri alınabilir. Telemetriyi tamamen sıfırlamak mümkün değildir — burada yapılabilenler listelenir.</div>'+(adbOk?'':NEEDADB)+
+ '<div class="sec">Sistem ayarları</div>'+TELE.map((t,k)=>'<div class="r2" onclick="teleTog('+k+')"><div><div class="n">'+t.i+'  '+t.t+' <span class="bd '+RISK[t.risk].c+'">'+RISK[t.risk].t+'</span></div><div class="s2">'+t.d+'</div></div>'+tg(vals[k]!==undefined&&t.on(vals[k]))+'</div>').join('')+
+ '<div class="sec">Alan adı engelleme</div><div class="r2" onclick="dnsSet(0).then(sgTele)"><div><div class="n">🛡️  AdGuard DNS aç</div><div class="s2">Cihazın tamamında reklam ve izleyici alan adlarını engeller. Şu an: '+esc(window.__dnsNow||'bilinmiyor')+'</div></div><span class="btn b">Aç</span></div>'+
+ '<div class="sec">Paketler</div><div class="r2" onclick="DBF=\'tele\';sgDebloat()"><div><div class="n">📦  Telemetri / reklam paketleri</div><div class="s2">'+tc.length+' paket bulundu — incele ve dondur.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="sec">Google</div><div class="r2" onclick="N(\'startAction\',{a:\'com.google.android.gms.settings.ADS_PRIVACY\'})"><div><div class="n">🆔  Reklam kimliği ayarları</div><div class="s2">Reklam kimliğini sıfırla / kişiselleştirmeyi kapat (Google ayar ekranı).</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="N(\'startAction\',{a:\'android.settings.PRIVACY_SETTINGS\'})"><div><div class="n">🔒  Gizlilik ayarları</div><div class="s2">Kullanım ve tanılama dahil sistem gizlilik ekranı.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="gmsAn(true)"><div><div class="n">🧪  Deneysel: GMS analitik bileşenlerini kapat</div><div class="s2">Google Analytics servis bileşenleri devre dışı bırakılır. Cihaza göre çalışmayabilir; güncellemeden sonra geri gelebilir.</div></div><span class="btn">Uygula</span></div>'+
+ '<div class="r2" onclick="gmsAn(false)"><div><div class="n">↩️  GMS analitik bileşenlerini geri aç</div></div><span class="btn">Uygula</span></div>',backSG)}
+async function teleTog(k){if(!adbOk){toast('⚠️','ADB bağlı değil');return}const t=TELE[k],e=$$('#mbody .r2')[k],tgl=e&&e.querySelector('.tog'),turnOn=!(tgl&&tgl.classList.contains('on'));
+ const r=await N('adb',{c:turnOn?t.cOn:t.cOff});if(r.code===0){tgl&&tgl.classList.toggle('on',turnOn);toast('✅',turnOn?'Uygulandı':'Geri alındı')}else toast('❌',String(r.out||r.error||'başarısız').slice(0,90))}
+async function gmsAn(off){if(!adbOk){toast('⚠️','ADB bağlı değil');return}toast('⏳','Uygulanıyor…');let ok=0;const bad=[];
+ for(const c of GMS_COMP){const r=await N('adb',{c:(off?'pm disable ':'pm enable ')+'com.google.android.gms/'+c});if(r.code===0&&!/Exception|Error|Unknown/i.test(r.out||''))ok++;else bad.push(c.split('.').pop()+': '+String(r.out||r.error||'').slice(0,50))}
+ toast(ok?'✅':'❌',ok+' / '+GMS_COMP.length+' bileşen '+(off?'kapatıldı':'açıldı'));if(bad.length)info('Bazı bileşenler değişmedi',bad.join('\n')+'\n\nBu cihaz bileşen değişikliğine izin vermiyor olabilir.')}
+/* --- Güvenlik denetimi --- */
+async function sgAudit(){curView='audit';mset('🔐 Güvenlik Denetimi','<div class="nf">Denetleniyor…</div>',backSG);const r=await N('audit');if(curView!=='audit')return;
+ if(r.error){mset('🔐 Güvenlik Denetimi','<div class="empty">'+esc(r.error)+'</div>',backSG);return}
+ const row=(c,t,s,b)=>'<div class="r2"><div><div class="n">'+c+'  '+t+'</div>'+(s?'<div class="s2">'+s+'</div>':'')+'</div>'+(b||'')+'</div>';
+ const ext=a=>!a.s&&a.p!=='com.ihlauncher.tv';
+ mset('🔐 Güvenlik Denetimi','<div class="sec">Durum</div>'+row(r.adb?'⚠️':'✅','USB/Ağ hata ayıklama (ADB)',r.adb?'Açık. Ağdaki herkes erişemez ama yetkili cihazlar komut çalıştırabilir. İşin bitince kapat.':'Kapalı','<span class="bd '+(r.adb?'w':'a')+'">'+(r.adb?'AÇIK':'KAPALI')+'</span>')+
+ row(r.dev?'ℹ️':'✅','Geliştirici seçenekleri',r.dev?'Açık':'Kapalı','<span class="bd '+(r.dev?'f':'a')+'">'+(r.dev?'AÇIK':'KAPALI')+'</span>')+
+ '<div class="sec">Erişilebilirlik hizmetleri ('+r.a11y.length+')</div><div class="nf">Bu hizmetler ekranı okuyabilir ve tuşları yakalayabilir. Tanımadığın hizmetleri kapat.</div>'+
+ (r.a11y.map(a=>row(ext(a)?'⚠️':'✅',esc(a.l),esc(a.p),'<span class="bd '+(a.p==='com.ihlauncher.tv'?'a':(a.s?'f':'w'))+'">'+(a.p==='com.ihlauncher.tv'?'BU UYGULAMA':(a.s?'SİSTEM':'3. TARAF'))+'</span>')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Bildirim dinleyicileri ('+r.listeners.length+')</div><div class="nf">Bildirimlerin içeriğini okuyabilir.</div>'+
+ (r.listeners.map(a=>row(ext(a)?'⚠️':'✅',esc(a.l),esc(a.p),'<span class="bd '+(a.p==='com.ihlauncher.tv'?'a':(a.s?'f':'w'))+'">'+(a.p==='com.ihlauncher.tv'?'BU UYGULAMA':(a.s?'SİSTEM':'3. TARAF'))+'</span>')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Hassas izinli kullanıcı uygulamaları ('+r.apps.length+')</div><div class="nf">Dokun: izinleri incele / geri al.</div>'+
+ (r.apps.map(a=>'<div class="r2" onclick="permsFor('+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="s2">'+esc(a.perms.join(', '))+'</div></div><span class="bd w">'+a.perms.length+' izin</span></div>').join('')||'<div class="empty">Yok</div>')+
+ '<div style="margin-top:10px"><span class="btn" onclick="N(\'openSettings\',{k:\'a11y\'})">Erişilebilirlik ayarı</span><span class="btn" onclick="N(\'openSettings\',{k:\'notif\'})">Bildirim erişimi</span><span class="btn" onclick="N(\'openSettings\',{k:\'dev\'})">Geliştirici seçenekleri</span></div>',backSG)}
+/* --- Geri Alma Merkezi --- */
+async function sgRecover(){curView='recover';mset('♻️ Geri Alma Merkezi','<div class="nf">Taranıyor…</div>',backSG);ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];if(curView!=='recover')return;adbOk=await adbReady();
+ const by=(a,b)=>a.l.localeCompare(b.l,'tr'),fr=ALL.filter(a=>a.inst&&!a.en).sort(by),mine=ALL.filter(a=>!a.inst&&S.rmlog[a.p]).sort(by),other=ALL.filter(a=>!a.inst&&!S.rmlog[a.p]).sort(by).slice(0,120);
+ const R=(a,op,t)=>'<div class="r2" onclick="recOne('+q(op)+','+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="p">'+esc(a.p)+'</div></div><span class="btn '+(op==='unfreeze'?'b':'g')+'">'+t+'</span></div>';
+ mset('♻️ Geri Alma Merkezi','<div class="nf">Dondurduğun veya kullanıcı 0’dan kaldırdığın paketleri tek dokunuşla geri getir. Tamamen kaldırılmış kullanıcı uygulamaları geri gelmez.</div>'+(adbOk?'':NEEDADB)+
+ '<div><span class="btn b" onclick="recAll()">♻️ Dondurulan + kaldırdıklarımı geri getir ('+(fr.length+mine.length)+')</span></div>'+
+ '<div class="sec">Dondurulmuş ('+fr.length+')</div>'+(fr.map(a=>R(a,'unfreeze','Çöz')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Bu launcher ile kaldırılanlar ('+mine.length+')</div>'+(mine.map(a=>R(a,'restore','Geri yükle')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Diğer kaldırılmış paketler ('+other.length+')</div><div class="nf">Bunlar üretici varsayılanı olarak bu kullanıcıda hiç kurulu olmamış olabilir; yalnızca ne olduğunu biliyorsan geri yükle.</div>'+(other.map(a=>R(a,'restore','Geri yükle')).join('')||'<div class="empty">Yok</div>'),backSG)}
+async function recOne(op,p){toast('⏳','İşleniyor…');const r=await pmRun(op,p);toast(r.ok?'✅':'❌',r.ok?'Geri getirildi: '+baseLab(p):String(r.out||r.error||'başarısız').slice(0,90));await loadApps();keepNext();sgRecover()}
+async function recAll(){if(!(await adbReady())){info('ADB gerekli','Geri getirme için ADB / Shizuku bağlı olmalı.');return}if(!(await conf('Dondurduğun ve bu launcher ile kaldırdığın paketler geri getirilsin mi?')))return;
+ let ok=0,bad=0;const list=ALL.filter(a=>(a.inst&&!a.en)||(!a.inst&&S.rmlog[a.p]));for(let k=0;k<list.length;k++){toast('⏳',(k+1)+' / '+list.length);const a=list[k],r=await pmRun(a.inst?'unfreeze':'restore',a.p,true);if(r.ok)ok++;else bad++}
+ await loadApps();toast(bad?'⚠️':'✅',ok+' geri getirildi, '+bad+' başarısız');sgRecover()}
+/* --- Uygulama Yöneticisi --- */
+let AM={f:'user',q:''},AML=[];
+async function sgApps(){curView='apps';ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];
+ mset('🧊 Uygulama Yöneticisi','<div class="chips">'+[['user','Kullanıcı'],['sys','Sistem'],['frozen','Dondurulmuş'],['gone','Kaldırılmış'],['all','Hepsi']].map(c=>'<div class="chip" data-cf="'+c[0]+'" onclick="amF(\''+c[0]+'\')">'+c[1]+'</div>').join('')+'</div><input class="tx" id="amq" placeholder="Ara…" oninput="AM.q=this.value;amRender()" data-submit="amSub"><div id="aml" style="margin-top:12px"></div>',backSG);amRender()}
+function amSub(){const l=$('#aml .r2');if(l)focusEl(l)}
+function amF(f){AM.f=f;amRender()}
+function amRender(){const f=AM.f,qq=(AM.q||'').toLowerCase();$$('[data-cf]').forEach(c=>c.classList.toggle('on',c.dataset.cf===f));
+ AML=ALL.filter(a=>{if(qq&&!(a.l.toLowerCase().includes(qq)||a.p.includes(qq)))return false;if(f==='user')return !a.s&&a.inst;if(f==='sys')return a.s&&a.inst;if(f==='frozen')return a.inst&&!a.en;if(f==='gone')return !a.inst;return true}).sort((a,b)=>a.l.localeCompare(b.l,'tr')).slice(0,200);
+ const e=$('#aml');if(!e)return;e.innerHTML=AML.length?AML.map((a,i)=>{const c=classify(a.p,a.l);return '<div class="r2" onclick="amMenu('+i+')"><div style="min-width:0"><div class="n">'+esc(a.l)+(a.s&&c.risk!=='unknown'?' <span class="bd '+RISK[c.risk].c+'">'+RISK[c.risk].t+'</span>':'')+'</div><div class="p">'+esc(a.p)+'</div></div><span class="bd '+(!a.inst?'u':(!a.en?'f':'a'))+'">'+(!a.inst?'KALDIRILDI':(!a.en?'DONDURULDU':'AKTİF'))+'</span></div>'}).join(''):'<div class="empty">Sonuç yok</div>'}
+function amMenu(i){const a=AML[i];if(!a)return;const it=[];
+ if(!a.inst)it.push(['♻️  Geri yükle',()=>pmDo('restore',a.p)]);
+ else{it.push(a.en?['🧊  Dondur',()=>pmDo('freeze',a.p)]:['🔥  Çöz',()=>pmDo('unfreeze',a.p)]);it.push(['🗑️  Kaldır',()=>uninstallApp(a.p,a.s)]);it.push(['⛔  Zorla durdur',()=>pmDo('stop',a.p)]);it.push(['🧹  Verileri temizle',()=>pmDo('clear',a.p)]);it.push(['🔋  Arka planı kısıtla',()=>pmDo('bgRestrict',a.p)]);it.push(['🔐  İzinler',()=>permsFor(a.p)]);it.push(['ℹ️  Ayrıntılar',()=>appDetail(a.p)])}
+ menu(a.l,it)}
+/* --- ADB --- */
+const PRESETS=[['Kullanıcı paketleri','pm list packages -3'],['Sistem paketleri','pm list packages -s'],['Dondurulmuşlar','pm list packages -d'],['Ekran','wm size; wm density'],['Android sürümü','getprop ro.build.version.release'],['Bellek','head -n 5 /proc/meminfo'],['IP','ip -f inet addr show'],['Açık uygulama','dumpsys activity activities | grep mResumedActivity'],['Isı','dumpsys thermalservice | head -n 30'],['Ping','ping -c 3 1.1.1.1'],['Yeniden başlat','reboot']];
+function term(t,c){const d=$('#term');if(!d)return;const s=document.createElement('div');s.textContent=t;if(c)s.className=c;d.appendChild(s);d.scrollTop=d.scrollHeight}
+async function sgAdb(){curView='adb';const st=await N('adbStatus');
+ mset('⌨️ ADB Terminal','<div class="nf">Durum: <b style="color:'+(st.ready?'var(--ok)':'var(--bad)')+'">'+(st.ready?'● Bağlı ('+esc(st.mode)+' '+esc(st.info)+')':'● Bağlı değil')+'</b><br>Shizuku: '+(st.shizukuReady?'izinli':(st.shizukuRunning?'çalışıyor, izin gerekli':'çalışmıyor'))+'</div>'+
+ '<div><span class="btn g" onclick="adbConn()">🔌 Bağlan ('+esc(st.host)+':'+st.port+')</span><span class="btn" onclick="adbEdit()">✏️ Adres/port</span><span class="btn b" onclick="shizukuAsk()">🔑 Shizuku izni</span><span class="btn" onclick="runSetup()">⚡ Tek tuş kurulum</span><span class="btn" onclick="setHome()">🏠 Varsayılan yap</span></div>'+
+ '<div class="nf">TV’de Geliştirici seçenekleri → USB/Ağ hata ayıklama açık olmalı. İlk bağlantıda çıkan izin penceresinde “Her zaman izin ver”i seç.</div><div id="term"></div><input class="tx" id="adbin" placeholder="komut (ör. pm list packages -3)" data-submit="adbRun">'+
+ '<div style="margin-top:12px">'+PRESETS.map((p,k)=>'<span class="btn" onclick="adbPreset('+k+')">'+p[0]+'</span>').join('')+'</div>'+((S.hist||[]).length?'<div class="nf">Geçmiş:</div><div>'+S.hist.slice(0,12).map((h,k)=>'<span class="chip" onclick="adbHist('+k+')">'+esc(h.slice(0,30))+'</span>').join(' ')+'</div>':''),backSG)}
+async function shizukuAsk(){await N('shizukuRequest');toast('🔑','Shizuku izin isteği gönderildi')}
+async function adbConn(){const st=await N('adbStatus');toast('⏳','Bağlanılıyor… TV’de izin penceresi çıkabilir');const r=await N('adbConnect',{host:st.host,port:st.port});toast(r.r==='ok'?'✅':'❌',r.r==='ok'?'ADB bağlandı':String(r.r||r.error).slice(0,90));sgAdb()}
+async function adbEdit(){const st=await N('adbStatus');const v=await ask('ADB adresi (host:port)',st.host+':'+st.port);if(!v)return;const m=v.trim().split(':');const r=await N('adbConnect',{host:m[0],port:parseInt(m[1]||'5555',10)});toast(r.r==='ok'?'✅':'❌',r.r==='ok'?'ADB bağlandı':String(r.r||r.error).slice(0,90));sgAdb()}
+async function adbRun(){const i=$('#adbin');if(!i)return;const c=i.value.trim();if(!c)return;i.value='';term('$ '+c,'tp');S.hist=[c].concat((S.hist||[]).filter(x=>x!==c)).slice(0,30);save();const r=await N('adb',{c});term(r.out||r.error||'(çıktı yok)')}
+async function adbPreset(k){const p=PRESETS[k];if(p[1]==='reboot'&&!(await conf('Cihaz yeniden başlatılsın mı?')))return;$('#adbin').value=p[1];adbRun()}
+function adbHist(k){$('#adbin').value=S.hist[k];focusEl($('#adbin'))}
+/* --- Remap --- */
+async function sgRemap(){curView='remap';const acc=(await N('keyAccess')).v,km=S.keymap||{};
+ let h=acc?'':'<div class="nf">⚠️ Erişilebilirlik servisi kapalı.</div><span class="btn g" onclick="runSetup()">⚡ Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'a11y\'})">Erişilebilirlik ayarı</span>';
+ h+='<span class="btn b" onclick="keyAdd()">➕ Yeni tuş ata</span><div style="margin-top:12px">'+(Object.keys(km).map(c=>'<div class="r2"><div><div class="n">'+esc(S.keyNames[c]||c)+' → '+esc(lab(km[c]))+'</div><div class="p">keyCode '+c+'</div></div><div><span class="btn" onclick="keyAdd('+c+')">Değiştir</span><span class="btn r" onclick="keyDel('+c+')">Sil</span></div></div>').join('')||'<div class="empty">Atanmış tuş yok</div>')+'</div>';
+ mset('🎮 Kumanda Remap',h,backSG)}
+let learnT;
+function keyAdd(code){if(code){keyPickApp(code,S.keyNames[code]||String(code));return}
+ $('#dlgbox').innerHTML='<div class="dt">Tuşa bas</div><div class="dm">Kumandada atamak istediğin tuşa bas (15 sn). Yön tuşları, OK, Geri ve Ana Ekran atanamaz.</div>';$('#dlg').classList.add('show');N('keyLearn');clearTimeout(learnT);learnT=setTimeout(()=>{N('keyLearnStop');closeDlg()},15000)}
+window.__key=(code,name)=>{clearTimeout(learnT);closeDlg();if([3,4,19,20,21,22,23,66,82].includes(code)){toast('⛔','Bu tuş atanamaz');return}keyPickApp(code,name.replace('KEYCODE_',''))};
+async function keyPickApp(code,name){const p=await pickApp(name+' tuşu hangi uygulamayı açsın?');if(!p)return;S.keymap[code]=p;S.keyNames[code]=name;save();N('setKeymap',{m:JSON.stringify(S.keymap)});toast('✅',name+' → '+lab(p));sgRemap()}
+function keyDel(c){delete S.keymap[c];save();N('setKeymap',{m:JSON.stringify(S.keymap)});sgRemap()}
+/* --- DNS --- */
+const DNS=[['🛡️','AdGuard DNS (reklam + izleyici engeller)','hostname','dns.adguard-dns.com'],['⚡','Cloudflare','hostname','one.one.one.one'],['🔍','Google DNS','hostname','dns.google'],['🔒','Quad9 (zararlı alan adı engeller)','hostname','dns.quad9.net'],['🔄','Otomatik','opportunistic',''],['⛔','Kapalı','off','']];
+async function sgDns(){curView='dns';const cur=await N('getDns');const ls=(cur.out||'').split('\n');
+ mset('🌐 Özel DNS (Private DNS)','<div class="nf">Şu an: <b>'+esc(cur.code===0?(ls[0]+(ls[0]==='hostname'?' • '+ls[1]:'')):'ADB bağlı değil')+'</b><br>Android 9+ gerekir; cihazın tamamında geçerli olur.</div>'+DNS.map((d,k)=>'<div class="r2" onclick="dnsSet('+k+').then(sgDns)"><div class="n">'+d[0]+' '+d[1]+(d[3]?'<div class="p">'+d[3]+'</div>':'')+'</div>'+((cur.code===0&&ls[0]===d[2]&&(d[2]!=='hostname'||ls[1]===d[3]))?'<span class="bd a">● AKTİF</span>':'')+'</div>').join(''),backSG)}
+async function dnsSet(k){const d=DNS[k];const r=await N('setDns',{mode:d[2],host:d[3]});toast(r.ok?'✅':'❌',r.ok?'DNS: '+d[1].split(' (')[0]:String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+/* --- VPN / CEC / Boot / Yedek / İzin / Bilgi / Perf / Çözünürlük --- */
+async function sgVpn(){curView='vpn';const l=await N('vpnApps');
+ mset('🔒 VPN','<div class="nf">Android, VPN’i yalnızca kullanıcı onayıyla başlatan uygulamalar üzerinden açar. Kurulu VPN uygulamanı buradan aç.</div><span class="btn" onclick="N(\'openSettings\',{k:\'vpn\'})">VPN ayarları</span><div style="margin-top:12px">'+((Array.isArray(l)&&l.length)?l.map(a=>'<div class="r2" onclick="launch('+q(a.p)+')"><div class="n">🔒 '+esc(a.l)+'</div><span class="bd a">AÇ</span></div>').join(''):'<div class="empty">Bilinen bir VPN uygulaması kurulu değil</div>')+'</div>',backSG)}
+async function sgCec(){curView='cec';await loadInputs();const st=await cecState(),A=st&&st.A==='1',E=!st||st.E!=='0';
+ mset('📡 HDMI-CEC / Girişler','<div class="nf">Geç: girişe geç (CEC cihazı çoğu zaman uyanır) • Adı değiştir: kendi etiketin.</div>'+(INPS.length?INPS.map((i,k)=>'<div class="r2"><div><div class="n">'+esc(S.cecNames[i.id]||i.cec||i.label)+'</div><div class="p">'+esc(i.label)+' • port '+i.port+' • CEC: '+esc(i.cec||'-')+' • '+['bağlı','beklemede','bağlı değil'][i.state]+'</div></div><div><span class="btn g" onclick="goInput('+k+')">Geç</span><span class="btn" onclick="renameInput('+k+').then(sgCec)">Adı değiştir</span></div></div>').join(''):'<div class="empty">Bu cihazda TV girişi bulunamadı</div>')+
+ '<div class="sec">CEC ayarları</div>'+(st?'':NEEDADB)+
+ '<div class="r2" onclick="cecTog(\'en\','+(E?0:1)+')"><div><div class="n">CEC (HDMI kontrol) açık</div><div class="s2">Kapalıyken bağlı cihazlar uyandırılamaz.</div></div>'+tg(E)+'</div>'+
+ '<div class="r2" onclick="cecTog(\'off\','+(A?0:1)+')"><div><div class="n">TV uyurken bağlı cihazları da kapat</div><div class="s2">TV bekleme moduna geçerken CEC ile cihazlara kapanma komutu gönderir. Cihaz bu komutu desteklemiyorsa etkisiz kalır.</div></div>'+tg(A)+'</div>'+
+ '<div class="r2" onclick="cecRestart()"><div><div class="n">🔄 CEC’i yeniden başlat</div><div class="s2">Cihaz listede görünmüyor veya tepki vermiyorsa dene.</div></div></div>'+
+ '<div class="nf">Not: Android, tek bir HDMI cihazına doğrudan “aç/kapat” komutu göndermeyi kabuktan sunmuyor. Girişe geçmek (yönlendirme) cihazı uyandırır; kapatma ise TV uyurken toplu gider.</div>',backSG)}
+async function cecTog(k,v){if(!(await adbReady())){toast('⚠️','ADB bağlı değil');return}await cecRun(k==='en'?cecEn(v):cecOff(v),v?'Açıldı':'Kapatıldı');keepNext();sgCec()}
+function sgBoot(){curView='boot';mset('🚀 Açılışta Başlat','<div class="nf">Cihaz her yeniden başladığında launcher ilk açılışında bu uygulamalar sırayla başlatılır.</div>'+sortedApps().map((a,k)=>'<div class="r2" onclick="bootTog('+k+')"><div class="n">'+esc(lab(a.p))+'</div>'+tg(S.bootApps.includes(a.p))+'</div>').join(''),backSG)}
+function bootTog(k){const p=sortedApps()[k].p,i=S.bootApps.indexOf(p);if(i>=0)S.bootApps.splice(i,1);else S.bootApps.push(p);save();const e=$$('#mbody .r2')[k];if(e)e.querySelector('.tog').classList.toggle('on',i<0)}
+async function backupNow(manual){saveNow();const r=await N('backupNow');if(r&&r.ok){S.autoBackup.last=Date.now();save();if(manual)toast('💾','Yedeklendi: '+r.name)}else if(manual)toast('❌',String((r&&r.error)||'Yedek yazılamadı').slice(0,90));return !!(r&&r.ok)}
+async function sgBackup(){curView='backup';const bi=await N('backupInfo'),ab=S.autoBackup;if(curView!=='backup')return;
+ mset('💾 Yedekle / Geri Yükle','<div class="nf">Tema, favoriler, gizli uygulamalar, klasörler, sıralama, kartlar, bölüm düzeni, kumanda atamaları ve ayarlar JSON olarak yedeklenir.</div>'+
+ '<div class="sec">Tek tuşla yedek</div>'+
+ '<div class="r2" onclick="N(\'backupTree\')"><div><div class="n">📁 Yedek klasörü</div><div class="s2">'+(bi.set?esc(bi.label||'seçili'):'Seçilmedi — USB belleği tak ve bir klasör seç (ilk seferde bir kez)')+'</div></div><span class="btn">'+(bi.set?'Değiştir':'Seç')+'</span></div>'+
+ '<div><span class="btn b" onclick="backupNow(true)">⚡ Şimdi yedekle</span></div>'+
+ '<div class="r2" onclick="abSet(\'on\')"><div><div class="n">Otomatik yedek</div><div class="s2">Seçili klasöre belirli aralıkta yedek alır (USB takılıysa). Son: '+(ab.last?new Date(ab.last).toLocaleString('tr-TR'):'yok')+'</div></div>'+tg(ab.on)+'</div>'+
+ '<div class="chips">'+[3,7,14,30].map(d=>'<div class="chip'+(ab.days===d?' on':'')+'" onclick="abSet(\'days\','+d+')">'+d+' gün</div>').join('')+'</div>'+
+ '<div class="sec">Dosya olarak</div><div class="nf">Sistem dosya seçicisiyle istediğin yere kaydet veya oradan geri yükle (USB; cihazında Google Drive uygulaması varsa Drive da listelenir).</div><span class="btn" onclick="saveNow();N(\'exportBackup\')">📤 Dosya olarak kaydet</span><span class="btn" onclick="N(\'importBackup\')">📥 İçe aktar</span>',backSG)}
+function abSet(k,v){const a=S.autoBackup;if(k==='on'){a.on=!a.on;if(a.on&&!a.last)a.last=0}else a.days=v;save();keepNext();sgBackup()}
+window.__backupTree=()=>{toast('📁','Yedek klasörü seçildi');if(curView==='backup')sgBackup()};
+window.__reload=()=>location.reload();
+let PERMS=[],PERMPKG='';
+async function sgPerms(){const p=await pickApp('Hangi uygulamanın izinleri?');if(p)permsFor(p)}
+async function permsFor(p){const r=await N('perms',{p});if(!Array.isArray(r)){toast('❌',String(r.error||'okunamadı').slice(0,80));return}PERMS=r;PERMPKG=p;curView='perms';
+ mset('🔑 İzinler — '+esc(lab(p)),'<div class="nf">Yalnızca çalışma zamanı (tehlikeli) izinler listelenir. Aç/kapat: ADB ile ver/geri al.</div>'+(r.length?r.map((x,k)=>'<div class="r2" onclick="permTog('+k+')"><div><div class="n">'+esc(x.n.replace('android.permission.',''))+'</div><div class="p">'+esc(x.n)+'</div></div>'+tg(x.g)+'</div>').join(''):'<div class="empty">Çalışma zamanı izni yok</div>'),backSG)}
+async function permTog(k){const x=PERMS[k];const r=await N('permSet',{p:PERMPKG,perm:x.n,g:!x.g});if(r.ok){x.g=!x.g;const e=$$('#mbody .r2')[k];if(e)e.querySelector('.tog').classList.toggle('on',x.g)}else toast('❌',String(r.out||r.error||'başarısız').slice(0,90))}
+async function sgInfo(){curView='info';const r=await N('deviceInfo');mset('ℹ️ Cihaz Bilgisi',Array.isArray(r)?r.map(x=>'<div class="kv"><span>'+esc(x.k)+'</span><span>'+esc(x.v)+'</span></div>').join(''):'<div class="empty">Okunamadı</div>',backSG)}
+function sgPerf(){curView='perf';mset('⚡ Performans','<div class="nf">Animasyon ölçeği (ADB ile). Düşük değer arayüzü hızlı gösterir.</div><span class="btn" onclick="perf(\'1\')">Animasyon 1x</span><span class="btn g" onclick="perf(\'0.5\')">Animasyon 0.5x</span><span class="btn b" onclick="perf(\'0\')">Animasyon kapalı</span><div style="margin-top:12px"><span class="btn r" onclick="perf(\'kill\')">🧹 Arka plan uygulamalarını kapat</span></div>',backSG)}
+async function perf(v){const r=await N('perf',{v});toast(r.ok?'✅':'❌',r.ok?'Uygulandı':String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+async function sgRes(){curView='res';const r=await N('wmGet');
+ mset('🖥️ Çözünürlük / Yoğunluk','<div class="nf">'+esc(r.code===0?r.out:'ADB bağlı değil')+'<br>Uyguladıktan sonra 15 sn içinde “Koru”yu seçmezsen otomatik eski haline döner.</div><div class="nf">Boyut:</div>'+['1280x720','1920x1080','2560x1440','3840x2160'].map(s=>'<span class="btn" onclick="wmApply(\'wm size '+s+'\')">'+s+'</span>').join('')+'<div class="nf">Yoğunluk (dpi):</div>'+[160,213,240,320,480].map(d=>'<span class="btn" onclick="wmApply(\'wm density '+d+'\')">'+d+'</span>').join('')+'<div style="margin-top:12px"><span class="btn r" onclick="wmReset()">↩️ Sıfırla</span></div>',backSG)}
+let wmI;
+async function wmApply(c){const r=await N('wmSet',{c});if(r.code!==0){toast('❌',String(r.out||r.error||'ADB bağlı değil').slice(0,90));return}
+ let t=15;$('#dlgbox').innerHTML='<div class="dm">Ekran düzgün görünüyor mu?\n<b id="wmt">15</b> sn içinde Koru seçilmezse eski haline döner.</div><div class="drow"><div class="btn g" onclick="wmKeep()">Koru</div><div class="btn r" onclick="wmReset()">Geri al</div></div>';showDlg();clearInterval(wmI);wmI=setInterval(()=>{t--;const e=$('#wmt');if(e)e.textContent=t;if(t<=0){clearInterval(wmI);closeDlg()}},1000)}
+async function wmKeep(){clearInterval(wmI);await N('wmConfirm');closeDlg();toast('✅','Ayar korundu');sgRes()}
+async function wmReset(){clearInterval(wmI);await N('wmReset');closeDlg();toast('↩️','Sıfırlandı');sgRes()}
+/* ===== Kumanda renkli tuşları ===== */
+const ACTS={none:['🚫','Yok'],voice:['🎤','Sesli arama'],search:['🔍','Uygulama ara'],notif:['🔔','Bildirimler'],settings:['⚙️','Ayarlar'],center:['🛠️','Sistem Merkezi'],layout:['🧩','Ana ekran düzeni'],android:['📱','Android Ayarları'],top:['⬆️','Başa dön'],inputs:['📺','Giriş kaynağı seç'],clean:['🧹','Önbelleği temizle'],backup:['💾','Şimdi yedekle']};
+function runAct(a){switch(a){
+ case 'voice':voice();break;
+ case 'search':closePanels();$('#content').scrollTo({top:0});$('#q').focus();break;
+ case 'notif':openPanel('notif');break;case 'settings':openPanel('settings');break;
+ case 'center':surgeonHome();break;case 'layout':layoutView();break;case 'android':N('openSettings',{k:'android'});break;
+ case 'top':closePanels();$('#content').scrollTo({top:0});{const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}break;
+ case 'inputs':menu('Giriş kaynağı',INPS.length?INPS.map((i,k)=>['📺  '+(S.cecNames[i.id]||i.cec||i.label),()=>goInput(k)]):[['Bu cihazda giriş yok',()=>{}]]);break;
+ case 'clean':autoCleanRun(true);break;case 'backup':backupNow(true);break}}
+const CKC={red:['#FF453A','Kırmızı'],green:['#30D158','Yeşil'],yellow:['#FFD60A','Sarı'],blue:['#0A84FF','Mavi']};
+function sgColor(){curView='color';mset('🎮 Kumanda Kısayolları','<div class="nf">Kumandanın renkli tuşlarına ana ekranda bir eylem ata. (Renkli tuşu olmayan kumandalarda çalışmaz.)</div>'+
+ Object.keys(CKC).map(k=>'<div class="r2" onclick="colorPick(\''+k+'\')"><div class="n"><span class="cd" style="background:'+CKC[k][0]+'"></span>'+CKC[k][1]+' tuş</div><span class="btn">'+ACTS[S.colorKeys[k]||'none'][0]+' '+ACTS[S.colorKeys[k]||'none'][1]+'</span></div>').join(''),launcherSettings)}
+function colorPick(k){menu(CKC[k][1]+' tuş',Object.keys(ACTS).map(a=>[ACTS[a][0]+'  '+ACTS[a][1],()=>{S.colorKeys[k]=a;save();keepNext();sgColor()}]))}
+/* ===== Ses komutu ===== */
+function voice(){N('voice').then(r=>{if(r.error)toast('❌',r.error)})}
+let vActs=[];
+window.__voice=t=>{t=(t||'').toLowerCase().trim();if(!t){toast('🎤','Anlaşılamadı');return}voiceResults(t)};
+function voiceResults(t){const qq=t.replace(/(^|\s)(aç|çalıştır|başlat|git|göster)(?=\s|$)/g,' ').replace(/\s+/g,' ').trim(),words=qq.split(' ').filter(w=>w.length>1),res=[];
+ const apps=APPS.filter(a=>S.showHidden||!S.hidden.includes(a.p)).map(a=>{const l=lab(a.p).toLowerCase(),b=a.l.toLowerCase();let sc=0;if(qq&&(qq===l||qq.indexOf(l)>=0))sc+=10;if(qq&&l.startsWith(qq))sc+=5;words.forEach(w=>{if(l.includes(w)||b.includes(w))sc+=3});return{a,sc}}).filter(x=>x.sc>0).sort((x,y)=>y.sc-x.sc||lab(x.a.p).localeCompare(lab(y.a.p),'tr')).slice(0,8);
+ apps.forEach(x=>res.push({img:icon(x.a.p),t:lab(x.a.p),d:'Uygulamayı aç',f:()=>launch(x.a.p)}));
+ const cmds=[['ayarlar','⚙️','Ayarlar',()=>openPanel('settings')],['bildirim','🔔','Bildirimler',()=>openPanel('notif')],['sistem','🛠️','Sistem Merkezi',surgeonHome],['debloat','🧼','Akıllı Debloat',sgDebloat],['telemetri','🛡️','Telemetri & Gizlilik',sgTele],['temizle','🧹','Önbelleği temizle',()=>autoCleanRun(true)],['tema','🎨','Tema & Görünüm',openTheme],['duvar','🖼️','Duvar Kağıdı',openWall],['kart','🧩','Kart ekle',addWidgetMenu],['widget','🧩','Kart ekle',addWidgetMenu]];
+ cmds.forEach(c=>{if(t.indexOf(c[0])>=0||words.some(w=>w.length>3&&c[0].startsWith(w)))if(!res.some(r=>r.t===c[2]))res.push({e:c[1],t:c[2],d:'Ayar / araç',f:c[3]})});
+ INPS.forEach((i,k)=>{const n=(S.cecNames[i.id]||i.cec||i.label).toLowerCase();if(words.some(w=>n.includes(w)||i.label.toLowerCase().includes(w)))res.push({e:'📺',t:'Giriş: '+(S.cecNames[i.id]||i.cec||i.label),d:'Bu girişe geç',f:()=>goInput(k)})});
+ res.push({e:'🔍',t:'Tüm uygulamalarda ara: “'+qq+'”',d:'Ana ekrandaki aramaya yaz',f:()=>{$('#q').value=qq;renderGrid();$('#content').scrollTo({top:0})}});
+ vActs=res.map(r=>r.f);
+ $('#dlgbox').style.maxWidth='620px';
+ $('#dlgbox').innerHTML='<div class="dt">🎤 “'+esc(t)+'”</div><div class="dm" style="text-align:center">'+(apps.length?apps.length+' uygulama bulundu':'Eşleşen uygulama yok')+'</div>'+res.map((r,k)=>'<div class="ditem vr" onclick="voicePick('+k+')">'+(r.img?'<img src="'+r.img+'" alt="">':'<div class="vi">'+r.e+'</div>')+'<div><div>'+esc(r.t)+'</div><div style="font-size:12px;opacity:.7;font-weight:400">'+esc(r.d)+'</div></div></div>').join('');showDlg()}
+function voicePick(k){closeDlg();vActs[k]()}
+/* ===== Başlat ===== */
+let rsT;
+window.__resume=()=>{clearTimeout(rsT);rsT=setTimeout(()=>{loadApps().then(()=>{loadInputs()});pollN();autoCheck()},300)};
+window.__pkgChanged=()=>{clearTimeout(rsT);rsT=setTimeout(loadApps,1500)};
+function init(){load();if(S.dbRemote&&S.dbRemote.data)applyRemote(S.dbRemote.data);applyTheme();applyWall();applyRows();renderWidgets();tick();setInterval(tick,1000);
+ N('setKeymap',{m:JSON.stringify(S.keymap||{})});
+ loadApps().then(()=>{loadInputs();setTimeout(()=>{if(document.activeElement===document.body||!document.activeElement){const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}},250)});
+ setInterval(poll,3000);setTimeout(unusedHint,20000);setTimeout(()=>{if(S.updRepo&&Date.now()-S.updAt>6048e5)updCheck(false)},40000);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
+init();
+</script></body></html>
