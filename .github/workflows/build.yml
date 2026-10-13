@@ -1,0 +1,40 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      # Ubuntu runner'da Android SDK hazır gelir. setup-android@v3 artık var olmayan 'tools' paketini
+      # kurmaya çalışıp hata verdiği için kullanılmıyor; yalnızca lisanslar kabul edilir.
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      # İkili dosya yüklenemediyse anahtarı metin (base64) dosyasından geri oluştur; ikisi de yoksa debug imzasıyla derlenir.
+      - name: Restore signing key (optional)
+        run: |
+          if [ ! -f app/ihlauncher.keystore ] && [ -f app/ihlauncher.keystore.b64 ]; then base64 -d app/ihlauncher.keystore.b64 > app/ihlauncher.keystore; fi
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        run: gradle assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ihlauncher-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Release (tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
