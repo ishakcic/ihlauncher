@@ -581,10 +581,13 @@ class Bridge(private val act: MainActivity) {
         try {
             for (i in tim.tvInputList) {
                 if (!i.isPassthroughInput) continue
-                val hdmi = try { i.hdmiDeviceInfo } catch (e: Throwable) { null }
+                // getHdmiDeviceInfo() gizli (@SystemApi) bir API: genel SDK'da yok, bu yüzden yansıma ile okunur.
+                val hdmi: Any? = try { i.javaClass.getMethod("getHdmiDeviceInfo").invoke(i) } catch (e: Throwable) { null }
+                val cec: String = try { hdmi?.javaClass?.getMethod("getDisplayName")?.invoke(hdmi)?.toString() ?: "" } catch (e: Throwable) { "" }
+                val port: Int = try { (hdmi?.javaClass?.getMethod("getPortId")?.invoke(hdmi) as? Number)?.toInt() ?: -1 } catch (e: Throwable) { -1 }
                 val label = try { (i.loadCustomLabel(act) ?: i.loadLabel(act))?.toString() ?: i.id } catch (e: Throwable) { i.id }
                 arr.put(obj("id" to i.id, "label" to label, "type" to i.type,
-                    "cec" to (hdmi?.displayName ?: ""), "port" to (hdmi?.portId ?: -1),
+                    "cec" to cec, "port" to port,
                     "state" to tim.getInputState(i.id)))
             }
         } catch (e: Throwable) { }

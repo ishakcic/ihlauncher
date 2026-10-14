@@ -28,7 +28,20 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleDebug --stacktrace --console=plain 2>&1 | tee build.log
+      # Derleme patlarsa asıl hata satırlarını annotation ve özet sayfasına yaz (log açmadan görülsün)
+      - name: Show build errors
+        if: failure()
+        run: |
+          grep -E '^e: |error: |What went wrong|Execution failed|Could not |No such file|not found' build.log | head -15 | while IFS= read -r l; do echo "::error::${l:0:480}"; done || true
+          { echo '### Derleme hatası (son satırlar)'; echo '```'; tail -n 70 build.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: build-log
+          path: build.log
       - uses: actions/upload-artifact@v4
         with:
           name: ihlauncher-debug-apk
