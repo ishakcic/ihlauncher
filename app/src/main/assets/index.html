@@ -173,7 +173,18 @@ body[data-top=pill] .search:focus-within input,body[data-top=pill] .search.has i
 body[data-top=pill] .wifi{padding:0 12px}
 body[data-top=pill] #content{padding-top:104px}
 .pre{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.pre .pc{border-radius:22px;padding:18px 20px;background:var(--glass);position:relative;overflow:hidden}.pre .pc:focus{box-shadow:var(--ring)}.pre .pc .t{font-size:19px;font-weight:600;margin-bottom:4px}.pre .pc .s{font-size:13px;color:var(--t2);line-height:1.4}.pre .pc.on{box-shadow:inset 0 0 0 2px var(--accent)}.pre .pc.on:focus{box-shadow:var(--ring)}
-@media (max-width:900px){.topbar{padding:10px 14px 16px;flex-wrap:wrap;gap:8px}#clock{font-size:30px}#date{display:none}.search{width:150px;height:44px}.ib,.wifi{height:44px}.ib{width:44px}#content{padding:150px 14px 60px}#wname{display:none}.wifi{padding:0 12px}.tl{width:100%}.hd{width:200px}.wg{width:250px}.wg.big{width:340px}.sg{grid-template-columns:1fr}.ts{grid-template-columns:repeat(2,1fr)}.sum{grid-template-columns:repeat(2,1fr)}.side{width:100%;padding:20px 14px;border-radius:0}.modal{padding:18px;width:98%}.mt{font-size:24px}.wgrid{grid-template-columns:repeat(2,1fr)}.rt{font-size:19px}}
+@media (max-width:900px) and (orientation:portrait){.topbar{padding:10px 14px 16px;flex-wrap:wrap;gap:8px}#clock{font-size:30px}#date{display:none}.search{width:150px;height:44px}.ib,.wifi{height:44px}.ib{width:44px}#content{padding:150px 14px 60px}#wname{display:none}.wifi{padding:0 12px}.tl{width:100%}.hd{width:200px}.wg{width:250px}.wg.big{width:340px}.sg{grid-template-columns:1fr}.ts{grid-template-columns:repeat(2,1fr)}.sum{grid-template-columns:repeat(2,1fr)}.side{width:100%;padding:20px 14px;border-radius:0}.modal{padding:18px;width:98%}.mt{font-size:24px}.wgrid{grid-template-columns:repeat(2,1fr)}.rt{font-size:19px}}
+@media (max-height:540px) and (orientation:landscape){
+ .topbar{padding:8px 22px 20px}#clock{font-size:30px}#date{font-size:14px}
+ .ib,.wifi,.search{height:40px;border-radius:20px}.ib{width:40px}.search{width:210px}
+ body[data-top=pill] .topbar{top:10px;right:20px;padding:4px 6px 4px 16px}body[data-top=pill] #clock{font-size:22px}body[data-top=pill] .search{width:40px}body[data-top=pill] .search:focus-within,body[data-top=pill] .search.has{width:200px}
+ #content{padding:78px 22px 40px}body[data-top=pill] #content{padding-top:62px}
+ .row{margin-bottom:18px}.rt{font-size:17px}.rt:before{height:16px}.rs{padding:8px 8px 12px;gap:12px}
+ .hd{width:190px;height:92px}.hd .d{font-size:19px}.wg{width:230px;height:136px}.wg.big{width:340px}.wv{font-size:24px}.wv.big{font-size:38px}.wh{margin-bottom:6px}.wb{width:28px;height:28px}.ws{margin-top:3px;font-size:12px}.bar{margin-top:6px}.card{padding:12px 14px;border-radius:18px}.addw{height:136px;width:130px}
+ .tile{padding:8px 4px 6px;border-radius:18px}.tl2{font-size:12px}.grid{gap:6px 6px}
+ .modal{max-height:96vh;padding:16px 22px;border-radius:22px}.mt{font-size:22px;margin:6px 0 12px}.sg{grid-template-columns:repeat(3,1fr)}.side{width:380px;padding:18px}.pt{font-size:24px}.dlgbox{max-height:94vh;padding:16px}
+ .sum{grid-template-columns:repeat(4,1fr)}.wgrid{grid-template-columns:repeat(3,1fr)}.ts{grid-template-columns:repeat(3,1fr)}.pre{grid-template-columns:repeat(2,1fr)}
+}
 </style></head>
 <body data-theme="oneui">
 <div id="errbar" onclick="this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#FF453A;color:#fff;font:600 15px/1.35 sans-serif;padding:8px 14px;word-break:break-all"></div>
@@ -222,10 +233,12 @@ const LOOKS={
  classic:{n:'Klasik',d:'Düz renk zemin, squircle simgeler, geniş üst çubuk',v:{tileStyle:'icon',topStyle:'wide',blur:0,focusFx:'scale',dock:false,wall:'',icLabel:'always'}},
  calm:{n:'Sakin',d:'Gün doğumu manzarası, cam panel içinde simgeler, adlar sadece odakta',v:{tileStyle:'icon',topStyle:'pill',blur:2,focusFx:'ring',dock:true,wall:'scene:dawn',icLabel:'focus'}},
  vivid:{n:'Canlı',d:'Kutup ışığı, güçlü cam, parlayan odak, büyük banner kutucuklar',v:{tileStyle:'banner',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:aurora',icLabel:'always',iconSize:'l'}}};
+const ROT={0:'Kapalı',30:'30 dk',60:'1 saat',1440:'Her gün'};
+const LK=[['theme',()=>Object.keys(THEMES)],['accent',()=>Object.keys(ACC)],['icShape',()=>Object.keys(ISH)],['icLabel',()=>Object.keys(ILB)],['iconSize',()=>Object.keys(SIZES)],['tileStyle',()=>Object.keys(TLS)],['topStyle',()=>Object.keys(TOPS)],['blur',()=>Object.keys(BLR)],['focusFx',()=>Object.keys(FXS)],['dock',()=>['0','1']],['idle',()=>Object.keys(IDL)],['rot',()=>Object.keys(ROT)],['wall',()=>['','auto'].concat(Object.keys(SCN).map(k=>'scene:'+k))]];
 const CH=(o,cur,fn)=>'<div class="chips">'+Object.keys(o).map(k=>'<div class="chip'+(String(cur)===String(k)?' on':'')+'" onclick="'+fn+'(\''+k+'\')">'+(Array.isArray(o[k])?o[k][0]:o[k])+'</div>').join('')+'</div>';
 const ROWS={in:'Giriş Kaynakları',wg:'Kartlar',fav:'Favoriler',apps:'Tüm Uygulamalar'},ROWI={in:'',wg:'',fav:'',apps:''};
 const DEF={fav:[],hidden:[],order:[],folders:{},theme:'oneui',accent:'blue',icShape:'sq',icLabel:'always',wall:'',blur:0,tileStyle:'icon',topStyle:'wide',focusFx:'scale',dock:false,idle:0,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
- rmlog:{},updRepo:'',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'m',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
+ rmlog:{},updRepo:'ishakcic/ihlauncher',updMode:'ask',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'m',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
 let S=JSON.parse(JSON.stringify(DEF));
 if(typeof Native==='undefined'){window.Native={sync:()=>'{}',call:(id,m)=>setTimeout(()=>window.__res(id,m==='apps'?'[]':'{}'),10)}}
 const pend={};let seq=0;
@@ -236,7 +249,7 @@ function saveNow(){clearTimeout(svT);Native.sync('setState',JSON.stringify({s:JS
 let svT;function save(){clearTimeout(svT);svT=setTimeout(()=>Native.sync('setState',JSON.stringify({s:JSON.stringify(S)})),250)}
 function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Object.assign(S,s);
  ['nightAuto','nightOn','clock','removed'].forEach(k=>delete S[k]);              /* eski sürüm alanları */
- if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.cinema.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
+ if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.cinema.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
  for(const k of ['keymap','keyNames','cecNames','folders','labels','rmlog'])S[k]=S[k]||{};
  for(const k of ['fav','hidden','order','bootApps','hist','inOrder','widgets'])if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(DEF[k]));
  if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
@@ -250,7 +263,8 @@ const lumOf=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16&255)+.587*(n>
 /* Squircle: |x|^n+|y|^n=1 (n=5) eğrisinden üretilen kırpma yolu */
 function buildClip(){if($('#clipSvg'))return;const n=5,N=96,p=[];for(let k=0;k<N;k++){const t=k/N*2*Math.PI,c=Math.cos(t),sn=Math.sin(t);p.push((.5+.5*Math.sign(c)*Math.pow(Math.abs(c),2/n)).toFixed(4)+' '+(.5+.5*Math.sign(sn)*Math.pow(Math.abs(sn),2/n)).toFixed(4))}
  document.body.insertAdjacentHTML('beforeend','<svg id="clipSvg" width="0" height="0" style="position:absolute"><defs><clipPath id="clipSq" clipPathUnits="objectBoundingBox"><path d="M'+p.join('L')+'Z"/></clipPath></defs></svg>')}
-function applyTheme(){buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');r.setProperty('--isz',SIZES[S.iconSize][1]+'px');const bw={s:150,m:180,l:210,xl:240}[S.iconSize]||180;r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
+window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&window.S)applyTheme()},200)});
+function applyTheme(){buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
 /* ===== Saat ===== */
 function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
  $('#clock').textContent=t;$('#date').textContent=d;setB('time',t);setB('date2',d)}
@@ -273,7 +287,7 @@ function focusables(){const L=layer();let els=[...(L||document.body).querySelect
 let navigating=false,memX=null,memY=null;
 document.addEventListener('focusin',()=>{if(!navigating){memX=null;memY=null}});
 function ensureVisible(e){const c=$('#content'),L=layer();
- if(!L&&c.contains(e)){const r=e.getBoundingClientRect(),top=112,bot=innerHeight-30;
+ if(!L&&c.contains(e)){const r=e.getBoundingClientRect(),top=innerHeight<540?78:112,bot=innerHeight-30;
   if(r.top<top)c.scrollTop+=r.top-top-12;else if(r.bottom>bot)c.scrollTop+=r.bottom-bot+12;
   const f=[...c.querySelectorAll('.row')].find(x=>x.offsetParent);if(f&&f.contains(e))c.scrollTop=0;
   const rs=e.closest('.rs');if(rs){const a=rs.getBoundingClientRect(),b=e.getBoundingClientRect();if(b.left<a.left+24)rs.scrollLeft+=b.left-a.left-40;else if(b.right>a.right-24)rs.scrollLeft+=b.right-a.right+40}}
@@ -491,7 +505,7 @@ async function loadWx(w){WX[w.id]=WX[w.id]||{t:0};WX[w.id].t=Date.now();
   const r=await(await fetch('https://api.open-meteo.com/v1/forecast?latitude='+w.lat+'&longitude='+w.lon+'&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto')).json();const c=r.current;
   WX[w.id]={t:Date.now(),temp:c.temperature_2m,code:c.weather_code,wind:c.wind_speed_10m}}
  catch(e){WX[w.id]={t:Date.now(),err:(e&&e.message)||'Bağlantı hatası'}}
- renderWx(w)}
+ if(S.wall==='auto')applyWall();renderWx(w)}
 function renderWx(w){const e=$('[data-wx="'+w.id+'"]');if(!e)return;const d=WX[w.id];
  if(!d||(!d.err&&d.temp==null)){e.innerHTML='<div class="ws">Yükleniyor…</div>';return}
  if(d.err){e.innerHTML='<div class="ws">'+esc(d.err)+'</div>';return}
@@ -569,6 +583,7 @@ function lookView(){curView='look';const cur=Object.keys(LOOKS).find(k=>Object.k
   '<div class="sec">Kutucuk stili</div>'+CH(TLS,S.tileStyle,"setLook.bind(null,'tileStyle')")+'<div class="sec">Uygulama paneli (cam zemin)</div>'+CH({0:'Kapalı',1:'Açık'},S.dock?1:0,"setLook.bind(null,'dock')")+
   '<div class="sec">Cam bulanıklığı</div>'+CH(BLR,S.blur,"setLook.bind(null,'blur')")+'<div class="sec">Üst çubuk</div>'+CH(TOPS,S.topStyle,"setLook.bind(null,'topStyle')")+
   '<div class="sec">Odak efekti</div>'+CH(FXS,S.focusFx,"setLook.bind(null,'focusFx')")+'<div class="sec">Boşta solma</div><div class="nf">Belirlenen süre dokunulmazsa ekran öğeleri solar, duvar kağıdı tam görünür. Herhangi bir tuş geri getirir.</div>'+CH(IDL,S.idle,"setLook.bind(null,'idle')")+
+  '<div class="sec">Paylaş</div><span class="btn" onclick="showLookCode()">Görünüm kodumu göster</span><span class="btn" onclick="enterLookCode()">Kod gir</span>'+
   '<div class="sec">Daha fazlası</div><span class="btn" onclick="openWall()">Duvar kağıdı</span><span class="btn" onclick="iconSettings()">Simgeler</span><span class="btn" onclick="openTheme()">Renk teması</span>',null)}
 function setIsz(k){S.iconSize=k;applyTheme();save();renderAll();keepNext();iconSettings()}
 function setIcShape(k){S.icShape=k;applyTheme();save();keepNext();iconSettings()}
@@ -587,6 +602,8 @@ const SCN={
  ocean:{n:'Okyanus',sky:['#1B2A5E','#B2557A','#F6A66A'],sun:[960,620,80,'#FFE3B0'],sea:['#7A4670','#1A2150'],seed:2},
  city:{n:'Şehir gecesi',sky:['#0B1030','#2A2766','#C06A8A'],city:1,seed:8},
  aurora:{n:'Kutup ışığı',sky:['#030A1A','#07203A','#0C3A4E'],stars:1,aur:['#2FE6B8','#3BC7FF','#8B6BFF'],L:[[780,90,'#04101C',1],[900,60,'#020912',1]],seed:4},
+ day:{n:'Gündüz',sky:['#4F8FDB','#9CCBF2','#E6F3FC'],sun:[1400,230,58,'#FFF8D6'],L:[[640,70,'#8DBB6A'],[740,60,'#6BA35A',1],[860,45,'#4C8A4A',1],[960,35,'#32683A',1]],mist:1,seed:14},
+ rain:{n:'Yağmur',sky:['#232C3A','#475669','#7C8B9B'],L:[[620,70,'#5C7185'],[730,55,'#44596C',1],[850,45,'#2F4455',1],[960,35,'#1D2D3A',1]],mist:2,rain:1,seed:17},
  mist1:{n:'Buzlu mavi',sky:['#08242C','#0E5560','#1B8A8C'],blob:['#5FE0C8','#2E8FD8','#0B3A55','#9FF0E0'],seed:6},
  mist2:{n:'Sıcak sis',sky:['#1B1030','#4A1F4F','#9A3F5B'],blob:['#FF9F6B','#C0407A','#5B2A8A','#FFC58A'],seed:12}
 };
@@ -609,16 +626,33 @@ function sceneSvg(id){const c=SCN[id]||SCN.lake,r=rng(c.seed||1),W=1920,H=1080;l
   if(c.mist&&i>0)o+='<rect y="'+(base-amp-60)+'" width="'+W+'" height="'+(180+amp)+'" fill="url(#m)" opacity="'+(c.mist===2?1:.7)+'"/>';
   o+='<path d="'+d+'" fill="'+col+'"/>';
   if(pines){for(let x=10+r()*30;x<W;x+=26+r()*46){const y=f(x)+6,h=46+r()*70+i*10,w=h*.34;o+='<path d="M'+x.toFixed(0)+' '+(y-h).toFixed(0)+' L'+(x+w*.62).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x+w*.3).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x+w).toFixed(0)+' '+y.toFixed(0)+' L'+(x-w).toFixed(0)+' '+y.toFixed(0)+' L'+(x-w*.3).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x-w*.62).toFixed(0)+' '+(y-h*.52).toFixed(0)+'Z" fill="'+col+'"/>'}}});
+ if(c.rain){for(let i=0;i<150;i++){const x=r()*W,y=r()*H;o+='<line x1="'+x.toFixed(0)+'" y1="'+y.toFixed(0)+'" x2="'+(x-16).toFixed(0)+'" y2="'+(y+54).toFixed(0)+'" stroke="#D5E4F2" stroke-width="1.6" opacity="'+(.12+r()*.2).toFixed(2)+'"/>'}}
  if(c.water){o+='<rect y="800" width="'+W+'" height="280" fill="url(#w)"/><defs><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c.water[0]+'"/><stop offset="1" stop-color="'+c.water[1]+'"/></linearGradient></defs>';
   if(c.sun)o+='<ellipse cx="'+c.sun[0]+'" cy="880" rx="'+(c.sun[2]*1.4)+'" ry="26" fill="'+c.sun[3]+'" opacity=".28"/>'}
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid slice">'+o+'</svg>'}
 const SCNCACHE={};
-function wallCss(v){if(!v)return '';if(v.indexOf('scene:')===0){const id=v.slice(6);if(!SCN[id])return '';return SCNCACHE[id]||(SCNCACHE[id]='url(\'data:image/svg+xml;utf8,'+encodeURIComponent(sceneSvg(id)).replace(/\'/g,'%27')+'\') center/cover')}
+function autoScene(){const h=new Date().getHours(),night=h>=20||h<6,dusk=h>=18&&h<20,dawn=h>=6&&h<9,wx=Object.values(WX).find(d=>d&&d.code!=null),c=wx?wx.code:-1;
+ if((c>=71&&c<=77)||c===85||c===86)return 'snow';if((c>=51&&c<=67)||(c>=80&&c<=82)||c>=95)return 'rain';if(c===3||(c>=45&&c<=48))return night?'mist1':'forest';
+ return night?'lake':dusk?'desert':dawn?'dawn':'day'}
+function wallCss(v){if(v==='auto')v='scene:'+autoScene();if(!v)return '';if(v.indexOf('scene:')===0){const id=v.slice(6);if(!SCN[id])return '';return SCNCACHE[id]||(SCNCACHE[id]='url(\'data:image/svg+xml;utf8,'+encodeURIComponent(sceneSvg(id)).replace(/\'/g,'%27')+'\') center/cover')}
  if(v.indexOf('file')===0)return 'url(\''+v+'\') center/cover';if(v.indexOf('linear')===0)return v;return ''}
 
 const WP=Object.keys(SCN).map(k=>[SCN[k].n,'scene:'+k]);
-function openWall(){curView='wall';mset('Duvar Kağıdı','<span class="btn b" onclick="N(\'pickWallpaper\')">Galeriden seç</span><span class="btn" onclick="setWall(\'\')">Düz renk (temaya göre)</span><div class="wgrid">'+WP.map((w,k)=>'<div class="wi'+(S.wall===w[1]?' on':'')+'" style="background:'+wallCss(w[1])+'" onclick="setWall(WP['+k+'][1])"><b>'+w[0]+'</b></div>').join('')+'</div>',null)}
-function setWall(v){S.wall=v;save();applyWall();applyTheme();toast('🖼️','Duvar kağıdı güncellendi');keepNext();openWall()}
+function openWall(){curView='wall';mset('Duvar Kağıdı','<span class="btn b" onclick="N(\'pickWallpaper\')">Galeriden seç</span><span class="btn" onclick="setWall(\'\')">Düz renk (temaya göre)</span>'+
+ '<div class="sec">Otomatik</div><div class="nf">Saate ve (Kartlar’a Hava Durumu eklediysen) havaya göre manzara kendiliğinden değişir.</div><div class="wgrid" style="margin-top:0"><div class="wi'+(S.wall==='auto'?' on':'')+'" style="background:'+wallCss('auto')+'" onclick="setWall(\'auto\')"><b>Hava ve saate göre</b></div></div>'+
+ '<div class="sec">Manzaralar</div><div class="wgrid" style="margin-top:0">'+WP.map((w,k)=>'<div class="wi'+(S.wall===w[1]?' on':'')+'" style="background:'+wallCss(w[1])+'" onclick="setWall(WP['+k+'][1])"><b>'+w[0]+'</b></div>').join('')+'</div>'+
+ '<div class="sec">Manzara döngüsü</div>'+CH(ROT,S.rot,'setRot'),null)}
+function setRot(m){S.rot=+m;S.rotAt=Date.now();save();keepNext();openWall()}
+function rotTick(){if(!S.rot)return;if(Date.now()-(S.rotAt||0)>=S.rot*60000){const k=Object.keys(SCN),cur=(S.wall||'').indexOf('scene:')===0?k.indexOf(S.wall.slice(6)):-1;S.wall='scene:'+k[(cur+1)%k.length];S.rotAt=Date.now();save();applyWall()}}
+// görünüm kodu: 13 karakter, başka cihazda aynı görünümü kurar
+function lookCode(){return LK.map(([k,f])=>{const v=k==='dock'?(S.dock?'1':'0'):String(S[k]);return Math.max(0,f().indexOf(v)).toString(36)}).join('').toUpperCase().replace(/(.{4})(?=.)/g,'$1-')}
+function applyCode(c){c=String(c).replace(/[^0-9A-Za-z]/g,'').toLowerCase();if(c.length!==LK.length)return false;const o={};
+ for(let j=0;j<LK.length;j++){const arr=LK[j][1](),i=parseInt(c[j],36);if(!(i>=0&&i<arr.length))return false;o[LK[j][0]]=arr[i]}
+ for(const k in o)S[k]=k==='dock'?o[k]==='1':(k==='blur'||k==='idle'||k==='rot')?+o[k]:o[k];S.rotAt=Date.now();save();applyTheme();applyWall();renderAll();return true}
+function showLookCode(){info('Görünüm kodun',lookCode()+'\n\nBaşka bir cihazda Ayarlar → Görünüm → “Kod gir” ile aynı görünümü kurabilirsin.')}
+async function enterLookCode(){const v=await ask('Görünüm kodu (örn. 0000-1011-...)','');if(v===null)return;if(applyCode(v)){toast('✅','Görünüm uygulandı');lookView()}else toast('❌','Kod geçersiz')}
+
+function setWall(v){S.wall=v;S.rot=0;save();applyWall();applyTheme();toast('🖼️','Duvar kağıdı güncellendi');keepNext();openWall()}
 function applyWall(){const b=$('#bg'),c=wallCss(S.wall);if(c){b.className='bg wp';b.style.background=c}else{b.className='bg def';b.style.background=''}document.body.classList.toggle('hasw',!!c)}
 function launcherSettings(){curView='ls';mset('Launcher Ayarları','<div class="nf">Kumandada bir uygulamanın seçeneklerini açmak için <b>OK tuşunu yarım saniye basılı tut</b> (Menü/Info tuşu da çalışır).</div>'+
  '<div class="r2" onclick="S.showHidden=!S.showHidden;save();renderGrid();keepNext();launcherSettings()"><div class="n">Gizli uygulamaları göster</div>'+tg(S.showHidden)+'</div>'+
@@ -670,30 +704,41 @@ async function resetState(){if(!(await conf('Tüm launcher ayarları (favoriler,
 /* --- Launcher güncelleme kontrolü (GitHub Releases) --- */
 const verNums=v=>String(v||'').replace(/^v/i,'').split(/[^0-9]+/).filter(Boolean).map(Number);
 function verCmp(a,b){a=verNums(a);b=verNums(b);for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0}
+async function updFetch(){const me=await N('appInfo',{p:'com.ihlauncher.tv'}),cur=me.v||'0';
+ const r=await fetch('https://api.github.com/repos/'+S.updRepo+'/releases/latest',{headers:{'Accept':'application/vnd.github+json'}});
+ if(r.status===404)throw new Error('Sürüm yayını (Release) bulunamadı. Depoda en az bir yayın olmalı.');if(!r.ok)throw new Error('GitHub HTTP '+r.status);
+ const j=await r.json(),tag=j.tag_name||'',ast=(j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{};S.updAt=Date.now();save();
+ return{tag,cur,apk:ast.browser_download_url||'',sha:ast.digest||'',url:j.html_url,body:j.body||'',newer:verCmp(tag,cur)>0}}
 async function updCheck(manual){if(!S.updRepo){if(manual)updView();return null}
- try{const me=await N('appInfo',{p:'com.ihlauncher.tv'});const cur=me.v||'0';
-  const r=await fetch('https://api.github.com/repos/'+S.updRepo+'/releases/latest',{headers:{'Accept':'application/vnd.github+json'}});
-  if(r.status===404)throw new Error('Sürüm yayını (Release) bulunamadı');if(!r.ok)throw new Error('GitHub HTTP '+r.status);
-  const j=await r.json(),tag=j.tag_name||'',ast=(j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{},apk=ast.browser_download_url||'',sha=ast.digest||'';
-  S.updAt=Date.now();save();const newer=verCmp(tag,cur)>0;
-  if(newer&&(manual||S.updSkip!==tag)){if(manual)updShow({tag,cur,apk,sha,url:j.html_url,body:j.body||''});else toast('⬆️','Yeni sürüm var: '+tag+' • Launcher Ayarları → Güncelleme kontrolü')}
-  else if(manual)toast('✅','Güncelsin ('+cur+')');
-  return newer}
+ try{const r=await updFetch();
+  if(r.newer){window.updR=r;if(manual||S.updSkip!==r.tag)updShow(r)}else if(manual)toast('✅','Güncelsin ('+r.cur+')');
+  return r.newer}
  catch(e){if(manual)toast('❌',String(e.message||e).slice(0,90));return null}}
+/* Otomatik kontrol: 6 saatte bir; mod “auto” ise sormadan indirir ve kurar (ADB bağlıysa onay penceresi de çıkmaz) */
+async function updAuto(force){if(S.updMode==='off'||!S.updRepo||window.__updBusy)return;if(!force&&Date.now()-S.updAt<216e5)return;window.__updBusy=1;
+ try{const r=await updFetch();if(!r.newer||S.updSkip===r.tag)return;window.updR=r;
+  if(S.updMode==='auto'&&r.apk){toast('⬇️','Yeni sürüm '+r.tag+' indiriliyor…');await updInstall(true)}
+  else if(!layer()&&!panel)updShow(r);else toast('⬆️','Yeni sürüm var: '+r.tag+' • Launcher Ayarları → Güncelleme')}
+ catch(e){}finally{window.__updBusy=0}}
 function updShow(r){const body=String(r.body||'').replace(/[#*`]/g,'').trim().slice(0,500);
  $('#dlgbox').innerHTML='<div class="dt">Yeni sürüm: '+esc(r.tag)+'</div><div class="dm">Mevcut: '+esc(r.cur)+(body?'\n\n'+esc(body):'')+'</div><div class="drow" style="flex-wrap:wrap">'+(r.apk?'<div class="btn b" onclick="updInstall()">İndir ve kur</div>':'')+'<div class="btn" onclick="closeDlg();N(\'openUrl\',{u:updR.url})">İndirme sayfasını aç</div>'+(r.apk?'<div class="btn" onclick="updApk()">APK adresi</div>':'')+'<div class="btn" onclick="S.updSkip=updR.tag;save();closeDlg()">Bu sürümü atla</div></div>';window.updR=r;showDlg()}
-async function updInstall(){closeDlg();const r=window.updR;if(!r||!r.apk)return;
- let c=await N('canInstall');
- if(!c.ok){if(await adbReady()){await N('adb',{c:'appops set com.ihlauncher.tv REQUEST_INSTALL_PACKAGES allow'});c=await N('canInstall')}
-  if(!c.ok){if(await conf('Güncellemeyi kurabilmek için bu uygulamaya “Bilinmeyen uygulamaları yükle” izni vermelisin. Ayar ekranı açılsın mı?'))N('unknownSources');return}}
- toast('⬇️','İndiriliyor…');const res=await N('installApk',{url:r.apk,sha:r.sha||''});
+async function updInstall(auto){closeDlg();const r=window.updR;if(!r||!r.apk)return;
+ const silent=await adbReady();
+ if(silent){await N('adb',{c:'appops set com.ihlauncher.tv REQUEST_INSTALL_PACKAGES allow'})}
+ else{const c=await N('canInstall');if(!c.ok){if(auto){toast('⚠️','Otomatik kurulum için “Bilinmeyen uygulamalar” izni ya da ADB gerekli');return}
+   if(await conf('Güncellemeyi kurabilmek için bu uygulamaya “Bilinmeyen uygulamaları yükle” izni vermelisin. Ayar ekranı açılsın mı?'))N('unknownSources');return}}
+ if(!auto)toast('⬇️','İndiriliyor…');
+ const res=await N('installApk',{url:r.apk,sha:r.sha||'',silent});
  if(res.error){toast('❌',res.error==='NEED_PERM'?'Yükleme izni gerekli':String(res.error).slice(0,100));return}
- toast('📦','Kurulum onayı açılıyor…')}
+ toast(res.mode==='silent'?'✅':'📦',res.mode==='silent'?'Güncellendi, yeniden başlıyor…':'Kurulum onayı açılıyor…')}
 window.__dl=p=>toast('⬇️','İndiriliyor %'+p);
 function updApk(){closeDlg();info('APK adresi','TV’de “Downloader” gibi bir uygulamayla bu adresi girip indirebilirsin:\n\n'+updR.apk)}
-function updView(){curView='upd';N('appInfo',{p:'com.ihlauncher.tv'}).then(me=>mset('Güncelleme Kontrolü','<div class="nf">Sürümler GitHub Releases’ten kontrol edilir. Depoya <b>v2.1.0</b> gibi bir etiket gönderince derleme akışı APK’yı otomatik yayınlar.</div>'+
+const UPM={off:'Kapalı',ask:'Haber ver ve sor',auto:'Otomatik indir ve kur'};
+function setUpdMode(m){S.updMode=m;save();keepNext();updView();if(m!=='off')updAuto(true)}
+function updView(){curView='upd';N('appInfo',{p:'com.ihlauncher.tv'}).then(me=>mset('Güncelleme (GitHub)','<div class="nf">Yeni sürümler GitHub Releases’ten alınır. Depoya kod gönderince derleme akışı APK’yı otomatik yayınlar; launcher 6 saatte bir bakar.</div>'+
+ '<div class="sec">Güncelleme modu</div>'+CH(UPM,S.updMode,'setUpdMode')+'<div class="nf">'+(S.updMode==='auto'?'ADB bağlıysa kurulum sessizce yapılır ve launcher yeniden başlar. ADB yoksa sistem onay penceresi çıkar.':S.updMode==='ask'?'Yeni sürüm bulununca “İndir ve kur” penceresi açılır.':'Otomatik kontrol kapalı; yalnızca “Şimdi kontrol et” çalışır.')+'</div>'+
  '<div class="kv"><span>Yüklü sürüm</span><span>'+esc(me.v||'?')+'</span></div><div class="kv"><span>GitHub deposu</span><span>'+esc(S.updRepo||'ayarlanmadı')+'</span></div><div class="kv"><span>Son kontrol</span><span>'+(S.updAt?new Date(S.updAt).toLocaleString('tr-TR'):'—')+'</span></div>'+
- '<div style="margin-top:14px"><span class="btn" onclick="updRepoSet()">Depo ayarla</span><span class="btn b" onclick="updCheck(true)">Şimdi kontrol et</span></div><div class="nf">Depo ayarlıysa haftada bir otomatik kontrol edilir.</div>',launcherSettings))}
+ '<div style="margin-top:14px"><span class="btn" onclick="updRepoSet()">Depo ayarla</span><span class="btn b" onclick="updCheck(true)">Şimdi kontrol et</span></div>',launcherSettings))}
 async function updRepoSet(){const v=await ask('GitHub deposu (kullanıcı/depo)',S.updRepo||'');if(v===null)return;const t=v.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/+$/,'');
  if(t&&!/^[\w.-]+\/[\w.-]+$/.test(t)){toast('❌','Biçim: kullanıcı/depo');return}S.updRepo=t;S.updSkip='';save();updView()}
 /* --- Kullanılmayan uygulamalar --- */
@@ -964,12 +1009,12 @@ function voiceResults(t){const qq=t.replace(/(^|\s)(aç|çalıştır|başlat|git
 function voicePick(k){closeDlg();vActs[k]()}
 /* ===== Başlat ===== */
 let rsT;
-window.__resume=()=>{clearTimeout(rsT);rsT=setTimeout(()=>{loadApps().then(()=>{loadInputs()});pollN();autoCheck()},300)};
+window.__resume=()=>{setTimeout(()=>updAuto(),4000);clearTimeout(rsT);rsT=setTimeout(()=>{loadApps().then(()=>{loadInputs()});pollN();autoCheck()},300)};
 window.__pkgChanged=()=>{clearTimeout(rsT);rsT=setTimeout(loadApps,1500)};
 function init(){safe('fx',fx);safe('load',load);safe('uzak liste',()=>{if(S.dbRemote&&S.dbRemote.data)applyRemote(S.dbRemote.data)});safe('tema',applyTheme);safe('duvar kağıdı',applyWall);safe('bölümler',applyRows);safe('kartlar',renderWidgets);safe('saat',tick);setInterval(()=>safe('saat',tick),1000);
  N('setKeymap',{m:JSON.stringify(S.keymap||{})});
  loadApps().then(()=>{loadInputs();setTimeout(()=>{if(document.activeElement===document.body||!document.activeElement){const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}},250)});
  if(!S.hintLp&&navigator.maxTouchPoints===0){S.hintLp=1;save();setTimeout(()=>toast('','Seçenekler için OK tuşunu basılı tut'),2500)}
- setInterval(poll,3000);setTimeout(unusedHint,20000);setTimeout(()=>{if(S.updRepo&&Date.now()-S.updAt>6048e5)updCheck(false)},40000);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
+ setInterval(poll,3000);rotTick();setInterval(()=>{rotTick();if(S.wall==='auto')applyWall()},60000);setTimeout(unusedHint,20000);setTimeout(()=>updAuto(),25000);setInterval(()=>updAuto(),36e5);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
 init();
 </script></body></html>

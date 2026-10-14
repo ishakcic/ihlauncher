@@ -29,6 +29,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:stateNotNeeded="true"
+            android:screenOrientation="sensorLandscape"
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation|uiMode|density|fontScale|locale|layoutDirection|smallestScreenSize|screenLayout">
             <intent-filter>

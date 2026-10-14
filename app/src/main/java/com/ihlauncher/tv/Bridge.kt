@@ -280,7 +280,7 @@ class Bridge(private val act: MainActivity) {
         "market" -> market(a.getString("p"))
         "openUrl" -> openUrl(a.getString("u"))
         "canInstall" -> obj("ok" to act.packageManager.canRequestPackageInstalls()).toString()
-        "installApk" -> installApk(a.getString("url"), a.optString("sha", ""))
+        "installApk" -> installApk(a.getString("url"), a.optString("sha", ""), a.optBoolean("silent", false))
         "unknownSources" -> {
             ui.post { try {
                 act.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:$ME")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -747,9 +747,9 @@ class Bridge(private val act: MainActivity) {
     @Volatile private var installSession = -1
 
     /** GitHub sürüm APK'sını indirir, (varsa) SHA-256 doğrular ve PackageInstaller ile kurar. İmza aynı olmalıdır. */
-    private fun installApk(url: String, sha: String): String {
+    private fun installApk(url: String, sha: String, silent: Boolean): String {
         if (!url.startsWith("https://github.com/") || !url.contains("/releases/download/")) throw Exception("Yalnızca GitHub sürüm adresleri kabul edilir")
-        if (!act.packageManager.canRequestPackageInstalls()) throw Exception("NEED_PERM")
+        if (!silent && !act.packageManager.canRequestPackageInstalls()) throw Exception("NEED_PERM")
         val f = File(act.cacheDir, "update.apk")
         val conn = java.net.URL(url).openConnection() as java.net.HttpURLConnection
         conn.connectTimeout = 15000; conn.readTimeout = 30000
@@ -774,6 +774,21 @@ class Bridge(private val act: MainActivity) {
         if (f.length() < 100_000) { f.delete(); throw Exception("İndirilen dosya geçersiz") }
         val got = md.digest().joinToString("") { "%02x".format(it) }
         if (sha.isNotBlank() && !got.equals(sha.removePrefix("sha256:"), ignoreCase = true)) { f.delete(); throw Exception("SHA-256 uyuşmuyor, kurulum iptal edildi") }
+        if (silent) {
+            // ADB bağlıysa onay penceresi olmadan "pm install -r" ile kur (uygulama kendini güncelleyince süreç yeniden başlar).
+            try {
+                val ext = act.getExternalFilesDir(null)
+                if (ext != null) {
+                    val g = File(ext, "update.apk")
+                    f.copyTo(g, true)
+                    g.setReadable(true, false)
+                    val r = Adb.shell(act, "pm install -r -d \"" + g.absolutePath + "\"")
+                    g.delete()
+                    if (r.first == 0 && r.second.contains("Success")) return obj("ok" to true, "mode" to "silent", "sha" to got).toString()
+                }
+            } catch (e: Exception) { }
+        }
+        if (!act.packageManager.canRequestPackageInstalls()) throw Exception("NEED_PERM")
         val inst = act.packageManager.packageInstaller
         val id = inst.createSession(PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL))
         installSession = id
