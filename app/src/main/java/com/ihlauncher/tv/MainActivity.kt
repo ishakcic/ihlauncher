@@ -31,7 +31,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 class MainActivity : Activity() {
-    companion object { @Volatile var cur: MainActivity? = null }
+    companion object { @Volatile var cur: MainActivity? = null; @Volatile var fg = false }
     lateinit var web: WebView
     private lateinit var bridge: Bridge
     private val cache = object : LruCache<String, ByteArray>(6 * 1024 * 1024) {
@@ -95,8 +95,11 @@ class MainActivity : Activity() {
         registerReceiver(pkgReceiver, f)
     }
 
+    override fun onPause() { fg = false; super.onPause() }
+
     override fun onResume() {
         super.onResume()
+        fg = true
         cur = this
         web.requestFocus()
         js("window.__resume&&window.__resume()")

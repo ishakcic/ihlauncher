@@ -1,4 +1,4 @@
-/* ihlauncher • Sistem Merkezi bilgi tabanı
+/* ihlauncher • Kontrol Odası bilgi tabanı
  * Risk: safe = güvenli (dondurunca bir şey kaybetmezsin) • caution = dikkat (bir özellik kaybolabilir)
  *       risky = riskli (sistem/arayüz bozulabilir) • critical = kritik (asla önerilmez, Bridge de engeller)
  * Not: Liste "tüm" cihazları kapsamaz; yalnızca cihazda GERÇEKTEN kurulu olanlar gösterilir.

@@ -252,8 +252,8 @@ class Bridge(private val act: MainActivity) {
             okJ()
         }
         "keyLearn" -> {
-            KeyService.learn = { code ->
-                act.js("window.__key(" + code + "," + JSONObject.quote(KeyEvent.keyCodeToString(code)) + ")")
+            KeyService.learn = { id, name ->
+                act.js("window.__key(" + JSONObject.quote(id) + "," + JSONObject.quote(name) + ")")
             }
             okJ()
         }
