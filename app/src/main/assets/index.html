@@ -282,7 +282,7 @@ const lumOf=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16&255)+.587*(n>
 /* Squircle: |x|^n+|y|^n=1 (n=5) eğrisinden üretilen kırpma yolu */
 function buildClip(){if($('#clipSvg'))return;const n=5,N=96,p=[];for(let k=0;k<N;k++){const t=k/N*2*Math.PI,c=Math.cos(t),sn=Math.sin(t);p.push((.5+.5*Math.sign(c)*Math.pow(Math.abs(c),2/n)).toFixed(4)+' '+(.5+.5*Math.sign(sn)*Math.pow(Math.abs(sn),2/n)).toFixed(4))}
  document.body.insertAdjacentHTML('beforeend','<svg id="clipSvg" width="0" height="0" style="position:absolute"><defs><clipPath id="clipSq" clipPathUnits="objectBoundingBox"><path d="M'+p.join('L')+'Z"/></clipPath></defs></svg>')}
-window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&window.S)applyTheme()},200)});
+window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&typeof S!=='undefined')applyTheme()},200)});
 function applyTheme(){buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
 /* ===== Saat ===== */
 function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
@@ -368,10 +368,10 @@ let dlgOpener=null,dlgKey='';
 function markOpener(){if($('#dlg').classList.contains('show'))return;const a=document.activeElement;dlgOpener=a&&a!==document.body?a:null;dlgKey=(a&&a.dataset&&a.dataset.p)||''}
 function showDlg(){markOpener();$('#dlg').classList.add('show');setTimeout(focusFirst,30)}
 /* Pencere kapanınca odak, açan öğeye geri döner (kumandada başa zıplamasın) */
-function closeDlg(){$('#dlg').classList.remove('show');$('#dlgbox').style.maxWidth='';
+function closeDlg(){if(window.__learnActive){window.__learnActive=false;clearTimeout(learnT);N('keyLearnStop')}$('#dlg').classList.remove('show');$('#dlgbox').style.maxWidth='';
  const o=dlgOpener,k=dlgKey;dlgOpener=null;dlgKey='';
  if(o&&o.isConnected){try{o.focus({preventScroll:true})}catch(e){}}
- setTimeout(()=>{if(layer()&&layer()!==$('#dlg')&&!layer().contains(document.activeElement))return;const a=document.activeElement;if(!a||a===document.body){const e=k&&document.querySelector('[data-p="'+k.replace(/"/g,'\\"')+'"]');if(e&&e.getClientRects().length)focusEl(e)}},90)}
+ setTimeout(()=>{if(layer()&&layer()!==$('#dlg')&&!layer().contains(document.activeElement))return;const a=document.activeElement;if(!a||a===document.body){const e=k&&document.querySelector('[data-p="'+k.replace(/"/g,'\\"')+'"]');if(e&&e.getClientRects().length)focusEl(e);else{const f=document.querySelector('#favRow .card,#grid .tile');if(f)focusEl(f)}}},90)}
 let menuActs=[],qActs=[];
 function quickBar(p,rid){const isF=S.fav.includes(p),hid=S.hidden.includes(p),a=APPS.find(x=>x.p===p),sys=a?a.s:false;
  const it=[['','Aç',()=>launch(p)],[isF?'':'',isF?'Favoriden çıkar':'Favori',()=>toggleFav(p)],[hid?'':'',hid?'Göster':'Gizle',()=>toggleHide(p)],['','Dondur',()=>pmDo('freeze',p)],['','Kaldır',()=>uninstallApp(p,sys)],['⋯','Daha fazla',()=>appMenu(p,rid)]];
@@ -666,14 +666,15 @@ function openWall(){curView='wall';mset('Görünüm',apBar('wall')+'<span class=
 function setRot(m){S.rot=+m;S.rotAt=Date.now();save();keepNext();openWall()}
 function rotTick(){if(!S.rot)return;if(Date.now()-(S.rotAt||0)>=S.rot*60000){const k=Object.keys(SCN),cur=(S.wall||'').indexOf('scene:')===0?k.indexOf(S.wall.slice(6)):-1;S.wall='scene:'+k[(cur+1)%k.length];S.rotAt=Date.now();save();applyWall()}}
 // görünüm kodu: 13 karakter, başka cihazda aynı görünümü kurar
-function lookCode(){return LK.map(([k,f])=>{const v=k==='dock'?(S.dock?'1':'0'):String(S[k]);return Math.max(0,f().indexOf(v)).toString(36)}).join('').toUpperCase().replace(/(.{4})(?=.)/g,'$1-')}
+function lookCode(){return LK.map(([k,f])=>{const v=k==='dock'?(S.dock?'1':'0'):String(S[k]);const i=f().indexOf(v);return i<0?'z':i.toString(36)}).join('').toUpperCase().replace(/(.{4})(?=.)/g,'$1-')}
 function applyCode(c){c=String(c).replace(/[^0-9A-Za-z]/g,'').toLowerCase();if(c.length!==LK.length)return false;const o={};
- for(let j=0;j<LK.length;j++){const arr=LK[j][1](),i=parseInt(c[j],36);if(!(i>=0&&i<arr.length))return false;o[LK[j][0]]=arr[i]}
+ for(let j=0;j<LK.length;j++){if(c[j]==='z')continue;const arr=LK[j][1](),i=parseInt(c[j],36);if(!(i>=0&&i<arr.length))return false;o[LK[j][0]]=arr[i]}
  for(const k in o)S[k]=k==='dock'?o[k]==='1':(k==='blur'||k==='idle'||k==='rot')?+o[k]:o[k];S.rotAt=Date.now();save();applyTheme();applyWall();renderAll();return true}
 function showLookCode(){info('Görünüm kodun',lookCode()+'\n\nBaşka bir cihazda Ayarlar → Görünüm → “Kod gir” ile aynı görünümü kurabilirsin.')}
 async function enterLookCode(){const v=await ask('Görünüm kodu (örn. 0000-1011-...)','');if(v===null)return;if(applyCode(v)){toast('✅','Görünüm uygulandı');lookView()}else toast('❌','Kod geçersiz')}
 
 function setWall(v){S.wall=v;S.rot=0;save();applyWall();applyTheme();toast('🖼️','Duvar kağıdı güncellendi');keepNext();openWall()}
+window.__wall=function(u){if(!u||typeof u!=='string'){toast('❌','Duvar kağıdı okunamadı');return}S.wall=u;S.rot=0;S.rotAt=Date.now();save();applyWall();applyTheme();bump();toast('🖼️','Duvar kağıdı uygulandı');if(curView==='wall')openWall()};
 function applyWall(){const b=$('#bg'),c=wallCss(S.wall);if(c){b.className='bg wp';b.style.background=c}else{b.className='bg def';b.style.background=''}document.body.classList.toggle('hasw',!!c)}
 const rw=(t,d,fn,tog)=>'<div class="r2'+(tog===undefined?' go':'')+'" onclick="'+fn+'"><div><div class="n">'+t+'</div>'+(d?'<div class="s2">'+d+'</div>':'')+'</div>'+(tog===undefined?'':tg(tog))+'</div>';
 function launcherSettings(){curView='ls';mset('Launcher Ayarları',
@@ -755,7 +756,7 @@ async function updInstall(auto){closeDlg();const r=window.updR;if(!r||!r.apk)ret
    if(await conf('Güncellemeyi kurabilmek için bu uygulamaya “Bilinmeyen uygulamaları yükle” izni vermelisin. Ayar ekranı açılsın mı?'))N('unknownSources');return}}
  if(!auto)toast('⬇️','İndiriliyor…');
  const res=await N('installApk',{url:r.apk,sha:r.sha||'',silent});
- if(res.error){toast('❌',res.error==='NEED_PERM'?'Yükleme izni gerekli':String(res.error).slice(0,100));return}
+ if(res.error){if(res.error==='NEED_PERM'){if(await conf('Güncellemeyi kurmak için ihlauncher’a “bilinmeyen uygulama yükleme” izni vermelisin. İzin ekranı açılsın mı?'))N('openSettings',{k:'install'});return}toast('❌',String(res.error).slice(0,100));return}
  toast(res.mode==='silent'?'✅':'📦',res.mode==='silent'?'Güncellendi, yeniden başlıyor…':'Kurulum onayı açılıyor…')}
 window.__dl=p=>toast('⬇️','İndiriliyor %'+p);
 function updApk(){closeDlg();info('APK adresi','TV’de “Downloader” gibi bir uygulamayla bu adresi girip indirebilirsin:\n\n'+updR.apk)}
@@ -881,14 +882,14 @@ async function sgTele(){curView='tele';mset('Telemetri & Gizlilik','<div class="
  if(curView!=='tele')return;await scanSys();if(curView!=='tele')return;
  const tc=cands().filter(i=>i.c.cat==='tele');
  mset('Telemetri & Gizlilik','<div class="nf">Hiçbir ayar kalıcı değildir; hepsi geri alınabilir. Telemetriyi tamamen sıfırlamak mümkün değildir — burada yapılabilenler listelenir.</div>'+(adbOk?'':NEEDADB)+
- '<div class="sec">Sistem ayarları</div>'+TELE.map((t,k)=>'<div class="r2" onclick="teleTog('+k+')"><div><div class="n">'+t.i+'  '+t.t+' <span class="bd '+RISK[t.risk].c+'">'+RISK[t.risk].t+'</span></div><div class="s2">'+t.d+'</div></div>'+tg(vals[k]!==undefined&&t.on(vals[k]))+'</div>').join('')+
+ '<div class="sec">Sistem ayarları</div>'+TELE.map((t,k)=>'<div class="r2" data-tk="'+k+'" onclick="teleTog('+k+')"><div><div class="n">'+t.i+'  '+t.t+' <span class="bd '+RISK[t.risk].c+'">'+RISK[t.risk].t+'</span></div><div class="s2">'+t.d+'</div></div>'+tg(vals[k]!==undefined&&t.on(vals[k]))+'</div>').join('')+
  '<div class="sec">Alan adı engelleme</div><div class="r2" onclick="dnsSet(0).then(sgTele)"><div><div class="n">AdGuard DNS aç</div><div class="s2">Cihazın tamamında reklam ve izleyici alan adlarını engeller. Şu an: '+esc(window.__dnsNow||'bilinmiyor')+'</div></div><span class="btn b">Aç</span></div>'+
  '<div class="sec">Paketler</div><div class="r2" onclick="dbOpenList(\'tele\')"><div><div class="n">Telemetri / reklam paketleri</div><div class="s2">'+tc.length+' paket bulundu — incele ve dondur.</div></div><span class="btn">Aç</span></div>'+
  '<div class="sec">Google</div><div class="r2" onclick="N(\'startAction\',{a:\'com.google.android.gms.settings.ADS_PRIVACY\'})"><div><div class="n">Reklam kimliği ayarları</div><div class="s2">Reklam kimliğini sıfırla / kişiselleştirmeyi kapat (Google ayar ekranı).</div></div><span class="btn">Aç</span></div>'+
  '<div class="r2" onclick="N(\'startAction\',{a:\'android.settings.PRIVACY_SETTINGS\'})"><div><div class="n">Gizlilik ayarları</div><div class="s2">Kullanım ve tanılama dahil sistem gizlilik ekranı.</div></div><span class="btn">Aç</span></div>'+
  '<div class="r2" onclick="gmsAn(true)"><div><div class="n">Deneysel: GMS analitik bileşenlerini kapat</div><div class="s2">Google Analytics servis bileşenleri devre dışı bırakılır. Cihaza göre çalışmayabilir; güncellemeden sonra geri gelebilir.</div></div><span class="btn">Uygula</span></div>'+
  '<div class="r2" onclick="gmsAn(false)"><div><div class="n">GMS analitik bileşenlerini geri aç</div></div><span class="btn">Uygula</span></div>',backSG)}
-async function teleTog(k){if(!adbOk){toast('⚠️','ADB bağlı değil');return}const t=TELE[k],e=$$('#mbody .r2')[k],tgl=e&&e.querySelector('.tog'),turnOn=!(tgl&&tgl.classList.contains('on'));
+async function teleTog(k){if(!adbOk){toast('⚠️','ADB bağlı değil');return}const t=TELE[k],e=$('#mbody [data-tk="'+k+'"]'),tgl=e&&e.querySelector('.tog'),turnOn=!(tgl&&tgl.classList.contains('on'));
  const r=await N('adb',{c:turnOn?t.cOn:t.cOff});if(r.code===0){tgl&&tgl.classList.toggle('on',turnOn);toast('✅',turnOn?'Uygulandı':'Geri alındı')}else toast('❌',String(r.out||r.error||'başarısız').slice(0,90))}
 async function gmsAn(off){if(!adbOk){toast('⚠️','ADB bağlı değil');return}toast('⏳','Uygulanıyor…');let ok=0;const bad=[];
  for(const c of GMS_COMP){const r=await N('adb',{c:(off?'pm disable ':'pm enable ')+'com.google.android.gms/'+c});if(r.code===0&&!/Exception|Error|Unknown/i.test(r.out||''))ok++;else bad.push(c.split('.').pop()+': '+String(r.out||r.error||'').slice(0,50))}
@@ -972,9 +973,9 @@ async function keysView(){curView='keys';const acc=(await N('keyAccess')).v,km=S
  mset('Tuş Atama',h,null)}
 let learnT;
 async function keyAdd(){if(!(await N('keyAccess')).v){toast('⚠️','Önce erişilebilirlik servisini aç');return}
- $('#dlgbox').innerHTML='<div class="dt">Tuşa bas</div><div class="dm">Kumandada atamak istediğin tuşa bas. Yön tuşları, Tamam ve Geri dahil her tuş atanabilir.\n15 sn içinde basmazsan kendiliğinden kapanır.</div><div class="drow"><div class="btn" onclick="keyLearnCancel()">Vazgeç</div></div>';markOpener();$('#dlg').classList.add('show');N('keyLearn');clearTimeout(learnT);learnT=setTimeout(()=>{N('keyLearnStop');closeDlg()},15000)}
-function keyLearnCancel(){clearTimeout(learnT);N('keyLearnStop');closeDlg()}
-window.__key=(id,name)=>{clearTimeout(learnT);closeDlg();KTMP[String(id)]=String(name).replace('KEYCODE_','');keyStart(String(id))};
+ $('#dlgbox').innerHTML='<div class="dt">Tuşa bas</div><div class="dm">Kumandada atamak istediğin tuşa bas. Yön tuşları, Tamam ve Geri dahil her tuş atanabilir.\n15 sn içinde basmazsan kendiliğinden kapanır.</div><div class="drow"><div class="btn" onclick="keyLearnCancel()">Vazgeç</div></div>';markOpener();$('#dlg').classList.add('show');window.__learnActive=true;N('keyLearn');clearTimeout(learnT);learnT=setTimeout(()=>{closeDlg()},15000)}
+function keyLearnCancel(){closeDlg()}
+window.__key=(id,name)=>{window.__learnActive=false;clearTimeout(learnT);closeDlg();KTMP[String(id)]=String(name).replace('KEYCODE_','');keyStart(String(id))};
 async function keyStart(id){if(KCRIT.includes(id)&&!(await conf(keyName(id)+' tuşu gezinme için kullanılıyor. Atama yalnızca başka uygulamalar açıkken çalışır; ihlauncher içinde bu tuş normal çalışmaya devam eder. Devam edilsin mi?')))return;keyPickTarget(id)}
 function keyPickTarget(id){menu(keyName(id)+' tuşu ne yapsın?',[['Uygulama aç…',()=>keyApp(id)],['Launcher eylemi…',()=>keyActMenu(id)],['Sistem eylemi…',()=>keyGlbMenu(id)],['Tuşu devre dışı bırak',()=>keySet(id,'none')]])}
 async function keyApp(id){const p=await pickApp(keyName(id)+' tuşu hangi uygulamayı açsın?');if(!p)return;keySet(id,p)}

@@ -324,6 +324,13 @@ class Bridge(private val act: MainActivity) {
     }
 
     private fun openSettings(k: String): String {
+        if (k == "install") {
+            ui.post {
+                try { act.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:$ME")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                catch (e: Exception) { try { act.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (e2: Exception) { } }
+            }
+            return okJ()
+        }
         val action = when (k) {
             "android" -> Settings.ACTION_SETTINGS
             "wifi" -> Settings.ACTION_WIFI_SETTINGS
@@ -424,6 +431,9 @@ class Bridge(private val act: MainActivity) {
             "appops set $ME GET_USAGE_STATS allow",
             "appops set $ME REQUEST_INSTALL_PACKAGES allow",
             "cmd notification allow_listener $ME/$ME.NotifService",
+            "n=$ME/$ME.NotifService; cur=\$(settings get secure enabled_notification_listeners); " +
+                "case \"\$cur\" in *\$n*) ;; null|\"\") settings put secure enabled_notification_listeners \$n ;; " +
+                "*) settings put secure enabled_notification_listeners \"\$cur:\$n\" ;; esac",
             "cur=\$(settings get secure enabled_accessibility_services); " +
                 "case \"\$cur\" in *$cls*) ;; null|\"\") settings put secure enabled_accessibility_services $cls ;; " +
                 "*) settings put secure enabled_accessibility_services \"\$cur:$cls\" ;; esac; " +
@@ -782,7 +792,7 @@ class Bridge(private val act: MainActivity) {
                     val g = File(ext, "update.apk")
                     f.copyTo(g, true)
                     g.setReadable(true, false)
-                    val r = Adb.shell(act, "pm install -r -d \"" + g.absolutePath + "\"")
+                    val r = Adb.shell(act, "pm install -r \"" + g.absolutePath + "\"")
                     g.delete()
                     if (r.first == 0 && r.second.contains("Success")) return obj("ok" to true, "mode" to "silent", "sha" to got).toString()
                 }
@@ -802,6 +812,11 @@ class Bridge(private val act: MainActivity) {
         return obj("ok" to true, "sha" to got).toString()
     }
 
+    fun cleanup() {
+        try { installRx?.let { act.unregisterReceiver(it) } } catch (e: Throwable) { }
+        installRx = null
+    }
+
     private fun registerInstallRx() {
         if (installRx != null) return
         val rx = object : android.content.BroadcastReceiver() {
@@ -816,7 +831,10 @@ class Bridge(private val act: MainActivity) {
                         if (ok) try { act.startActivity(confirm!!.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (e: Exception) {}
                     }
                     PackageInstaller.STATUS_SUCCESS -> act.js("window.__toast('✅','Güncelleme kuruldu')")
-                    else -> act.js("window.__toast('❌'," + JSONObject.quote(i.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "Kurulum başarısız") + ")")
+                    else -> {
+                        try { act.packageManager.packageInstaller.abandonSession(installSession) } catch (e: Exception) { }
+                        act.js("window.__toast('❌'," + JSONObject.quote(i.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "Kurulum başarısız") + ")")
+                    }
                 }
             }
         }

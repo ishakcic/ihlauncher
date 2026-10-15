@@ -152,6 +152,7 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         if (cur === this) cur = null
         wmH.removeCallbacks(wmTick)
+        try { bridge.cleanup() } catch (e: Exception) { }
         try { wmDialog?.dismiss() } catch (e: Exception) { }
         wmDialog = null
         try { unregisterReceiver(pkgReceiver) } catch (e: Exception) { }
