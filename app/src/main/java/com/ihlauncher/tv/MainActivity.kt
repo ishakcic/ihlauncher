@@ -33,6 +33,7 @@ import java.io.File
 class MainActivity : Activity() {
     companion object { @Volatile var cur: MainActivity? = null; @Volatile var fg = false }
     lateinit var web: WebView
+    lateinit var tv: TvEngine
     private lateinit var bridge: Bridge
     private val cache = object : LruCache<String, ByteArray>(6 * 1024 * 1024) {
         override fun sizeOf(key: String, value: ByteArray): Int = value.size
@@ -46,7 +47,12 @@ class MainActivity : Activity() {
         cur = this
         if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) WebView.setWebContentsDebuggingEnabled(true)
         web = WebView(this)
-        setContentView(web)
+        // Kök: önce TvView (arkada), üstte WebView. TV modunda WebView şeffaflaşır ve video "hole" alanından görünür.
+        val root = android.widget.FrameLayout(this)
+        root.setBackgroundColor(0xFF000000.toInt())
+        tv = TvEngine(this, root)
+        root.addView(web, android.widget.FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams.MATCH_PARENT, android.widget.FrameLayout.LayoutParams.MATCH_PARENT))
+        setContentView(root)
         web.setBackgroundColor(0xFF000000.toInt())
         web.settings.apply {
             javaScriptEnabled = true
@@ -95,7 +101,7 @@ class MainActivity : Activity() {
         registerReceiver(pkgReceiver, f)
     }
 
-    override fun onPause() { fg = false; super.onPause() }
+    override fun onPause() { fg = false; try { tv.release() } catch (e: Exception) { }; super.onPause() }
 
     override fun onResume() {
         super.onResume()
@@ -153,6 +159,7 @@ class MainActivity : Activity() {
         if (cur === this) cur = null
         wmH.removeCallbacks(wmTick)
         try { bridge.cleanup() } catch (e: Exception) { }
+        try { tv.release() } catch (e: Exception) { }
         try { wmDialog?.dismiss() } catch (e: Exception) { }
         wmDialog = null
         try { unregisterReceiver(pkgReceiver) } catch (e: Exception) { }
@@ -162,6 +169,11 @@ class MainActivity : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         web.evaluateJavascript("(window.__back&&window.__back())||false", null)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == TvEngine.REQ) js("window.__tvPerm&&window.__tvPerm()")
     }
 
     override fun onNewIntent(intent: Intent?) {

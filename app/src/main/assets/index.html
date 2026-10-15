@@ -204,7 +204,8 @@ body[data-top=pill] #content{padding-top:104px}
 .kr .ar{color:var(--t3);font-size:24px}
 .kr .kt{display:flex;align-items:center;gap:12px;flex:1;min-width:0}.kr .kt img{width:40px;height:40px;border-radius:10px;flex-shrink:0}
 .kw{font-size:12px;color:var(--warn);white-space:nowrap}
-</style></head>
+</style>
+<link rel="stylesheet" href="tv.css"></head>
 <body data-theme="oneui">
 <div id="errbar" onclick="this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#FF453A;color:#fff;font:600 15px/1.35 sans-serif;padding:8px 14px;word-break:break-all"></div>
 <script>
@@ -1073,4 +1074,4 @@ function init(){safe('fx',fx);safe('load',load);safe('uzak liste',()=>{if(S.dbRe
  if(!S.hintLp&&navigator.maxTouchPoints===0){S.hintLp=1;save();setTimeout(()=>toast('','Seçenekler için OK tuşunu basılı tut'),2500)}
  setInterval(poll,3000);rotTick();setInterval(()=>{rotTick();if(S.wall==='auto')applyWall()},60000);setTimeout(unusedHint,20000);setTimeout(()=>updAuto(),25000);setInterval(()=>updAuto(),36e5);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
 init();
-</script></body></html>
+</script><script src="tv.js"></script></body></html>

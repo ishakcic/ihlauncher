@@ -288,6 +288,18 @@ class Bridge(private val act: MainActivity) {
             okJ()
         }
         "uninstallUi" -> uninstallUi(a.getString("p"))
+        "tvState" -> act.tv.state()
+        "tvChannels" -> act.tv.channels()
+        "tvPrograms" -> act.tv.programs(a.getJSONArray("ids"), a.getLong("from"), a.getLong("to"))
+        "tvTune" -> { act.tv.tune(a.getLong("id"), a.getString("input")); okJ() }
+        "tvStop" -> { act.tv.stop(); okJ() }
+        "tvRect" -> { act.tv.rect(a.optInt("x"), a.optInt("y"), a.optInt("w"), a.optInt("h")); okJ() }
+        "tvMute" -> { act.tv.mute(a.optBoolean("m")); okJ() }
+        "tvMode" -> { act.tv.mode(a.optBoolean("on")); okJ() }
+        "tvSetup" -> act.tv.setup(a.getString("input"))
+        "tvPerm" -> { act.tv.requestPerm(); okJ() }
+        "tvLogo" -> act.tv.logo(a.getLong("id"))
+        "tvExternal" -> act.tv.external(a.getLong("id"))
         "trimCaches" -> { val r = Adb.shell(act, "pm trim-caches 999999999999"); obj("code" to r.first, "out" to r.second, "ok" to (r.first == 0)).toString() }
         else -> obj("error" to "unknown: $m").toString()
     }
@@ -428,6 +440,7 @@ class Bridge(private val act: MainActivity) {
         val cmds = listOf(
             "pm grant $ME android.permission.WRITE_SECURE_SETTINGS",
             "pm grant $ME android.permission.ACCESS_FINE_LOCATION",
+            "pm grant $ME android.permission.READ_TV_LISTINGS",
             "appops set $ME GET_USAGE_STATS allow",
             "appops set $ME REQUEST_INSTALL_PACKAGES allow",
             "cmd notification allow_listener $ME/$ME.NotifService",
