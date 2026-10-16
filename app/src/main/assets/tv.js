@@ -36,7 +36,7 @@ function build(){
    '<div class="t-tabs"><button class="t-tab on" data-t="now" onclick="TVUI.tab(\'now\')">Şimdi</button><button class="t-tab" data-t="guide" onclick="TVUI.tab(\'guide\')">Rehber</button><button class="t-tab" data-t="search" onclick="TVUI.tab(\'search\')">Ara</button></div>'+
    '<div class="t-meta"><span class="t-clk" id="tClk">--:--</span><div class="t-x" tabindex="0" onclick="TVUI.close()">✕</div></div></div>'+
   '<div class="t-stage"><div class="t-hole" id="pHole">'+
-    '<div class="t-nosig"><div class="t-nlogo" id="pLogo"></div><div class="t-nst" id="pSt">Kanal ayarlanıyor…</div><div class="t-btn" id="pFail" tabindex="0" onclick="TVUI.ext()">Sistem TV uygulamasında aç</div></div>'+
+    '<div class="t-nosig"><div class="t-nlogo" id="pLogo"></div><div class="t-nst" id="pSt">Kanal ayarlanıyor…</div><div style="display:flex;gap:10px" id="pFailBox"><div class="t-btn b" id="pFail" tabindex="0" onclick="TVUI.ext()">Sistem TV uygulamasında aç</div><div class="t-btn" tabindex="0" onclick="TVUI.diag()">Tanı</div></div></div>'+
     '<div class="t-hm"><div class="t-lab">CANLI YAYIN</div><div class="t-pnum" id="pNum">--</div></div>'+
     '<div class="t-hb"><div class="t-cn" id="pName">—</div><div class="t-pt" id="pNow">—</div><div class="t-pd" id="pDesc"></div>'+
      '<div class="t-pbar"><i id="pBar"></i></div><div class="t-ptm"><span id="pStart"></span><span id="pEnd"></span></div>'+
@@ -72,9 +72,10 @@ function upd(){
   sig()}
 function sig(){
   const T=$t('tv');if(!T)return;T.classList.toggle('vid',TV.vid);
-  const m=TV.fail?'Uygulama içinde açılamadı':(REASON[TV.reason]||'Kanal ayarlanıyor…');
-  $t('pSt').textContent=m;$t('pFail').style.display=TV.vid?'none':'';
+  const m=TV.fail==='timeout'?'Görüntü gelmedi: sinyal yok ya da cihaz uygulama içi oynatmaya izin vermiyor':TV.fail?'Uygulama içinde açılamadı':(REASON[TV.reason]||'Kanal ayarlanıyor…');
+  $t('pSt').textContent=m;$t('pFailBox').style.display=TV.vid?'none':'';
   const b=$t('tStat');b.textContent=TV.vid?'':m;b.classList.toggle('show',!TV.vid&&TV.watch)}
+function focusFail(){if(TV.watch)return;const e=$t('pFail');if(e&&e.getClientRects().length)focusEl(e)}
 function chanHtml(c){
   const k=col(c),n=nowNext(c.id).now,fav=favs().includes(c.id);
   const lg=TV.logos[c.id]?'<img src="data:image/png;base64,'+TV.logos[c.id]+'" alt="">':esc(c.name);
@@ -113,6 +114,7 @@ function tune(id){
   const c=TV.all.find(x=>x.id===id);if(!c)return;
   if(TV.curId!==id)TV.prevId=TV.curId;TV.curId=id;TV.tuned=true;TV.vid=false;TV.reason=1;TV.fail='';
   S.tvLast=id;save();N('tvTune',{id:c.id,input:c.in});upd();loadProgs([id]);
+  clearTimeout(TV.tt);TV.tt=setTimeout(()=>{if(TV.on&&!TV.vid&&!TV.fail&&TV.reason!==4){TV.fail='timeout';sig();focusFail()}},8000);
   document.querySelectorAll('#tRail .t-chan[data-id]').forEach(e=>e.classList.toggle('on',+e.dataset.id===id));
   if(TV.watch)osd()}
 function step(d){const L=TV.list.length?TV.list:TV.all;if(!L.length)return;let i=L.findIndex(c=>c.id===TV.curId);i=i<0?0:(i+d+L.length)%L.length;tune(L[i].id)}
@@ -181,7 +183,7 @@ function showSetup(kind){
     tu.map(i=>'<div class="t-btn b" tabindex="0" onclick="TVUI.scanIn('+JSON.stringify(i.id).replace(/"/g,'&quot;')+')">Kanal tara: '+esc(i.label)+'</div>').join('')+'<div class="t-btn" tabindex="0" onclick="TVUI.retry()">Yenile</div>';
   else h+='<h2>Tuner bulunamadı</h2><p>Bu cihazda uygulamaların kullanabildiği bir TV tuner girişi (DVB-S/S2/T/C) görünmüyor. Gerçek uydu yayını için cihazın dahili tuner’ı olmalı ve üreticinin TV Input servisini sunması gerekir; harici USB tuner ya da yalnızca internet tabanlı Android TV kutularında bu bölüm çalışmaz.</p>'+
     (inp.length?'<p>Görünen girişler: '+inp.map(i=>esc(i.label)).join(', ')+'</p>':'')+'<div class="t-btn" tabindex="0" onclick="TVUI.retry()">Tekrar dene</div>';
-  P.innerHTML=h+'<div class="t-btn" tabindex="0" onclick="TVUI.close()">Kapat</div></div>';
+  P.innerHTML=h+'<div class="t-btn" tabindex="0" onclick="TVUI.diag()">Tanı</div><div class="t-btn" tabindex="0" onclick="TVUI.close()">Kapat</div></div>';
   const e=P.querySelector('.t-btn');if(e)focusEl(e)}
 async function load(){
   const st=await N('tvState');TV.st=st;
@@ -220,12 +222,14 @@ window.TVUI={
   ext:()=>{const c=cur();if(c)N('tvExternal',{id:c.id})},
   scan:()=>{const tu=((TV.st&&TV.st.inputs)||[]).filter(i=>i.tuner&&i.setup);if(!tu.length){toast('❌','Kurulum ekranı sunan tuner girişi yok');return}if(tu.length===1)TVUI.scanIn(tu[0].id);else menu('Kanal tara',tu.map(i=>[i.label,()=>TVUI.scanIn(i.id)]))},
   scanIn:async id=>{const r=await N('tvSetup',{input:id});if(!r||!r.ok)toast('❌',(r&&r.error)||'Açılamadı')},
+  diag:async()=>{const st=await N('tvState');let d='İzin (READ_TV_LISTINGS): '+(st.perm?'var':'YOK')+'\nTV girişleri: '+((st.inputs||[]).map(i=>i.label+' ['+(i.tuner?'TUNER':i.type)+'] '+i.id).join('; ')||'yok')+'\nKanal sayısı: '+TV.all.length+'\nSon TvView olayı: '+(TV.last||'yok');
+    try{if(await adbReady()){const r=await N('adb',{c:'dumpsys tv_input | head -n 25'});d+='\n\n'+String(r.out||'').slice(0,700)}}catch(e){}info('Canlı TV tanı',d)},
   retry:()=>load(),
   grant:async()=>{let ok=false;try{if(await adbReady()){const r=await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});ok=r.code===0}}catch(e){}if(ok){load();return}N('tvPerm');toast('⏳','İzin penceresi açılıyor…')},
   askQ:async()=>{const v=await ask('Kanal veya program adı',TV.q||'');if(v!==null){TV.q=v;renderSearch()}}
 };
 window.__tvPerm=()=>{if(TV.on)load()};
-window.__tvEv=(t,d)=>{if(!TV.on)return;if(t==='video'){TV.vid=true;TV.fail=''}else if(t==='novideo'){TV.vid=false;TV.reason=+d}else{TV.vid=false;TV.fail=t}sig()};
+window.__tvEv=(t,d)=>{if(!TV.on)return;TV.last=t+':'+d;if(t==='video'){TV.vid=true;TV.fail='';clearTimeout(TV.tt)}else if(t==='novideo'){TV.vid=false;TV.reason=+d}else{TV.vid=false;TV.fail=t;clearTimeout(TV.tt);focusFail()}sig()};
 
 /* ---------- Tuş yönetimi: tam ekran izlerken kanal değiştirme ---------- */
 const COL={183:1,184:1,185:1,186:1,403:1,404:1,405:1,406:1};
@@ -243,6 +247,8 @@ window.addEventListener('keydown',e=>{
     else if(k==='Enter'||k==='MediaPlayPause')exitWatch();
     else if(COL[c])h=true;
     else h=false}
+  else if(TV.tab==='now'&&(k==='ChannelUp'||c===166||k==='PageUp'||c===92)){step(1)}
+  else if(TV.tab==='now'&&(k==='ChannelDown'||c===167||k==='PageDown'||c===93)){step(-1)}
   else h=false;
   if(h){e.preventDefault();e.stopImmediatePropagation()}},true);
 
