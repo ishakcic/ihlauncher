@@ -20,7 +20,7 @@ import org.json.JSONObject
  */
 class TvEngine(private val act: MainActivity, host: FrameLayout) {
     companion object {
-        const val PERM = "android.permission.READ_TV_LISTINGS"
+        val PERM: String = if (android.os.Build.VERSION.SDK_INT >= 26) "android.permission.READ_TV_LISTINGS" else "com.android.providers.tv.permission.READ_EPG_DATA"
         const val REQ = 20
     }
 
@@ -46,10 +46,13 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
 
     private fun obj() = JSONObject()
 
-    fun hasPerm(): Boolean = act.checkSelfPermission(PERM) == PackageManager.PERMISSION_GRANTED
+    fun hasPerm(): Boolean = act.checkCallingOrSelfPermission(PERM) == PackageManager.PERMISSION_GRANTED
 
     fun requestPerm() {
-        act.runOnUiThread { try { act.requestPermissions(arrayOf(PERM), REQ) } catch (e: Throwable) { } }
+        act.runOnUiThread {
+            if (android.os.Build.VERSION.SDK_INT >= 23) { try { act.requestPermissions(arrayOf(PERM), REQ) } catch (e: Throwable) { } }
+            else act.js("window.__tvPerm&&window.__tvPerm()")
+        }
     }
 
     private fun tim(): TvInputManager? = act.getSystemService(android.content.Context.TV_INPUT_SERVICE) as? TvInputManager
@@ -95,6 +98,7 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
             while (it.moveToNext()) {
                 if (iBr >= 0 && !it.isNull(iBr) && it.getInt(iBr) == 0) continue
                 val svc = s(it, iSvc)
+                if (svc == "SERVICE_TYPE_OTHER") continue // veri/teletext hizmetleri oynatılamaz
                 arr.put(obj().put("id", it.getLong(iId)).put("in", s(it, iIn)).put("num", s(it, iNum)).put("name", s(it, iName))
                     .put("radio", svc == "SERVICE_TYPE_AUDIO").put("type", s(it, iType)).put("vf", s(it, iVf))
                     .put("lock", iLock >= 0 && !it.isNull(iLock) && it.getInt(iLock) == 1))

@@ -130,7 +130,7 @@ function osd(){
   e.classList.add('show');clearTimeout(TV.ot);TV.ot=setTimeout(()=>e.classList.remove('show'),4500)}
 function digit(n){
   TV.num=(TV.num+n).slice(-4);const b=$t('tNumBox');b.textContent=TV.num;b.classList.add('show');clearTimeout(TV.nt);
-  TV.nt=setTimeout(()=>{const v=TV.num;TV.num='';b.classList.remove('show');const c=TV.all.find(x=>String(x.num)===v)||TV.all.find(x=>String(x.num)===String(parseInt(v,10)));if(c)tune(c.id);else toast('❌','Kanal bulunamadı: '+v)},1800)}
+  TV.nt=setTimeout(()=>{const v=TV.num;TV.num='';b.classList.remove('show');const c=TV.all.find(x=>String(x.num)===v)||TV.all.find(x=>parseFloat(x.num)===parseFloat(v));if(c)tune(c.id);else toast('❌','Kanal bulunamadı: '+v)},1800)}
 
 /* ---------- Konum (video penceresi) ---------- */
 function sendRect(){
@@ -186,6 +186,8 @@ function showSetup(kind){
   P.innerHTML=h+'<div class="t-btn" tabindex="0" onclick="TVUI.diag()">Tanı</div><div class="t-btn" tabindex="0" onclick="TVUI.close()">Kapat</div></div>';
   const e=P.querySelector('.t-btn');if(e)focusEl(e)}
 async function load(){
+  if(TV.loading)return;TV.loading=true;try{await load0()}finally{TV.loading=false}}
+async function load0(){
   const st=await N('tvState');TV.st=st;
   if(!st||!st.perm){showSetup('perm');return}
   const r=await N('tvChannels'),it=(r&&r.items)||[];
@@ -225,7 +227,7 @@ window.TVUI={
   diag:async()=>{const st=await N('tvState');let d='İzin (READ_TV_LISTINGS): '+(st.perm?'var':'YOK')+'\nTV girişleri: '+((st.inputs||[]).map(i=>i.label+' ['+(i.tuner?'TUNER':i.type)+'] '+i.id).join('; ')||'yok')+'\nKanal sayısı: '+TV.all.length+'\nSon TvView olayı: '+(TV.last||'yok');
     try{if(await adbReady()){const r=await N('adb',{c:'dumpsys tv_input | head -n 25'});d+='\n\n'+String(r.out||'').slice(0,700)}}catch(e){}info('Canlı TV tanı',d)},
   retry:()=>load(),
-  grant:async()=>{let ok=false;try{if(await adbReady()){const r=await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});ok=r.code===0}}catch(e){}if(ok){load();return}N('tvPerm');toast('⏳','İzin penceresi açılıyor…')},
+  grant:async()=>{let ok=false;try{if(await adbReady()){await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});await N('adb',{c:'pm grant com.ihlauncher.tv com.android.providers.tv.permission.READ_EPG_DATA'});ok=true}}catch(e){}if(ok){load();return}N('tvPerm');toast('⏳','İzin penceresi açılıyor…')},
   askQ:async()=>{const v=await ask('Kanal veya program adı',TV.q||'');if(v!==null){TV.q=v;renderSearch()}}
 };
 window.__tvPerm=()=>{if(TV.on)load()};
@@ -259,6 +261,7 @@ window.__back=function(){
   if($('#dlg').classList.contains('show')||$('#modal').classList.contains('show'))return _back();
   if(TV.on){if(TV.watch){exitWatch();return true}if(TV.tab==='guide'||TV.tab==='search'){setTab('now');setTimeout(focusCur,100);return true}close();return true}
   return _back()};
+const _home=window.__home;window.__home=function(){if(TV.on)close();if(_home)_home()};
 const _res=window.__resume;
 window.__resume=function(){if(_res)_res();if(TV.on)setTimeout(()=>{if(TV.tab==='setup'||!TV.all.length)load();else{N('tvMode',{on:true});sendRect();if(TV.curId&&TV.tuned)tune(TV.curId)}},700)};
 const _run=runAct;runAct=function(a){if(a==='tv'){closePanels();TVUI.open();return}_run(a)};

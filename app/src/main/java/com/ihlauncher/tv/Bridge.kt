@@ -107,6 +107,8 @@ class Bridge(private val act: MainActivity) {
     }
 
     private val exec = Executors.newFixedThreadPool(4)
+    /** TV kontrol komutları (tune/rect/stop/mode/mute) sıralı çalışsın: havuzda yarışırsa tvStop, tvTune'dan sonra işlenebilir. */
+    private val tvExec = Executors.newSingleThreadExecutor()
     private val ui = Handler(Looper.getMainLooper())
     private val sp get() = Store.sp(act)
 
@@ -124,7 +126,8 @@ class Bridge(private val act: MainActivity) {
 
     @JavascriptInterface
     fun call(id: String, method: String, args: String) {
-        exec.execute {
+        val ctl = method == "tvTune" || method == "tvStop" || method == "tvRect" || method == "tvMode" || method == "tvMute"
+        (if (ctl) tvExec else exec).execute {
             val res = try { dispatch(method, JSONObject(args)) } catch (e: Throwable) {
                 obj("error" to (e.message ?: e.toString())).toString()
             }
@@ -441,6 +444,7 @@ class Bridge(private val act: MainActivity) {
             "pm grant $ME android.permission.WRITE_SECURE_SETTINGS",
             "pm grant $ME android.permission.ACCESS_FINE_LOCATION",
             "pm grant $ME android.permission.READ_TV_LISTINGS",
+            "pm grant $ME com.android.providers.tv.permission.READ_EPG_DATA",
             "appops set $ME GET_USAGE_STATS allow",
             "appops set $ME REQUEST_INSTALL_PACKAGES allow",
             "cmd notification allow_listener $ME/$ME.NotifService",

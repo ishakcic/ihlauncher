@@ -84,7 +84,7 @@ class MainActivity : Activity() {
         web.loadUrl("file:///android_asset/index.html")
 
         val sp = Store.sp(this)
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+        if (android.os.Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             !sp.getBoolean("asked_loc", false)) {
             sp.edit().putBoolean("asked_loc", true).apply()
             try { requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 10) } catch (e: Exception) { }

@@ -22,7 +22,7 @@ body.tvon #tv{display:block}
 #tv .t-x:focus{box-shadow:0 0 0 calc(var(--u)*3) #fff}
 
 #tv .t-stage{position:absolute;top:calc(var(--u)*100);left:calc(var(--u)*44);right:calc(var(--u)*44);bottom:calc(var(--u)*262);z-index:1;display:grid;grid-template-columns:1.55fr 1fr;gap:calc(var(--u)*20)}
-#tv .t-hole{position:relative;z-index:0;border-radius:calc(var(--u)*26);box-shadow:0 0 calc(var(--u)*120) calc(var(--u)*-30) var(--c1),0 0 0 4000px var(--bgc)}
+#tv .t-hole{position:relative;z-index:0;border-radius:calc(var(--u)*26);box-shadow:0 0 calc(var(--u)*50) calc(var(--u)*-20) var(--c1),0 0 0 4000px var(--bgc)}
 #tv .t-nosig{position:absolute;inset:0;border-radius:calc(var(--u)*26);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*14);
  background:radial-gradient(ellipse 85% 65% at 28% 22%,var(--c1) 0%,transparent 62%),radial-gradient(ellipse 75% 75% at 80% 78%,var(--c2) 0%,transparent 62%),#04060C}
 #tv.vid .t-nosig{display:none}
