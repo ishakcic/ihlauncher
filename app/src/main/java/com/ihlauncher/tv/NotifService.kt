@@ -1,6 +1,7 @@
 package com.ihlauncher.tv
 
 import android.app.Notification
+import android.content.ComponentName
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import org.json.JSONObject
@@ -13,7 +14,10 @@ class NotifService : NotificationListenerService() {
     }
 
     override fun onListenerConnected() { inst = this; refresh() }
-    override fun onListenerDisconnected() { inst = null }
+    override fun onListenerDisconnected() {
+        inst = null
+        try { requestRebind(ComponentName(this, NotifService::class.java)) } catch (e: Throwable) { }
+    }
     override fun onNotificationPosted(sbn: StatusBarNotification?) { refresh() }
     override fun onNotificationRemoved(sbn: StatusBarNotification?) { refresh() }
 

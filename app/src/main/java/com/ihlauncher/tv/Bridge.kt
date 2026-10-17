@@ -50,7 +50,7 @@ class Bridge(private val act: MainActivity) {
             "com.android.inputmethod.", "com.android.networkstack", "com.android.permissioncontroller",
             "com.google.android.permissioncontroller", "com.android.modulemetadata", "com.google.android.modulemetadata",
             "com.android.webview", "com.google.android.webview", "com.android.vending", "com.google.android.gsf",
-            "com.android.keychain", "com.android.certinstaller", "com.android.vpndialogs", "com.android.tv.settings"
+            "com.android.keychain", "com.android.certinstaller", "com.android.documentsui", "com.google.android.documentsui", "com.android.vpndialogs", "com.android.tv.settings"
         )
         fun isProtected(p: String): Boolean = p in CRIT || PROT_PREFIX.any { p.startsWith(it) }
         private val PKG_RE = Regex("^[A-Za-z0-9._]+$")
@@ -84,17 +84,23 @@ class Bridge(private val act: MainActivity) {
             return (if (sz != null) "wm size $sz" else "wm size reset") + "; " + (if (dn != null) "wm density $dn" else "wm density reset")
         }
 
-        fun wmRevertNow(c: Context) {
+        /** Geri alma başarılı olana kadar bayrak silinmez; ADB kopuksa 5 sn arayla (en çok 60 kez) yeniden dener. */
+        fun wmRevertNow(c: Context, attempt: Int = 0) {
             wmCancel()
             val app = c.applicationContext
             val sp = Store.sp(app)
             if (!sp.getBoolean("wm_pending", false)) return
             val prev = sp.getString("wm_prev", "") ?: ""
-            sp.edit().putBoolean("wm_pending", false).apply()
             Thread {
-                Adb.shell(app, wmRestoreCmd(prev))
-                MainActivity.cur?.js("window.__toast('↩️','Önceki ekran ayarına dönüldü')")
-                MainActivity.cur?.js("window.__wmDone&&window.__wmDone()")
+                val r = Adb.shell(app, wmRestoreCmd(prev))
+                if (r.first == 0) {
+                    sp.edit().putBoolean("wm_pending", false).apply()
+                    MainActivity.cur?.js("window.__toast('↩️','Önceki ekran ayarına dönüldü')")
+                    MainActivity.cur?.js("window.__wmDone&&window.__wmDone()")
+                } else if (attempt < 60) {
+                    mainH.postDelayed({ wmRevertNow(app, attempt + 1) }, 5000)
+                }
+                // 60 denemeden sonra bayrak açık kalır; Activity açılınca (wmCheckPending) yine denenir.
             }.start()
         }
 
@@ -410,7 +416,7 @@ class Bridge(private val act: MainActivity) {
             else -> throw Exception("bilinmeyen işlem")
         }
         val r = Adb.shell(act, cmd)
-        val ok = r.first == 0 && !r.second.contains("Exception") && !r.second.contains("Failure") && !r.second.contains("Error")
+        val ok = r.first == 0 && !Regex("(?m)^(Failure|Error|Exception|java\\.lang\\.)").containsMatchIn(r.second)
         return obj("code" to r.first, "out" to r.second, "ok" to ok).toString()
     }
 
@@ -444,7 +450,6 @@ class Bridge(private val act: MainActivity) {
             "pm grant $ME android.permission.WRITE_SECURE_SETTINGS",
             "pm grant $ME android.permission.ACCESS_FINE_LOCATION",
             "pm grant $ME android.permission.READ_TV_LISTINGS",
-            "pm grant $ME com.android.providers.tv.permission.READ_EPG_DATA",
             "appops set $ME GET_USAGE_STATS allow",
             "appops set $ME REQUEST_INSTALL_PACKAGES allow",
             "cmd notification allow_listener $ME/$ME.NotifService",
@@ -575,8 +580,14 @@ class Bridge(private val act: MainActivity) {
         val dm = act.resources.displayMetrics
         var ip = ""
         try {
-            for (ni in NetworkInterface.getNetworkInterfaces()) for (ad in ni.inetAddresses) {
-                if (!ad.isLoopbackAddress && ad.hostAddress != null && !ad.hostAddress!!.contains(":")) ip = ad.hostAddress!!
+            var best = -1
+            for (ni in NetworkInterface.getNetworkInterfaces()) {
+                if (!ni.isUp || ni.isLoopback) continue
+                val rank = when { ni.name.startsWith("eth") -> 3; ni.name.startsWith("wlan") -> 2; ni.name.startsWith("tun") || ni.name.startsWith("rmnet") || ni.name.startsWith("dummy") -> 0; else -> 1 }
+                for (ad in ni.inetAddresses) {
+                    val h = ad.hostAddress ?: continue
+                    if (!ad.isLoopbackAddress && !h.contains(":") && rank > best) { best = rank; ip = h }
+                }
             }
         } catch (e: Exception) { }
         val home = act.packageManager.resolveActivity(
@@ -832,6 +843,8 @@ class Bridge(private val act: MainActivity) {
     fun cleanup() {
         try { installRx?.let { act.unregisterReceiver(it) } } catch (e: Throwable) { }
         installRx = null
+        try { exec.shutdownNow() } catch (e: Throwable) { }
+        try { tvExec.shutdownNow() } catch (e: Throwable) { }
     }
 
     private fun registerInstallRx() {

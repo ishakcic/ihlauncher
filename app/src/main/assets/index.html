@@ -700,7 +700,7 @@ async function setSaver(){const r=await N('screensaver');toast(r.code===0?'✅':
 async function setHome(){const r=await N('setHome');toast(r.code===0?'✅':'❌',r.code===0?'Varsayılan ana ekran ayarlandı':(r.out||r.error||'ADB bağlı değil').slice(0,90))}
 async function runSetup(){if(!(await conf('ADB ile şunlar verilecek: konum izni, kullanım istatistiği (kullanılmayan uygulama önerisi), bildirim erişimi, erişilebilirlik (tuş atama). Devam?')))return;toast('⏳','Kurulum çalışıyor…');const r=await N('setup');
  if(r.error||!Array.isArray(r)){info('Kurulum başarısız',r.error||'ADB bağlı değil. Kontrol Odası → ADB Terminal’den bağlan.');return}
- info('Kurulum sonucu',r.map(x=>(x.code===0?'':'')+x.c+(x.out?'\n   '+x.out.slice(0,80):'')).join('\n'));pollN()}
+ info('Kurulum sonucu',r.map(x=>(x.code===0?'✅ ':'❌ ')+x.c+(x.out?'\n   '+x.out.slice(0,80):'')).join('\n'));pollN()}
 /* ===== Kontrol Odası ===== */
 const adbReady=async()=>!!(await N('adbStatus')).ready;
 const NEEDADB='<div class="nf">ADB / Shizuku bağlı değil: tarama çalışır ama uygulama işlemleri yapılamaz. <span class="btn g" onclick="sgAdb()">Bağlan</span></div>';

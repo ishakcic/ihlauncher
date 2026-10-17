@@ -20,17 +20,27 @@ jobs:
       # kurmaya çalışıp hata verdiği için kullanılmıyor; yalnızca lisanslar kabul edilir.
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-      # İkili dosya yüklenemediyse anahtarı metin (base64) dosyasından geri oluştur; ikisi de yoksa debug imzasıyla derlenir.
-      - name: Restore signing key (optional)
+      # İmza anahtarı GitHub Secrets'tan gelir (depoda yok): IHL_KEYSTORE_B64, IHL_STORE_PASS, IHL_KEY_ALIAS, IHL_KEY_PASS.
+      # Secret yoksa (ör. fork PR) debug imzasıyla derlenir ama YAYINLANMAZ.
+      - name: Restore signing key
+        env:
+          KS_B64: ${{ secrets.IHL_KEYSTORE_B64 }}
         run: |
-          if [ ! -f app/ihlauncher.keystore ] && [ -f app/ihlauncher.keystore.b64 ]; then base64 -d app/ihlauncher.keystore.b64 > app/ihlauncher.keystore; fi
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/ihl.keystore"
+            echo "IHL_KEYSTORE=$RUNNER_TEMP/ihl.keystore" >> "$GITHUB_ENV"
+          fi
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Build debug APK
+      - name: Build release APK
+        env:
+          IHL_STORE_PASS: ${{ secrets.IHL_STORE_PASS }}
+          IHL_KEY_ALIAS: ${{ secrets.IHL_KEY_ALIAS }}
+          IHL_KEY_PASS: ${{ secrets.IHL_KEY_PASS }}
         run: |
           set -o pipefail
-          gradle assembleDebug --stacktrace --console=plain 2>&1 | tee build.log
+          gradle assembleRelease --stacktrace --console=plain 2>&1 | tee build.log
       # Derleme patlarsa asıl hata satırlarını annotation ve özet sayfasına yaz (log açmadan görülsün)
       - name: Show build errors
         if: failure()
@@ -44,8 +54,8 @@ jobs:
           path: build.log
       - uses: actions/upload-artifact@v4
         with:
-          name: ihlauncher-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ihlauncher-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
       # Ana dala her gönderimde (veya v* etiketinde) APK, GitHub Release olarak yayınlanır.
       # Launcher bu yayını kontrol edip kendini günceller. Sürüm numarası app/build.gradle.kts içindeki versionName'dir.
       - name: Read version
@@ -55,12 +65,13 @@ jobs:
           echo "version=$V"
           echo "v=$V" >> "$GITHUB_OUTPUT"
       - name: Prepare release asset
-        run: cp app/build/outputs/apk/debug/app-debug.apk "ihlauncher-${{ steps.ver.outputs.v }}.apk"
+        run: cp app/build/outputs/apk/release/app-release.apk "ihlauncher-${{ steps.ver.outputs.v }}.apk"
       - name: Publish release
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && env.IHL_KEYSTORE != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.ver.outputs.v) }}
           name: ihlauncher ${{ steps.ver.outputs.v }}
           files: ihlauncher-${{ steps.ver.outputs.v }}.apk
           make_latest: true
+          target_commitish: ${{ github.sha }}

@@ -35,6 +35,9 @@ object Adb {
         var last = ""
         val kp = try { keyPair(ctx) } catch (e: Throwable) { return "error: anahtar: " + (e.message ?: e.toString()) }
         for (p in listOf(port, 5555).distinct()) {
+            // Ulaşılamayan adreste dakikalarca beklemesin: önce 3 sn zaman aşımlı yoklama
+            try { java.net.Socket().use { it.connect(java.net.InetSocketAddress(host, p), 3000) } }
+            catch (e: Throwable) { last = e.message ?: e.toString(); continue }
             try {
                 val d = Dadb.create(host, p, kp)
                 val r = d.shell("echo ihl_ok")

@@ -199,10 +199,17 @@ class MainActivity : Activity() {
 
     private fun runBootApps() {
         val sp = Store.sp(this)
-        val bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime()
-        val last = sp.getLong("boot_time", 0L)
-        if (Math.abs(bootTime - last) < 120000L) return
-        sp.edit().putLong("boot_time", bootTime).apply()
+        // BOOT_COUNT saat atlamalarından (NTP) etkilenmez; yoksa eski yönteme dön.
+        val bc = try { android.provider.Settings.Global.getInt(contentResolver, android.provider.Settings.Global.BOOT_COUNT, -1) } catch (e: Exception) { -1 }
+        if (bc >= 0) {
+            if (sp.getInt("boot_count", -1) == bc) return
+            sp.edit().putInt("boot_count", bc).apply()
+        } else {
+            val bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime()
+            val last = sp.getLong("boot_time", 0L)
+            if (Math.abs(bootTime - last) < 120000L) return
+            sp.edit().putLong("boot_time", bootTime).apply()
+        }
         val arr = (try { JSONObject(sp.getString("state", "{}") ?: "{}").optJSONArray("bootApps") } catch (e: Exception) { null }) ?: return
         val h = Handler(Looper.getMainLooper())
         for (i in 0 until arr.length()) {
@@ -220,7 +227,7 @@ class MainActivity : Activity() {
                 1 -> { val uri = data.data ?: return; saveWallpaper(uri) }
                 2 -> {
                     val uri = data.data ?: return
-                    contentResolver.openOutputStream(uri)?.use { it.write((Store.sp(this).getString("state", "{}") ?: "{}").toByteArray()) }
+                    contentResolver.openOutputStream(uri, "wt")?.use { it.write((Store.sp(this).getString("state", "{}") ?: "{}").toByteArray()) }
                     js("window.__toast('💾','Yedek kaydedildi')")
                 }
                 3 -> {
@@ -250,10 +257,20 @@ class MainActivity : Activity() {
         val o = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, o) }
         var ss = 1
-        while (o.outWidth / ss > 2400) ss *= 2
+        while (o.outWidth / ss > 2400 || o.outHeight / ss > 2400) ss *= 2
         val o2 = BitmapFactory.Options().apply { inSampleSize = ss }
-        val bmp = contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, o2) }
+        var bmp = contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, o2) }
             ?: throw Exception("Görsel okunamadı")
+        val ori = try {
+            contentResolver.openInputStream(uri)?.use { android.media.ExifInterface(it).getAttributeInt(android.media.ExifInterface.TAG_ORIENTATION, 1) } ?: 1
+        } catch (e: Exception) { 1 }
+        val deg = when (ori) { 3 -> 180f; 6 -> 90f; 8 -> 270f; else -> 0f }
+        if (deg != 0f) {
+            val m = android.graphics.Matrix().apply { postRotate(deg) }
+            val r = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, m, true)
+            if (r !== bmp) bmp.recycle()
+            bmp = r
+        }
         val f = File(filesDir, "wallpaper.jpg")
         f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 90, it) }
         js("window.__wall(" + JSONObject.quote("file://" + f.absolutePath + "?t=" + System.currentTimeMillis()) + ")")

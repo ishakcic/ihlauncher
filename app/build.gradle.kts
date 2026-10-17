@@ -2,8 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
-// Sabit imza anahtarı varsa kullanılır; yoksa derleme normal debug imzasıyla yine de başarıyla biter.
-val stableKs = file("ihlauncher.keystore")
+// İmza anahtarı depoda TUTULMAZ. CI şu ortam değişkenlerini verir: IHL_KEYSTORE (dosya yolu), IHL_STORE_PASS, IHL_KEY_ALIAS, IHL_KEY_PASS.
+// Yoksa debug anahtarıyla imzalanır (yalnızca yerel deneme için).
+val stableKs: File? = System.getenv("IHL_KEYSTORE")?.let { File(it) }?.takeIf { it.exists() }
 
 android {
     namespace = "com.ihlauncher.tv"
@@ -12,25 +13,25 @@ android {
         applicationId = "com.ihlauncher.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 19
-        versionName = "2.7.5"
+        versionCode = 20
+        versionName = "2.7.6"
     }
     // Sabit imza: uygulama içi güncellemenin (aynı imza şartı) her derlemede çalışması için.
-    if (stableKs.exists()) {
+    if (stableKs != null) {
         signingConfigs {
             create("stable") {
                 storeFile = stableKs
-                storePassword = "ihlauncher"
-                keyAlias = "ihlauncher"
-                keyPassword = "ihlauncher"
+                storePassword = System.getenv("IHL_STORE_PASS")
+                keyAlias = System.getenv("IHL_KEY_ALIAS") ?: "ihlauncher"
+                keyPassword = System.getenv("IHL_KEY_PASS")
             }
         }
     }
     buildTypes {
-        debug { if (stableKs.exists()) signingConfig = signingConfigs.getByName("stable") }
         release {
             isMinifyEnabled = false
-            if (stableKs.exists()) signingConfig = signingConfigs.getByName("stable")
+            isDebuggable = false
+            signingConfig = if (stableKs != null) signingConfigs.getByName("stable") else signingConfigs.getByName("debug")
         }
     }
     compileOptions {

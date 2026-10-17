@@ -20,7 +20,7 @@ import org.json.JSONObject
  */
 class TvEngine(private val act: MainActivity, host: FrameLayout) {
     companion object {
-        val PERM: String = if (android.os.Build.VERSION.SDK_INT >= 26) "android.permission.READ_TV_LISTINGS" else "com.android.providers.tv.permission.READ_EPG_DATA"
+        const val PERM = "android.permission.READ_TV_LISTINGS"
         const val REQ = 20
     }
 
