@@ -10,10 +10,10 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "com.ihlauncher.tv"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 34
-        versionCode = 18
-        versionName = "2.7.4"
+        versionCode = 19
+        versionName = "2.7.5"
     }
     // Sabit imza: uygulama içi güncellemenin (aynı imza şartı) her derlemede çalışması için.
     if (stableKs.exists()) {
