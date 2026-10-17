@@ -13,8 +13,8 @@ android {
         applicationId = "com.ihlauncher.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 20
-        versionName = "2.7.6"
+        versionCode = 21
+        versionName = "2.8.0"
     }
     // Sabit imza: uygulama içi güncellemenin (aynı imza şartı) her derlemede çalışması için.
     if (stableKs != null) {

@@ -31,6 +31,7 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
         view.visibility = View.GONE
         view.isFocusable = false
         view.isFocusableInTouchMode = false
+        view.descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
         host.addView(view, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
         view.setCallback(object : TvView.TvInputCallback() {
             override fun onConnectionFailed(inputId: String) { ev("conn_failed", inputId) }
@@ -95,13 +96,19 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
             val iVf = it.getColumnIndex("video_format")
             val iBr = it.getColumnIndex("browsable")
             val iLock = it.getColumnIndex("locked")
+            val iOn = it.getColumnIndex("original_network_id")
+            val iTs = it.getColumnIndex("transport_stream_id")
+            val iSv = it.getColumnIndex("service_id")
             while (it.moveToNext()) {
                 if (iBr >= 0 && !it.isNull(iBr) && it.getInt(iBr) == 0) continue
                 val svc = s(it, iSvc)
                 if (svc == "SERVICE_TYPE_OTHER") continue // veri/teletext hizmetleri oynatılamaz
                 arr.put(obj().put("id", it.getLong(iId)).put("in", s(it, iIn)).put("num", s(it, iNum)).put("name", s(it, iName))
                     .put("radio", svc == "SERVICE_TYPE_AUDIO").put("type", s(it, iType)).put("vf", s(it, iVf))
-                    .put("lock", iLock >= 0 && !it.isNull(iLock) && it.getInt(iLock) == 1))
+                    .put("lock", iLock >= 0 && !it.isNull(iLock) && it.getInt(iLock) == 1)
+                    .put("onid", if (iOn >= 0 && !it.isNull(iOn)) it.getInt(iOn) else -1)
+                    .put("tsid", if (iTs >= 0 && !it.isNull(iTs)) it.getInt(iTs) else -1)
+                    .put("sid", if (iSv >= 0 && !it.isNull(iSv)) it.getInt(iSv) else -1))
             }
         }
         return o.toString()
@@ -144,6 +151,7 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
             try {
                 view.visibility = View.VISIBLE
                 view.tune(input, TvContract.buildChannelUri(id))
+                act.web.requestFocus()
                 view.setStreamVolume(if (muted) 0f else 1f)
             } catch (e: Throwable) { ev("conn_failed", e.message ?: "tune") }
         }
@@ -174,6 +182,7 @@ class TvEngine(private val act: MainActivity, host: FrameLayout) {
     fun mode(on: Boolean) {
         act.runOnUiThread {
             act.web.setBackgroundColor(if (on) 0 else 0xFF000000.toInt())
+            if (on) act.web.requestFocus()
             if (on) act.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             else act.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }

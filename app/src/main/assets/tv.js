@@ -1,269 +1,335 @@
-/* ihlauncher • Canlı TV (gerçek tuner/uydu yayını: Android TV Input Framework + TvView)
- * Kotlin tarafı: TvEngine.kt (Bridge: tvState, tvChannels, tvPrograms, tvTune, tvRect, ...). Video, WebView'in arkasındaki TvView'de oynar;
- * "pHole" alanı şeffaf kalır. Bu dosya index.html'deki global yardımcıları (N, $, esc, S, save, toast, ask, menu, info, focusEl) kullanır. */
+/* ihlauncher • Canlı TV v3 — her zaman tam ekran video + kumanda öncelikli arayüz.
+ * Video (TvView) hiç yeniden boyutlanmaz; liste/rehber/seçenekler videonun ÜSTÜNE çizilir.
+ * Tuşlar tamamen burada yönetilir (launcher'ın odak tahmini kullanılmaz); seçim JS durumundadır (.sel).
+ * Kanal düzenleme (gizle/sil, taşı, adlandır, favori) S.tvx içinde kalıcıdır; sistem kanal veritabanı değiştirilmez. */
 (function(){
 'use strict';
-const TV={on:false,watch:false,tab:'now',all:[],list:[],curId:null,prevId:null,tuned:false,filter:'all',prog:{},st:null,vid:false,reason:1,fail:'',muted:false,num:'',rf:0,logos:{},logoBusy:false,gs:-1,q:''};
-const WIN=24,GWIN=11,$t=id=>document.getElementById(id);
+const $t=id=>document.getElementById(id);
+const TV={on:false,mode:'watch',all:[],sorted:[],vis:[],list:[],curKey:null,prevKey:null,tuned:false,vid:false,reason:1,fail:'',muted:false,
+ filter:'all',sel:0,top:0,prog:{},logos:{},st:null,num:'',loading:false,move:null,csel:0,cbtn:1,cnf:null,gsel:0,gtop:0,osel:0,ssel:0,sitems:[],last:''};
+const VIS=8,GVIS=8;
+const FILT=[['all','Tümü'],['fav','★ Favori'],['hd','HD'],['tv','TV'],['radio','Radyo']];
 const hue=s=>{let h=0;s=String(s);for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)%360};
-const col=c=>{const h=hue(c.name||c.id);return{c1:'hsl('+h+',62%,44%)',c2:'hsl('+((h+55)%360)+',55%,22%)',bg:'hsl('+h+',40%,7%)'}};
+const col=c=>{const h=hue(c.name||c.id);return{c1:'hsl('+h+',66%,46%)',c2:'hsl('+((h+55)%360)+',58%,26%)'}};
 const fmt=ms=>new Date(ms).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
 const pct=p=>p?Math.max(0,Math.min(100,(Date.now()-p.s)/(p.e-p.s)*100)):0;
 const REASON={0:'Görüntü yok',1:'Kanal ayarlanıyor…',2:'Sinyal zayıf veya yok',3:'Arabelleğe alınıyor…',4:'Yalnızca ses (radyo)'};
 const isHd=c=>/720|1080|2160|4320/.test(c.vf||'');
 const tname=t=>String(t||'').replace('TYPE_','').replace(/_/g,'-')||'—';
-const cur=()=>TV.all.find(c=>c.id===TV.curId)||null;
-const curIdx=()=>TV.list.findIndex(c=>c.id===TV.curId);
-const favs=()=>S.tvFav||(S.tvFav=[]);
-const IC={star:'<path d="M12 3l2.6 6.9L22 10.5l-5.8 4.6 2.1 7.4L12 18.2 5.7 22.5l2.1-7.4L2 10.5l7.4-.6z"/>',mute:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>',vol:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/>',full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',scan:'<circle cx="12" cy="12" r="3"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/>'};
-const ic=k=>'<svg class="t-i" viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">'+IC[k]+'</svg>';
+const ini=s=>String(s||'?').replace(/\s+/g,'').slice(0,3).toUpperCase();
+const X=()=>S.tvx||(S.tvx={hide:{},order:[],name:{},fav:{},last:''});
+const curCh=()=>TV.all.find(c=>c.key===TV.curKey)||null;
+const selCh=()=>TV.list[TV.sel]||null;
+const EDITM=['edit','move','ctx','cnf'];
+const inList=()=>TV.mode==='list'||EDITM.indexOf(TV.mode)>=0;
 
 /* ---------- Program (EPG) ---------- */
-function nowNext(id){const p=TV.prog[id],l=p?p.l:[],n=Date.now(),i=l.findIndex(x=>x.s<=n&&x.e>n);return{now:i>=0?l[i]:null,next:i>=0?(l[i+1]||null):(l.find(x=>x.s>n)||null)}}
+function nowNext(c){const p=c&&TV.prog[c.id],l=p?p.l:[],n=Date.now(),i=l.findIndex(x=>x.s<=n&&x.e>n);return{now:i>=0?l[i]:null,next:i>=0?(l[i+1]||null):(l.find(x=>x.s>n)||null),all:l}}
 async function loadProgs(ids){
   ids=ids.filter(id=>{const p=TV.prog[id];return !p||Date.now()-p.t>300000});if(!ids.length)return;
   ids.forEach(id=>{TV.prog[id]={t:Date.now(),l:(TV.prog[id]||{l:[]}).l}});
-  const r=await N('tvPrograms',{ids,from:Date.now()-3*3600e3,to:Date.now()+12*3600e3});
+  const r=await N('tvPrograms',{ids,from:Date.now()-3*3600e3,to:Date.now()+14*3600e3});
   const m=(r&&r.map)||{};for(const k in m)TV.prog[k]={t:Date.now(),l:m[k]};
   if(TV.on)refresh()}
-
-/* ---------- Oluşturma ---------- */
-function build(){
-  if($t('tv'))return;
-  const d=document.createElement('div');d.id='tv';d.className='tab-now';
-  d.innerHTML=
-  '<div class="t-top"><div class="t-brand"><i></i>CANLI TV</div>'+
-   '<div class="t-tabs"><button class="t-tab on" data-t="now" onclick="TVUI.tab(\'now\')">Şimdi</button><button class="t-tab" data-t="guide" onclick="TVUI.tab(\'guide\')">Rehber</button><button class="t-tab" data-t="search" onclick="TVUI.tab(\'search\')">Ara</button></div>'+
-   '<div class="t-meta"><span class="t-clk" id="tClk">--:--</span><div class="t-x" tabindex="0" onclick="TVUI.close()">✕</div></div></div>'+
-  '<div class="t-stage"><div class="t-hole" id="pHole">'+
-    '<div class="t-nosig"><div class="t-nlogo" id="pLogo"></div><div class="t-nst" id="pSt">Kanal ayarlanıyor…</div><div style="display:flex;gap:10px" id="pFailBox"><div class="t-btn b" id="pFail" tabindex="0" onclick="TVUI.ext()">Sistem TV uygulamasında aç</div><div class="t-btn" tabindex="0" onclick="TVUI.diag()">Tanı</div></div></div>'+
-    '<div class="t-hm"><div class="t-lab">CANLI YAYIN</div><div class="t-pnum" id="pNum">--</div></div>'+
-    '<div class="t-hb"><div class="t-cn" id="pName">—</div><div class="t-pt" id="pNow">—</div><div class="t-pd" id="pDesc"></div>'+
-     '<div class="t-pbar"><i id="pBar"></i></div><div class="t-ptm"><span id="pStart"></span><span id="pEnd"></span></div>'+
-     '<div class="t-acts"><button class="t-pa" id="bFav" onclick="TVUI.fav()">'+ic('star')+'Favori</button><button class="t-pa" id="bMute" onclick="TVUI.mute()">'+ic('vol')+'Sessiz</button><button class="t-pa" onclick="TVUI.watch()">'+ic('full')+'Tam ekran</button><button class="t-pa" onclick="TVUI.detail()">'+ic('info')+'Bilgi</button><button class="t-pa" onclick="TVUI.scan()">'+ic('scan')+'Kanal tara</button></div></div>'+
-  '</div><div class="t-side">'+
-    '<div class="t-sc" style="--cc:rgba(79,195,247,.6)"><div class="t-sl">ŞİMDİ OYNUYOR</div><div><div class="t-sb" id="sNum">--</div><div style="display:inline-block;width:calc(100% - 80px)"><div class="t-st" id="sNow">—</div><div class="t-ss" id="sDesc"></div><div class="t-tm" id="sTm">—</div></div></div></div>'+
-    '<div class="t-sc" style="--cc:rgba(255,180,84,.6)"><div class="t-sl">SONRAKİ</div><div class="t-nx"><div class="t-nt" id="nTm">--:--</div><div><div class="t-st" id="nTt" style="font-size:14px;font-weight:500">—</div></div></div></div>'+
-    '<div class="t-sc" style="--cc:rgba(61,220,151,.6)"><div class="t-sl">YAYIN BİLGİSİ</div><div id="iKv"></div></div>'+
-  '</div></div>'+
-  '<div class="t-pane" id="tPane"></div>'+
-  '<div class="t-chs"><div class="t-ch"><div class="a">Kanallar</div><div class="b" id="tCount"></div><div class="t-fl" id="tFl">'+
-    [['all','Tümü'],['fav','★ Favoriler'],['hd','HD'],['tv','TV'],['radio','Radyo']].map(a=>'<button class="t-chip'+(a[0]==='all'?' on':'')+'" data-f="'+a[0]+'" onclick="TVUI.filter(\''+a[0]+'\')">'+a[1]+'</button>').join('')+
-  '</div></div><div class="t-rail" id="tRail"></div></div>'+
-  '<div class="t-osd" id="tOsd"></div><div class="t-numbox" id="tNumBox"></div><div class="t-stat" id="tStat"></div>';
-  document.body.appendChild(d)}
-
-/* ---------- Önizleme / kartlar ---------- */
-function upd(){
-  const c=cur(),T=$t('tv');if(!c||!T)return;const k=col(c);
-  T.style.setProperty('--c1',k.c1);T.style.setProperty('--c2',k.c2);T.style.setProperty('--bgc',k.bg);
-  const nn=nowNext(c.id),n=nn.now,x=nn.next;
-  $t('pNum').textContent=c.num;$t('pLogo').textContent=c.name;$t('pName').textContent=c.name+(isHd(c)?' · HD':'');
-  $t('pNow').textContent=n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok');
-  $t('pDesc').textContent=n?(n.d||''):'';
-  $t('pStart').textContent=n?fmt(n.s):'';$t('pEnd').textContent=n?fmt(n.e):'';$t('pBar').style.width=pct(n)+'%';
-  $t('sNum').textContent=c.num;$t('sNow').textContent=n?n.t:'—';$t('sDesc').textContent=n?(n.d||''):'';
-  $t('sTm').textContent=n?fmt(n.s)+' – '+fmt(n.e)+' · %'+Math.round(pct(n)):'EPG verisi yok';
-  $t('nTm').textContent=x?fmt(x.s):'--:--';$t('nTt').textContent=x?x.t:'—';
-  const inp=((TV.st&&TV.st.inputs)||[]).find(i=>i.id===c.in);
-  const kv=[['Kanal no',c.num],['Giriş',inp?inp.label:(c.in||'—').split('/').pop()],['Yayın türü',tname(c.type)],['Görüntü',(c.vf||'—').replace('VIDEO_FORMAT_','')],['Hizmet',c.radio?'Radyo':'TV'],['Kilit',c.lock?'Kilitli':'Açık']];
-  $t('iKv').innerHTML=kv.map(a=>'<div class="t-kv"><span>'+a[0]+'</span><span>'+esc(a[1])+'</span></div>').join('');
-  $t('bFav').classList.toggle('on',favs().includes(c.id));
-  sig()}
-function sig(){
-  const T=$t('tv');if(!T)return;T.classList.toggle('vid',TV.vid);
-  const m=TV.fail==='timeout'?'Görüntü gelmedi: sinyal yok ya da cihaz uygulama içi oynatmaya izin vermiyor':TV.fail?'Uygulama içinde açılamadı':(REASON[TV.reason]||'Kanal ayarlanıyor…');
-  $t('pSt').textContent=m;$t('pFailBox').style.display=TV.vid?'none':'';
-  const b=$t('tStat');b.textContent=TV.vid?'':m;b.classList.toggle('show',!TV.vid&&TV.watch)}
-function focusFail(){if(TV.watch)return;const e=$t('pFail');if(e&&e.getClientRects().length)focusEl(e)}
-function chanHtml(c){
-  const k=col(c),n=nowNext(c.id).now,fav=favs().includes(c.id);
-  const lg=TV.logos[c.id]?'<img src="data:image/png;base64,'+TV.logos[c.id]+'" alt="">':esc(c.name);
-  return '<div class="t-chan'+(c.id===TV.curId?' on':'')+'" tabindex="0" data-id="'+c.id+'" style="--cc:'+k.c1+';--cc2:'+k.c2+'" onclick="TVUI.pick('+c.id+')">'+
-   '<div class="t-r1"><div class="t-n">'+esc(c.num)+'</div>'+(fav?'<div class="t-fv">★</div>':'')+'</div><div class="t-lg" data-lg="'+c.id+'">'+lg+'</div>'+
-   '<div><div class="t-now">'+esc(n?n.t:(c.radio?'Radyo':'Program bilgisi yok'))+'</div><div class="t-mini"><i style="--p:'+pct(n)+'%"></i></div></div></div>'}
-function renderRail(focusId){
-  const L=TV.list,ci=curIdx(),R=$t('tRail');if(!R)return;
-  if(ci>=0&&(ci<TV.rf||ci>=TV.rf+WIN))TV.rf=Math.max(0,ci-4);
-  TV.rf=Math.max(0,Math.min(TV.rf,Math.max(0,L.length-WIN)));
-  const sl=L.slice(TV.rf,TV.rf+WIN);
-  let h='';
-  if(!L.length)h='<div class="t-empty">Bu filtrede kanal yok</div>';
-  else{
-    if(TV.rf>0)h+='<div class="t-chan" tabindex="0" onclick="TVUI.page(-1)"><div class="t-r1"><div class="t-n">‹</div></div><div class="t-lg">Önceki</div><div><div class="t-now">'+(TV.rf)+' kanal geride</div></div></div>';
-    h+=sl.map(chanHtml).join('');
-    if(TV.rf+WIN<L.length)h+='<div class="t-chan" tabindex="0" onclick="TVUI.page(1)"><div class="t-r1"><div class="t-n">›</div></div><div class="t-lg">Sonraki</div><div><div class="t-now">'+(L.length-TV.rf-WIN)+' kanal daha</div></div></div>'}
-  R.innerHTML=h;
-  $t('tCount').textContent=L.length+' KANAL · '+favs().length+' FAVORİ';
-  loadProgs(sl.map(c=>c.id));loadLogos(sl);
-  if(focusId!=null){const e=R.querySelector('[data-id="'+focusId+'"]');if(e)focusEl(e)}}
 async function loadLogos(sl){
   if(TV.logoBusy)return;TV.logoBusy=true;
   try{for(const c of sl){if(!TV.on)break;if(TV.logos[c.id]!==undefined)continue;
     const r=await N('tvLogo',{id:c.id});TV.logos[c.id]=(r&&r.d)||0;
-    if(r&&r.d){const e=document.querySelector('#tRail [data-lg="'+c.id+'"]');if(e)e.innerHTML='<img src="data:image/png;base64,'+r.d+'" alt="">'}}}
+    if(r&&r.d)document.querySelectorAll('[data-lg="'+c.id+'"]').forEach(e=>e.innerHTML='<img src="data:image/png;base64,'+r.d+'" alt="">')}}
   catch(e){}TV.logoBusy=false}
-function refresh(){
-  document.querySelectorAll('#tRail .t-chan[data-id]').forEach(e=>{const id=+e.dataset.id,c=TV.all.find(x=>x.id===id);if(!c)return;const n=nowNext(id).now;
-    e.querySelector('.t-now').textContent=n?n.t:(c.radio?'Radyo':'Program bilgisi yok');e.querySelector('.t-mini i').style.setProperty('--p',pct(n)+'%')});
-  upd();if(TV.tab==='guide')renderGuide(true);if(TV.watch&&$t('tOsd').classList.contains('show'))osd()}
 
-/* ---------- Kanal işlemleri ---------- */
-function applyFilter(){const f=TV.filter,fv=favs();TV.list=TV.all.filter(c=>f==='fav'?fv.includes(c.id):f==='hd'?isHd(c):f==='radio'?c.radio:f==='tv'?!c.radio:true)}
-function tune(id){
-  const c=TV.all.find(x=>x.id===id);if(!c)return;
-  if(TV.curId!==id)TV.prevId=TV.curId;TV.curId=id;TV.tuned=true;TV.vid=false;TV.reason=1;TV.fail='';
-  S.tvLast=id;save();N('tvTune',{id:c.id,input:c.in});upd();loadProgs([id]);
-  clearTimeout(TV.tt);TV.tt=setTimeout(()=>{if(TV.on&&!TV.vid&&!TV.fail&&TV.reason!==4){TV.fail='timeout';sig();focusFail()}},8000);
-  document.querySelectorAll('#tRail .t-chan[data-id]').forEach(e=>e.classList.toggle('on',+e.dataset.id===id));
-  if(TV.watch)osd()}
-function step(d){const L=TV.list.length?TV.list:TV.all;if(!L.length)return;let i=L.findIndex(c=>c.id===TV.curId);i=i<0?0:(i+d+L.length)%L.length;tune(L[i].id)}
-function focusCur(){const e=document.querySelector('#tRail .t-chan.on')||document.querySelector('#tRail .t-chan');if(e)focusEl(e)}
+/* ---------- Kanal modeli: anahtar, sıra, gizleme, ad, favori ---------- */
+function prep(items){
+  const seen={};
+  items.forEach((c,i)=>{c.i=i;let k=(c.onid>=0&&c.tsid>=0&&c.sid>=0)?(c.onid+'-'+c.tsid+'-'+c.sid):((c.in||'')+'|'+c.name);
+    if(seen[k]){seen[k]++;k+='#'+seen[k]}else seen[k]=1;c.key=k})}
+function migrate(){const x=X();
+  if(!x._m&&S.tvFav&&S.tvFav.length){S.tvFav.forEach(id=>{const c=TV.all.find(q=>q.id===id);if(c)x.fav[c.key]=1});
+    if(S.tvLast&&!x.last){const c=TV.all.find(q=>q.id===S.tvLast);if(c)x.last=c.key}x._m=1;save()}}
+function rebuild(){
+  const x=X(),pos={};x.order.forEach((k,i)=>{pos[k]=i});
+  TV.sorted=TV.all.slice().sort((a,b)=>{const pa=pos[a.key],pb=pos[b.key];if(pa!=null&&pb!=null)return pa-pb;if(pa!=null)return-1;if(pb!=null)return 1;return a.i-b.i});
+  TV.all.forEach(c=>{c.dn=x.name[c.key]||c.name});
+  TV.vis=TV.sorted.filter(c=>!x.hide[c.key]);TV.vis.forEach((c,i)=>{c.n=i+1});
+  filterList()}
+function filterList(){
+  const f=TV.filter,x=X();
+  TV.list=TV.vis.filter(c=>f==='fav'?x.fav[c.key]:f==='hd'?isHd(c):f==='radio'?c.radio:f==='tv'?!c.radio:true);
+  if(TV.sel>=TV.list.length)TV.sel=Math.max(0,TV.list.length-1)}
+function save2(){save()}
 
-/* ---------- Tam ekran + OSD ---------- */
-function enterWatch(){if(!TV.tuned)return;TV.watch=true;$t('tv').classList.add('watch');if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();sendRect();osd();sig()}
-function exitWatch(){TV.watch=false;$t('tv').classList.remove('watch');$t('tOsd').classList.remove('show');$t('tStat').classList.remove('show');setTimeout(()=>{sendRect();renderRail(TV.curId)},80)}
-function osd(){
-  const c=cur(),e=$t('tOsd');if(!c||!e)return;const nn=nowNext(c.id),n=nn.now,x=nn.next;
-  e.innerHTML='<div class="t-on">'+esc(c.num)+'</div><div class="t-oi"><div class="t-oc">'+esc(c.name)+(isHd(c)?'<span>HD</span>':'')+'</div><div class="t-ot">'+esc(n?n.t:'Program bilgisi yok')+'</div>'+
-   (n?'<div class="t-ob"><i style="width:'+pct(n)+'%"></i></div><div class="t-os">'+fmt(n.s)+' – '+fmt(n.e)+(x?'   •   Sonraki: '+esc(x.t):'')+'</div>':'')+'</div>';
-  e.classList.add('show');clearTimeout(TV.ot);TV.ot=setTimeout(()=>e.classList.remove('show'),4500)}
-function digit(n){
-  TV.num=(TV.num+n).slice(-4);const b=$t('tNumBox');b.textContent=TV.num;b.classList.add('show');clearTimeout(TV.nt);
-  TV.nt=setTimeout(()=>{const v=TV.num;TV.num='';b.classList.remove('show');const c=TV.all.find(x=>String(x.num)===v)||TV.all.find(x=>parseFloat(x.num)===parseFloat(v));if(c)tune(c.id);else toast('❌','Kanal bulunamadı: '+v)},1800)}
+/* ---------- Oluşturma ---------- */
+function build(){
+  if($t('tv'))return;
+  const d=document.createElement('div');d.id='tv';d.dataset.m='watch';
+  d.innerHTML=
+  '<div class="t-ban" id="tBan"></div>'+
+  '<div class="t-lp" id="tList"><div class="t-lh"><div class="t-lt">Kanallar</div><div class="t-ledit">DÜZENLE</div><div class="t-lc" id="lCnt"></div><div class="t-clk" id="lClk"></div></div>'+
+   '<div class="t-chips" id="lChips"></div><div class="t-rowsw"><div class="t-rows" id="lRows"></div><div class="t-sb"><i id="lBar"></i></div></div>'+
+   '<div class="t-det" id="lDet"></div><div class="t-hints" id="lHints"></div></div>'+
+  '<div class="t-gd" id="tGuide"></div>'+
+  '<div class="t-op" id="tOpts"></div>'+
+  '<div class="t-su" id="tSetup"></div>'+
+  '<div class="t-ctx" id="tCtx"></div><div class="t-cnf" id="tCnf"></div>'+
+  '<div class="t-numbox" id="tNum"></div><div class="t-stat" id="tStat"></div><div class="t-tip" id="tTip"></div>';
+  document.body.appendChild(d)}
+function setMode(m){
+  TV.mode=m;const T=$t('tv');T.dataset.m=m;
+  T.classList.toggle('v-list',inList());T.classList.toggle('ed',EDITM.indexOf(m)>=0);
+  T.classList.toggle('v-guide',m==='guide');T.classList.toggle('v-opts',m==='opts');T.classList.toggle('v-setup',m==='setup');
+  T.classList.toggle('v-ctx',m==='ctx');T.classList.toggle('v-cnf',m==='cnf');
+  if(m!=='watch')T.classList.remove('ban');
+  render();sig()}
+function render(){
+  if(inList())renderList();else if(TV.mode==='guide')renderGuide();else if(TV.mode==='opts')renderOpts();else if(TV.mode==='setup')renderSetup();
+  if(TV.mode==='ctx')renderCtx();if(TV.mode==='cnf')renderCnf()}
+function refresh(){if(!TV.on)return;render();if($t('tv').classList.contains('ban'))banner()}
+function tip(t){const e=$t('tTip');e.textContent=t;e.classList.add('show');clearTimeout(TV.tpt);TV.tpt=setTimeout(()=>e.classList.remove('show'),2400)}
 
-/* ---------- Konum (video penceresi) ---------- */
-function sendRect(){
-  if(!TV.on)return;const d=window.devicePixelRatio||1;
-  if(TV.watch){N('tvRect',{x:0,y:0,w:0,h:0});return}
-  if(TV.tab==='now'){const h=$t('pHole');if(h){const r=h.getBoundingClientRect();if(r.width>10&&r.height>10){N('tvRect',{x:Math.round(r.left*d),y:Math.round(r.top*d),w:Math.round(r.width*d),h:Math.round(r.height*d)});return}}}
-  N('tvRect',{x:0,y:0,w:2,h:2})}
-
-/* ---------- Sekmeler ---------- */
-function setTab(t){
-  TV.tab=t;const T=$t('tv');T.classList.remove('tab-now','tab-guide','tab-search','tab-setup');T.classList.add('tab-'+t);
-  T.querySelectorAll('.t-tab').forEach(e=>e.classList.toggle('on',e.dataset.t===t));
-  if(t==='guide')renderGuide();else if(t==='search')renderSearch();
-  requestAnimationFrame(()=>setTimeout(sendRect,60))}
+/* ---------- Kanal listesi ---------- */
 function rowHtml(c,i){
-  const nn=nowNext(c.id),n=nn.now,x=nn.next;
-  return '<div class="t-row'+(c.id===TV.curId?' on':'')+'" tabindex="0" data-id="'+c.id+'" onclick="TVUI.gpick('+c.id+')"><div class="t-rn">'+esc(c.num)+'</div><div class="t-rc">'+esc(c.name)+'</div>'+
-   '<div class="t-rp"><div class="x">'+esc(n?n.t:'Program bilgisi yok')+'</div>'+(n?'<div class="y">'+fmt(n.s)+' – '+fmt(n.e)+'</div><div class="z"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div>'+
-   '<div class="t-rp nx"><div class="x">'+esc(x?x.t:'')+'</div>'+(x?'<div class="y">'+fmt(x.s)+' – '+fmt(x.e)+'</div>':'')+'</div></div>'}
-function renderGuide(keep){
-  const L=TV.list,P=$t('tPane');let fid=null;
-  if(keep){const a=document.activeElement;if(a&&a.classList&&a.classList.contains('t-row')&&a.dataset.id)fid=a.dataset.id;else if(a&&a.dataset&&a.dataset.pg)fid='pg'+a.dataset.pg}
-  if(TV.gs<0||TV.gs>=L.length)TV.gs=Math.max(0,curIdx()-2);
-  const sl=L.slice(TV.gs,TV.gs+GWIN);
-  let h='<div class="t-ptt">Program Rehberi</div>';
-  if(TV.gs>0)h+='<div class="t-row pg" tabindex="0" data-pg="-1" onclick="TVUI.gpage(-1)">‹ Önceki '+GWIN+' kanal</div>';
-  h+=sl.map(rowHtml).join('');
-  if(TV.gs+GWIN<L.length)h+='<div class="t-row pg" tabindex="0" data-pg="1" onclick="TVUI.gpage(1)">Sonraki '+GWIN+' kanal ›</div>';
-  if(!L.length)h+='<div class="t-empty">Bu filtrede kanal yok</div>';
-  P.innerHTML=h;loadProgs(sl.map(c=>c.id));
-  if(fid){const e=fid.indexOf('pg')===0?P.querySelector('[data-pg="'+fid.slice(2)+'"]'):P.querySelector('[data-id="'+fid+'"]');if(e)focusEl(e)}
-  else if(!keep){const e=P.querySelector('.t-row.on')||P.querySelector('.t-row');if(e)focusEl(e)}}
-function renderSearch(){
-  const q=(TV.q||'').toLowerCase().trim(),P=$t('tPane');let res='';
-  if(q){
-    const ch=TV.all.filter(c=>c.name.toLowerCase().includes(q)||String(c.num)===q).slice(0,25);
-    res+=ch.map(rowHtml).join('');
-    const seen={};let pr='';
-    for(const id in TV.prog){const c=TV.all.find(x=>x.id===+id);if(!c)continue;for(const p of TV.prog[id].l){if(p.e>Date.now()&&p.t.toLowerCase().includes(q)&&!seen[id+p.s]&&Object.keys(seen).length<25){seen[id+p.s]=1;
-      pr+='<div class="t-row" tabindex="0" onclick="TVUI.gpick('+c.id+')"><div class="t-rn">'+esc(c.num)+'</div><div class="t-rc">'+esc(c.name)+'</div><div class="t-rp"><div class="x">'+esc(p.t)+'</div><div class="y">'+fmt(p.s)+' – '+fmt(p.e)+'</div></div><div></div></div>'}}}
-    res+=pr;if(!res)res='<div class="t-empty">Sonuç yok. Program araması yalnızca yüklenmiş rehber verisinde yapılır (Rehber sekmesinde gezdikçe dolar).</div>'}
-  P.innerHTML='<div class="t-ptt">Ara</div><div class="t-btn b" id="tAsk" tabindex="0" onclick="TVUI.askQ()">'+esc(TV.q||'Kanal veya program adı yaz…')+'</div>'+res;
-  const e=$t('tAsk');if(e)focusEl(e)}
+  const k=col(c),n=nowNext(c).now,x=X(),on=c.key===TV.curKey,mv=TV.move&&TV.move.key===c.key;
+  const lg=TV.logos[c.id]?'<img src="data:image/png;base64,'+TV.logos[c.id]+'" alt="">':esc(ini(c.dn));
+  return '<div class="t-r'+(i===TV.sel?' sel':'')+(on?' on':'')+(mv?' mv':'')+'" style="--cc:'+k.c1+';--cc2:'+k.c2+'" onclick="TVUI.row('+i+')"><div class="t-rn">'+c.n+'</div><div class="t-rl" data-lg="'+c.id+'">'+lg+'</div>'+
+   '<div class="t-rt"><div class="t-rc">'+esc(c.dn)+(isHd(c)?'<span class="t-hd">HD</span>':'')+(x.fav[c.key]?'<span class="t-fv">★</span>':'')+'</div><div class="t-rg">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div><div class="t-rp"><i style="width:'+pct(n)+'%"></i></div></div>'+
+   (mv?'<div class="t-mvi">↕</div>':(on?'<div class="t-eq"><i></i><i></i><i></i></div>':''))+'</div>'}
+function hint(c,txt){return '<span class="t-h">'+(c?'<i class="'+c+'"></i>':'')+txt+'</span>'}
+function renderList(){
+  const L=TV.list;
+  if(TV.sel>=L.length)TV.sel=Math.max(0,L.length-1);if(TV.sel<0)TV.sel=0;
+  if(TV.sel<TV.top)TV.top=TV.sel;else if(TV.sel>=TV.top+VIS)TV.top=TV.sel-VIS+1;
+  TV.top=Math.max(0,Math.min(TV.top,Math.max(0,L.length-VIS)));
+  const sl=L.slice(TV.top,TV.top+VIS);
+  $t('lRows').innerHTML=L.length?sl.map((c,j)=>rowHtml(c,TV.top+j)).join(''):'<div class="t-empty">'+(TV.filter==='fav'?'Favori kanal yok. Kırmızı tuşla ekle.':'Bu grupta kanal yok')+'</div>';
+  $t('lChips').innerHTML=FILT.map(f=>'<div class="t-chip'+(TV.filter===f[0]?' on':'')+'" onclick="TVUI.chip(\''+f[0]+'\')">'+f[1]+'</div>').join('');
+  $t('lCnt').textContent=L.length?(TV.sel+1)+' / '+L.length:'0';
+  const bar=$t('lBar');bar.style.height=Math.max(8,Math.min(100,VIS/Math.max(VIS,L.length)*100))+'%';bar.style.top=(L.length>VIS?TV.top/(L.length-VIS)*(100-parseFloat(bar.style.height)):0)+'%';
+  const c=selCh(),nn=c?nowNext(c):{now:null,next:null};
+  $t('lDet').innerHTML=c?'<div class="t-dt">'+esc(nn.now?nn.now.t:'Program bilgisi yok')+'</div>'+(nn.now?'<div class="t-dm">'+fmt(nn.now.s)+' – '+fmt(nn.now.e)+'  ·  %'+Math.round(pct(nn.now))+'</div><div class="t-dd">'+esc(nn.now.d||'')+'</div>':'')+(nn.next?'<div class="t-dn">Sonraki  '+fmt(nn.next.s)+'  '+esc(nn.next.t)+'</div>':''):'';
+  const m=TV.mode;
+  $t('lHints').innerHTML=m==='move'?hint('', '<b>▲▼</b> Taşı')+hint('','<b>OK</b> Bırak')+hint('','<b>Geri</b> İptal')
+   :(m==='list'?hint('','<b>◀▶</b> Grup')+hint('','<b>OK</b> İzle')+hint('r','Favori')+hint('g','Düzenle')+hint('y','Rehber')+hint('b','Seçenekler')
+   :hint('','<b>OK</b> İşlemler')+hint('r','Sil')+hint('g','Taşı')+hint('y','Adlandır')+hint('b','Favori')+hint('','<b>Geri</b> Bitir'));
+  loadProgs(sl.map(q=>q.id));loadLogos(sl);clock()}
+function setFilter(f){TV.filter=f;filterList();const i=TV.list.findIndex(c=>c.key===TV.curKey);TV.sel=i>=0?i:0;TV.top=0;render()}
+function moveSel(d){const n=TV.list.length;if(!n)return;TV.sel=(TV.sel+d+n)%n;render()}
 
-/* ---------- Kurulum / hata ekranları ---------- */
+/* ---------- Düzenleme ---------- */
+function editFav(c){const x=X();if(x.fav[c.key]){delete x.fav[c.key];tip('Favorilerden çıkarıldı')}else{x.fav[c.key]=1;tip('★ Favorilere eklendi')}save();filterList();render()}
+function startMove(c){setFilter('all');const x=X();x.order=TV.sorted.map(q=>q.key);TV.move={key:c.key,snap:x.order.slice()};TV.sel=TV.list.findIndex(q=>q.key===c.key);setMode('move')}
+function doMove(d){
+  const x=X(),v=TV.vis,i=v.findIndex(c=>c.key===TV.move.key),j=i+d;if(i<0||j<0||j>=v.length)return;
+  const a=v[i].key,b=v[j].key,ia=x.order.indexOf(a),ib=x.order.indexOf(b);x.order[ia]=b;x.order[ib]=a;rebuild();TV.sel=TV.list.findIndex(c=>c.key===a);render()}
+function endMove(ok){const x=X();if(!ok&&TV.move)x.order=TV.move.snap;TV.move=null;if(ok)save();rebuild();setMode('edit');if(ok)tip('Sıra kaydedildi')}
+function askDelete(c){TV.cnf={t:'“'+c.dn+'” listeden kaldırılsın mı?',s:'Sistem kanal veritabanından silinmez; Seçenekler’den geri getirilebilir.',yes:()=>delCh(c)};TV.cbtn=1;setMode('cnf')}
+function delCh(c){
+  const x=X(),wasCur=c.key===TV.curKey;x.hide[c.key]=1;save();rebuild();
+  if(wasCur){const nx=TV.vis[Math.min(TV.sel,TV.vis.length-1)];if(nx)tune(nx);else{N('tvStop');TV.tuned=false;TV.curKey=null}}
+  setMode('edit');tip('Kanal kaldırıldı')}
+async function rename(c){
+  const v=await ask('Kanal adı',c.dn);if(v===null)return;const x=X(),t=String(v).trim();
+  if(t&&t!==c.name)x.name[c.key]=t;else delete x.name[c.key];save();rebuild();render();tip('Ad güncellendi')}
+function restoreAll(){const x=X(),n=Object.keys(x.hide).length;x.hide={};save();rebuild();tip(n?n+' kanal geri getirildi':'Gizli kanal yok')}
+function resetOrder(){const x=X();x.order=[];x.name={};save();rebuild();tip('Sıra ve adlar sıfırlandı')}
+const CTX=()=>{const c=selCh(),f=c&&X().fav[c.key];return[['Taşı','↕',()=>startMove(c)],['Adını değiştir','✎',()=>{setMode('edit');rename(c)}],[f?'Favoriden çıkar':'Favorilere ekle','★',()=>{setMode('edit');editFav(c)}],['Listeden kaldır','🗑',()=>askDelete(c)]]};
+function renderCtx(){const c=selCh(),it=CTX();$t('tCtx').innerHTML='<div class="t-ct">'+esc(c?c.dn:'')+'</div>'+it.map((a,i)=>'<div class="t-ci'+(i===TV.csel?' sel':'')+'" onclick="TVUI.ctx('+i+')"><span>'+a[1]+'</span>'+a[0]+'</div>').join('')}
+function renderCnf(){const k=TV.cnf||{t:'',s:''};$t('tCnf').innerHTML='<div class="t-cb"><div class="t-cq">'+esc(k.t)+'</div><div class="t-cs">'+esc(k.s||'')+'</div><div class="t-cbs"><div class="t-cbn'+(TV.cbtn===0?' sel':'')+'" onclick="TVUI.cnfPick(0)">Evet, kaldır</div><div class="t-cbn'+(TV.cbtn===1?' sel':'')+'" onclick="TVUI.cnfPick(1)">Vazgeç</div></div></div>'}
+
+/* ---------- Rehber (EPG) ---------- */
+function openGuide(){const i=TV.list.findIndex(c=>c.key===TV.curKey);TV.gsel=i>=0?i:0;TV.gtop=0;setMode('guide')}
+function renderGuide(){
+  const L=TV.list;if(!L.length){$t('tGuide').innerHTML='<div class="t-empty">Kanal yok</div>';return}
+  if(TV.gsel>=L.length)TV.gsel=L.length-1;if(TV.gsel<TV.gtop)TV.gtop=TV.gsel;else if(TV.gsel>=TV.gtop+GVIS)TV.gtop=TV.gsel-GVIS+1;
+  TV.gtop=Math.max(0,Math.min(TV.gtop,Math.max(0,L.length-GVIS)));
+  const sl=L.slice(TV.gtop,TV.gtop+GVIS),c=L[TV.gsel],nn=nowNext(c);
+  const rows=sl.map((q,j)=>{const i=TV.gtop+j,a=nowNext(q),n=a.now,x=a.next;
+    return '<div class="t-gr'+(i===TV.gsel?' sel':'')+(q.key===TV.curKey?' on':'')+'" onclick="TVUI.grow('+i+')"><div class="t-rn">'+q.n+'</div><div class="t-gc">'+esc(q.dn)+'</div><div class="t-gp"><div class="x">'+esc(n?n.t:'Program bilgisi yok')+'</div>'+(n?'<div class="y">'+fmt(n.s)+' – '+fmt(n.e)+'</div><div class="z"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div><div class="t-gp nx"><div class="x">'+esc(x?x.t:'')+'</div>'+(x?'<div class="y">'+fmt(x.s)+'</div>':'')+'</div></div>'}).join('');
+  const up=nn.all.filter(p=>p.e>Date.now()).slice(0,8).map((p,i)=>'<div class="t-up'+(i===0?' now':'')+'"><b>'+fmt(p.s)+'</b><span>'+esc(p.t)+'</span></div>').join('')||'<div class="t-empty" style="padding:10px 0">Bu kanal için program bilgisi yok</div>';
+  $t('tGuide').innerHTML='<div class="t-gh"><div class="t-lt">Program Rehberi</div><div class="t-lc">'+(TV.gsel+1)+' / '+L.length+'</div><div class="t-clk" id="gClk"></div></div><div class="t-gb"><div class="t-gl">'+rows+'</div><div class="t-gdet"><div class="t-gdn">'+c.n+' · '+esc(c.dn)+'</div>'+
+    (nn.now?'<div class="t-gdt">'+esc(nn.now.t)+'</div><div class="t-gdm">'+fmt(nn.now.s)+' – '+fmt(nn.now.e)+'</div><div class="t-gdd">'+esc(nn.now.d||'')+'</div>':'<div class="t-gdt">Program bilgisi yok</div>')+'<div class="t-gul">Sıradaki programlar</div>'+up+'</div></div>'+
+    '<div class="t-hints">'+hint('','<b>▲▼</b> Kanal')+hint('','<b>◀▶</b> Grup')+hint('','<b>OK</b> İzle')+hint('g','Düzenle')+hint('b','Seçenekler')+hint('','<b>Geri</b> Kapat')+'</div>';
+  loadProgs(sl.map(q=>q.id).concat([c.id]));clock()}
+
+/* ---------- Seçenekler ---------- */
+function optItems(){
+  const hid=Object.keys(X().hide).length;
+  return[
+   {t:TV.muted?'Sesi aç':'Sessiz',s:'Yayın sesini kapat / aç',fn:muteT},
+   {t:'Kanal listesi',s:'Kanalları gez ve seç',fn:()=>setMode('list')},
+   {t:'Program rehberi',s:'Şimdi / sonraki programlar',fn:openGuide},
+   {t:'Kanalları düzenle',s:'Taşı · adlandır · kaldır · favori',fn:()=>setMode('edit')},
+   {t:'Kanal tara',s:'Uydu ayarları ve kanal arama',fn:scan},
+   {t:'Kaldırılanları geri getir'+(hid?' ('+hid+')':''),s:'Gizlenen kanalları listeye ekle',fn:restoreAll},
+   {t:'Sırayı ve adları sıfırla',s:'Sistem sırasına dön',fn:resetOrder},
+   {t:'Sistem TV uygulamasında aç',s:'Bu kanalı cihazın kendi TV ekranında göster',fn:()=>{const c=curCh();if(c)N('tvExternal',{id:c.id})}},
+   {t:'Tanı',s:'İzin, giriş ve sinyal bilgisi',fn:diag},
+   {t:'Canlı TV’den çık',s:'Ana ekrana dön',fn:close}]}
+function renderOpts(){
+  const it=optItems();if(TV.osel>=it.length)TV.osel=it.length-1;
+  $t('tOpts').innerHTML='<div class="t-lt" style="margin-bottom:18px">Seçenekler</div>'+it.map((o,i)=>'<div class="t-oi'+(i===TV.osel?' sel':'')+'" onclick="TVUI.opt('+i+')"><div class="a">'+esc(o.t)+'</div><div class="b">'+esc(o.s)+'</div></div>').join('')+'<div class="t-hints">'+hint('','<b>▲▼</b> Seç')+hint('','<b>OK</b> Uygula')+hint('','<b>Geri</b> Kapat')+'</div>'}
+function muteT(){TV.muted=!TV.muted;N('tvMute',{m:TV.muted});tip(TV.muted?'🔇 Ses kapalı':'🔊 Ses açık');if(TV.mode==='opts')render()}
+function scan(){
+  const tu=((TV.st&&TV.st.inputs)||[]).filter(i=>i.tuner&&i.setup);
+  if(!tu.length){tip('Kurulum ekranı sunan tuner girişi yok');return}
+  if(tu.length===1)scanIn(tu[0].id);else menu('Kanal tara',tu.map(i=>[i.label,()=>scanIn(i.id)]))}
+async function scanIn(id){const r=await N('tvSetup',{input:id});if(!r||!r.ok)tip((r&&r.error)||'Açılamadı')}
+async function diag(){
+  const st=await N('tvState');let d='İzin (READ_TV_LISTINGS): '+(st.perm?'var':'YOK')+'\nTV girişleri: '+((st.inputs||[]).map(i=>i.label+' ['+(i.tuner?'TUNER':i.type)+'] '+i.id).join('; ')||'yok')+'\nKanal sayısı: '+TV.all.length+'\nSon TvView olayı: '+(TV.last||'yok');
+  try{if(await adbReady()){const r=await N('adb',{c:'dumpsys tv_input | head -n 25'});d+='\n\n'+String(r.out||'').slice(0,700)}}catch(e){}info('Canlı TV tanı',d)}
+
+/* ---------- Kurulum / hata ekranı ---------- */
 function showSetup(kind){
-  setTab('setup');const P=$t('tPane'),inp=(TV.st&&TV.st.inputs)||[],tu=inp.filter(i=>i.tuner);let h='<div class="t-box">';
-  if(kind==='perm')h+='<h2>İzin gerekli</h2><p>Kanal ve program listesini okumak için “TV listelerini oku” (READ_TV_LISTINGS) izni gerekir. ADB/Shizuku bağlıysa tek dokunuşla verilir; değilse sistem izin penceresi açılır.</p><div class="t-btn b" tabindex="0" onclick="TVUI.grant()">İzin ver</div><div class="t-btn" tabindex="0" onclick="TVUI.retry()">Tekrar dene</div>';
-  else if(kind==='scan')h+='<h2>Kanal listesi boş</h2><p>Bu cihazda tuner girişi var ama henüz kanal bulunamadı. Sistemin kanal tarama ekranı açılır; uydu ayarları (LNB, DiSEqC, transponder) ve tarama orada yapılır. İşin bitince bu ekrana dönülür.</p>'+
-    tu.map(i=>'<div class="t-btn b" tabindex="0" onclick="TVUI.scanIn('+JSON.stringify(i.id).replace(/"/g,'&quot;')+')">Kanal tara: '+esc(i.label)+'</div>').join('')+'<div class="t-btn" tabindex="0" onclick="TVUI.retry()">Yenile</div>';
-  else h+='<h2>Tuner bulunamadı</h2><p>Bu cihazda uygulamaların kullanabildiği bir TV tuner girişi (DVB-S/S2/T/C) görünmüyor. Gerçek uydu yayını için cihazın dahili tuner’ı olmalı ve üreticinin TV Input servisini sunması gerekir; harici USB tuner ya da yalnızca internet tabanlı Android TV kutularında bu bölüm çalışmaz.</p>'+
-    (inp.length?'<p>Görünen girişler: '+inp.map(i=>esc(i.label)).join(', ')+'</p>':'')+'<div class="t-btn" tabindex="0" onclick="TVUI.retry()">Tekrar dene</div>';
-  P.innerHTML=h+'<div class="t-btn" tabindex="0" onclick="TVUI.diag()">Tanı</div><div class="t-btn" tabindex="0" onclick="TVUI.close()">Kapat</div></div>';
-  const e=P.querySelector('.t-btn');if(e)focusEl(e)}
-async function load(){
-  if(TV.loading)return;TV.loading=true;try{await load0()}finally{TV.loading=false}}
+  const inp=(TV.st&&TV.st.inputs)||[],tu=inp.filter(i=>i.tuner);let t='',p='',it=[];
+  if(kind==='perm'){t='İzin gerekli';p='Kanal ve program listesini okumak için “TV listelerini oku” izni gerekir. ADB/Shizuku bağlıysa tek dokunuşla verilir; değilse sistem izin penceresi açılır.';it=[['İzin ver',grant],['Tekrar dene',load],['Kapat',close]]}
+  else if(kind==='scan'){t='Kanal listesi boş';p='Tuner girişi var ama kanal bulunamadı. Sistemin kanal tarama ekranı açılır; uydu ayarları (LNB, DiSEqC, transponder) orada yapılır. Bitince bu ekrana dönülür.';
+    it=tu.map(i=>['Kanal tara: '+i.label,()=>scanIn(i.id)]).concat([['Yenile',load],['Tanı',diag],['Kapat',close]])}
+  else{t='Tuner bulunamadı';p='Uygulamaların kullanabildiği bir TV tuner girişi görünmüyor. Gerçek uydu yayını için cihazın dahili tuner’ı olmalı ve üretici TV Input servisini sunmalı.'+(inp.length?'\nGörünen girişler: '+inp.map(i=>i.label).join(', '):'');it=[['Tekrar dene',load],['Tanı',diag],['Kapat',close]]}
+  TV.sitems=it;TV.ssel=0;TV.stitle=t;TV.stext=p;setMode('setup')}
+function renderSetup(){
+  $t('tSetup').innerHTML='<div class="t-sbx"><div class="t-lt" style="margin-bottom:14px">'+esc(TV.stitle)+'</div><p>'+esc(TV.stext).replace(/\n/g,'<br>')+'</p>'+TV.sitems.map((a,i)=>'<div class="t-sbn'+(i===TV.ssel?' sel':'')+'" onclick="TVUI.setup('+i+')">'+esc(a[0])+'</div>').join('')+'</div>'}
+async function grant(){
+  let ok=false;try{if(await adbReady()){await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});ok=true}}catch(e){}
+  if(ok){load();return}N('tvPerm');tip('İzin penceresi açılıyor…')}
+
+/* ---------- Yükleme ---------- */
+async function load(){if(TV.loading)return;TV.loading=true;try{await load0()}finally{TV.loading=false}}
 async function load0(){
   const st=await N('tvState');TV.st=st;
   if(!st||!st.perm){showSetup('perm');return}
   const r=await N('tvChannels'),it=(r&&r.items)||[];
   it.sort((a,b)=>{const x=parseFloat(a.num),y=parseFloat(b.num);return((isNaN(x)?1e9:x)-(isNaN(y)?1e9:y))||String(a.name).localeCompare(String(b.name),'tr')});
-  TV.all=it;
-  if(!it.length){showSetup((st.inputs||[]).some(i=>i.tuner)?'scan':'notuner');return}
-  applyFilter();setTab('now');
-  const c=it.find(x=>x.id===S.tvLast)||TV.list[0]||it[0];TV.curId=c.id;TV.rf=0;renderRail();upd();
-  setTimeout(()=>{sendRect();tune(c.id);focusCur()},150)}
+  if(!it.length){TV.all=[];showSetup((st.inputs||[]).some(i=>i.tuner)?'scan':'notuner');return}
+  prep(it);TV.all=it;migrate();rebuild();N('tvRect',{x:0,y:0,w:0,h:0});
+  const x=X(),c=TV.all.find(q=>q.key===x.last&&!x.hide[q.key])||TV.vis[0];
+  if(!c){setMode('opts');tip('Tüm kanallar kaldırılmış');return}
+  setMode('watch');tune(c)}
+
+/* ---------- Ayarlama / izleme ---------- */
+function tune(c){
+  if(!c)return;if(TV.curKey!==c.key)TV.prevKey=TV.curKey;TV.curKey=c.key;TV.tuned=true;TV.vid=false;TV.reason=1;TV.fail='';X().last=c.key;save();
+  N('tvTune',{id:c.id,input:c.in});loadProgs([c.id]);sig();if(TV.mode==='watch')banner();else render();
+  clearTimeout(TV.tt);TV.tt=setTimeout(()=>{if(TV.on&&!TV.vid&&!TV.fail&&TV.reason!==4){TV.fail='timeout';sig()}},8000)}
+function step(d){const L=TV.list.some(c=>c.key===TV.curKey)?TV.list:TV.vis;if(!L.length)return;let i=L.findIndex(c=>c.key===TV.curKey);i=i<0?0:(i+d+L.length)%L.length;tune(L[i])}
+function recall(){const c=TV.all.find(q=>q.key===TV.prevKey&&!X().hide[q.key]);if(c)tune(c)}
+function banner(){
+  const c=curCh(),T=$t('tv');if(!c||!T)return;const nn=nowNext(c),n=nn.now,x=nn.next,k=col(c),fv=X().fav[c.key];
+  T.style.setProperty('--c1',k.c1);T.style.setProperty('--c2',k.c2);
+  $t('tBan').innerHTML='<div class="t-bn">'+(c.n||'')+'</div><div class="t-bi"><div class="t-bc"><span class="t-live">CANLI</span>'+esc(c.dn)+(isHd(c)?'<span class="t-hd">HD</span>':'')+(fv?'<span class="t-fv">★</span>':'')+(TV.muted?'<span class="t-mu">🔇</span>':'')+'</div>'+
+   '<div class="t-bt">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div>'+
+   (n?'<div class="t-bp"><i style="width:'+pct(n)+'%"></i></div><div class="t-bm"><span>'+fmt(n.s)+'</span><span>'+fmt(n.e)+'</span></div>':'')+
+   (x?'<div class="t-bx">Sonraki  <b>'+fmt(x.s)+'</b>  '+esc(x.t)+'</div>':'')+'</div><div class="t-bk">'+hint('','<b>OK</b> Liste')+hint('','<b>▲▼</b> Kanal')+hint('b','Seçenek')+'</div>';
+  T.classList.add('ban');clearTimeout(TV.bt);TV.bt=setTimeout(()=>T.classList.remove('ban'),5500)}
+function sig(){
+  const T=$t('tv');if(!T)return;T.classList.toggle('vid',TV.vid);
+  const e=$t('tStat');if(!e)return;
+  const show=!TV.vid&&TV.mode==='watch'&&TV.tuned;
+  let h='';
+  if(TV.fail){h='<div class="t-sx">Görüntü gelmedi</div><div class="t-ss">Sinyal yok olabilir ya da cihaz uygulama içi oynatmaya izin vermiyor.<br>Mavi tuş › Seçenekler › “Sistem TV uygulamasında aç” / “Tanı”</div>'}
+  else h='<div class="t-sp"></div><div class="t-sx">'+esc(REASON[TV.reason]||'Kanal ayarlanıyor…')+'</div>';
+  e.innerHTML=h;e.classList.toggle('show',show)}
+function digit(n){
+  TV.num=(TV.num+n).slice(-4);const b=$t('tNum');b.textContent=TV.num;b.classList.add('show');clearTimeout(TV.nt);
+  TV.nt=setTimeout(()=>{const v=parseInt(TV.num,10);TV.num='';b.classList.remove('show');const c=TV.vis.find(x=>x.n===v);if(c){if(TV.mode==='watch')tune(c);else{tune(c);TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===c.key));render()}}else tip('Kanal bulunamadı: '+v)},1700)}
 
 /* ---------- Aç / kapat ---------- */
-function open(){build();if(TV.on)return;TV.on=true;TV.watch=false;document.body.classList.add('tvon');$t('tv').classList.remove('watch');N('tvMode',{on:true});clock();load()}
+function open(){build();if(TV.on)return;TV.on=true;document.body.classList.add('tvon');$t('tv').className='';N('tvMode',{on:true});N('tvRect',{x:0,y:0,w:0,h:0});TV.mode='watch';clock();load()}
 function close(){
-  if(!TV.on)return;TV.on=false;TV.watch=false;TV.tuned=false;TV.vid=false;
-  document.body.classList.remove('tvon');$t('tv').classList.remove('watch');N('tvStop');N('tvMode',{on:false});
+  if(!TV.on)return;TV.on=false;TV.tuned=false;TV.vid=false;TV.move=null;clearTimeout(TV.tt);clearTimeout(TV.bt);
+  document.body.classList.remove('tvon');N('tvStop');N('tvMode',{on:false});
   setTimeout(()=>{const b=document.querySelector('.topbar [data-tvbtn]');if(b)focusEl(b)},60)}
-function clock(){const e=$t('tClk');if(e)e.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}
-setInterval(()=>{if(!TV.on)return;clock();const c=cur();if(c){const n=nowNext(c.id).now;if(n){$t('pBar').style.width=pct(n)+'%'}}document.querySelectorAll('#tRail .t-chan[data-id]').forEach(e=>{const n=nowNext(+e.dataset.id).now;e.querySelector('.t-mini i').style.setProperty('--p',pct(n)+'%')})},15000);
-window.addEventListener('resize',()=>{if(TV.on)setTimeout(sendRect,300)});
+function clock(){const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});['lClk','gClk'].forEach(i=>{const e=$t(i);if(e)e.textContent=t})}
+setInterval(()=>{if(!TV.on)return;clock();if(TV.mode!=='setup')refresh()},20000);
 
-/* ---------- Dışa açık işlemler ---------- */
-window.TVUI={
-  open,close,
-  tab:t=>setTab(t),
-  pick:id=>{if(id===TV.curId&&TV.tuned)enterWatch();else tune(id)},
-  gpick:id=>{setTab('now');TV.rf=0;const i=TV.list.findIndex(c=>c.id===id);if(i<0){TV.filter='all';applyFilter()}tune(id);renderRail(id);setTimeout(enterWatch,200)},
-  watch:enterWatch,
-  page:d=>{TV.rf=Math.max(0,TV.rf+d*WIN);renderRail();const e=document.querySelector('#tRail .t-chan[data-id]');if(e)focusEl(e)},
-  gpage:d=>{TV.gs=Math.max(0,TV.gs+d*GWIN);renderGuide();const e=$t('tPane').querySelector('.t-row[data-id]');if(e)focusEl(e)},
-  filter:f=>{TV.filter=f;applyFilter();TV.rf=0;TV.gs=-1;document.querySelectorAll('#tv .t-chip').forEach(e=>e.classList.toggle('on',e.dataset.f===f));renderRail()},
-  fav:()=>{const c=cur();if(!c)return;const a=favs(),i=a.indexOf(c.id);if(i>=0)a.splice(i,1);else a.push(c.id);save();applyFilter();renderRail();upd();toast('⭐',c.name+(i>=0?' favorilerden çıkarıldı':' favorilere eklendi'))},
-  mute:()=>{TV.muted=!TV.muted;N('tvMute',{m:TV.muted});$t('bMute').innerHTML=ic(TV.muted?'mute':'vol')+(TV.muted?'Ses aç':'Sessiz')},
-  detail:()=>{const c=cur();if(!c)return;const n=nowNext(c.id),p=n.now;info(c.num+' · '+c.name,(p?p.t+'\n'+fmt(p.s)+' – '+fmt(p.e)+(p.g?'  ('+p.g+')':'')+'\n\n'+(p.d||'Açıklama yok'):'Bu kanal için program bilgisi yok.')+'\n\nYayın: '+tname(c.type)+' • '+(c.vf||'-')+(n.next?'\nSonraki: '+fmt(n.next.s)+' '+n.next.t:''))},
-  ext:()=>{const c=cur();if(c)N('tvExternal',{id:c.id})},
-  scan:()=>{const tu=((TV.st&&TV.st.inputs)||[]).filter(i=>i.tuner&&i.setup);if(!tu.length){toast('❌','Kurulum ekranı sunan tuner girişi yok');return}if(tu.length===1)TVUI.scanIn(tu[0].id);else menu('Kanal tara',tu.map(i=>[i.label,()=>TVUI.scanIn(i.id)]))},
-  scanIn:async id=>{const r=await N('tvSetup',{input:id});if(!r||!r.ok)toast('❌',(r&&r.error)||'Açılamadı')},
-  diag:async()=>{const st=await N('tvState');let d='İzin (READ_TV_LISTINGS): '+(st.perm?'var':'YOK')+'\nTV girişleri: '+((st.inputs||[]).map(i=>i.label+' ['+(i.tuner?'TUNER':i.type)+'] '+i.id).join('; ')||'yok')+'\nKanal sayısı: '+TV.all.length+'\nSon TvView olayı: '+(TV.last||'yok');
-    try{if(await adbReady()){const r=await N('adb',{c:'dumpsys tv_input | head -n 25'});d+='\n\n'+String(r.out||'').slice(0,700)}}catch(e){}info('Canlı TV tanı',d)},
-  retry:()=>load(),
-  grant:async()=>{let ok=false;try{if(await adbReady()){await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});await N('adb',{c:'pm grant com.ihlauncher.tv com.android.providers.tv.permission.READ_EPG_DATA'});ok=true}}catch(e){}if(ok){load();return}N('tvPerm');toast('⏳','İzin penceresi açılıyor…')},
-  askQ:async()=>{const v=await ask('Kanal veya program adı',TV.q||'');if(v!==null){TV.q=v;renderSearch()}}
-};
-window.__tvPerm=()=>{if(TV.on)load()};
-window.__tvEv=(t,d)=>{if(!TV.on)return;TV.last=t+':'+d;if(t==='video'){TV.vid=true;TV.fail='';clearTimeout(TV.tt)}else if(t==='novideo'){TV.vid=false;TV.reason=+d}else{TV.vid=false;TV.fail=t;clearTimeout(TV.tt);focusFail()}sig()};
-
-/* ---------- Tuş yönetimi: tam ekran izlerken kanal değiştirme ---------- */
-const COL={183:1,184:1,185:1,186:1,403:1,404:1,405:1,406:1};
-window.addEventListener('keydown',e=>{
+/* ---------- Tuşlar ---------- */
+function keyName(e){
+  const k=e.key,c=e.keyCode;
+  if(k==='ArrowUp'||c===19)return'up';if(k==='ArrowDown'||c===20)return'down';if(k==='ArrowLeft'||c===21)return'left';if(k==='ArrowRight'||c===22)return'right';
+  if(k==='Enter'||c===13||c===23||c===66)return'ok';
+  if(c===183||c===403||k==='ColorF0Red'||k==='r')return'red';if(c===184||c===404||k==='ColorF1Green'||k==='g')return'green';
+  if(c===185||c===405||k==='ColorF2Yellow'||k==='y')return'yellow';if(c===186||c===406||k==='ColorF3Blue'||k==='b')return'blue';
+  if(c===82||k==='ContextMenu'||k==='F1'||k==='m')return'menu';if(c===165||k==='Info'||k==='i')return'info';if(c===172||k==='Guide')return'guide';
+  if(c===166||k==='ChannelUp'||k==='PageUp'||c===92)return'chup';if(c===167||k==='ChannelDown'||k==='PageDown'||c===93)return'chdn';
+  if(c===85||c===179||k==='MediaPlayPause')return'play';
+  if(/^[0-9]$/.test(k)&&!e.ctrlKey&&!e.altKey)return k;
+  return null}
+function onKey(e){
   if(!TV.on)return;
   if($('#dlg').classList.contains('show')||$('#modal').classList.contains('show'))return;
   const a=document.activeElement;if(a&&a.tagName==='INPUT'&&!a.readOnly)return;
-  const k=e.key,c=e.keyCode;let h=true;
-  if(/^[0-9]$/.test(k)&&!e.ctrlKey&&!e.altKey&&TV.all.length&&TV.tab==='now')digit(k);
-  else if(TV.watch){
-    if(k==='ArrowUp'||k==='ChannelUp'||k==='PageUp'||c===166||c===92)step(1);
-    else if(k==='ArrowDown'||k==='ChannelDown'||k==='PageDown'||c===167||c===93)step(-1);
-    else if(k==='ArrowLeft'){if(TV.prevId!=null)tune(TV.prevId)}
-    else if(k==='ArrowRight'||k==='Info'||k==='i'||c===165)osd();
-    else if(k==='Enter'||k==='MediaPlayPause')exitWatch();
-    else if(COL[c])h=true;
-    else h=false}
-  else if(TV.tab==='now'&&(k==='ChannelUp'||c===166||k==='PageUp'||c===92)){step(1)}
-  else if(TV.tab==='now'&&(k==='ChannelDown'||c===167||k==='PageDown'||c===93)){step(-1)}
-  else h=false;
-  if(h){e.preventDefault();e.stopImmediatePropagation()}},true);
+  const n=keyName(e);if(!n)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(e.type!=='keydown')return;
+  try{act(n,e.repeat)}catch(err){console.error(err)}}
+function act(n,rep){
+  const m=TV.mode,dg=/^[0-9]$/.test(n);
+  if(dg){if(m==='watch'||m==='list'||m==='edit')digit(n);return}
+  if(m==='watch'){
+    if(n==='up'||n==='chup')step(1);else if(n==='down'||n==='chdn')step(-1);
+    else if(n==='left')recall();else if(n==='right'||n==='info'||n==='play')banner();
+    else if(n==='ok'){TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===TV.curKey));setMode('list')}
+    else if(n==='red'){const c=curCh();if(c){const x=X();if(x.fav[c.key])delete x.fav[c.key];else x.fav[c.key]=1;save();banner();tip(x.fav[c.key]?'★ Favorilere eklendi':'Favorilerden çıkarıldı')}}
+    else if(n==='green'){TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===TV.curKey));setMode('edit')}
+    else if(n==='yellow'||n==='guide')openGuide();
+    else if(n==='blue'||n==='menu'){TV.osel=0;setMode('opts')}
+    return}
+  if(m==='list'||m==='edit'){
+    const ed=m==='edit';
+    if(n==='up')moveSel(-1);else if(n==='down')moveSel(1);else if(n==='chup')moveSel(-VIS);else if(n==='chdn')moveSel(VIS);
+    else if(n==='left'&&!ed)stepFilter(-1);else if(n==='right'&&!ed)stepFilter(1);
+    else if(n==='ok'){const c=selCh();if(!c)return;if(ed){TV.csel=0;setMode('ctx')}else{tune(c);setMode('watch');banner()}}
+    else if(n==='red'){const c=selCh();if(c){if(ed)askDelete(c);else editFav(c)}}
+    else if(n==='green'){if(ed){const c=selCh();if(c)startMove(c)}else setMode('edit')}
+    else if(n==='yellow'){if(ed){const c=selCh();if(c)rename(c)}else openGuide()}
+    else if(n==='blue'){if(ed){const c=selCh();if(c)editFav(c)}else{TV.osel=0;setMode('opts')}}
+    else if(n==='menu'){TV.osel=0;setMode('opts')}
+    else if(n==='guide')openGuide();
+    return}
+  if(m==='move'){
+    if(n==='up'||n==='chup')doMove(-1);else if(n==='down'||n==='chdn')doMove(1);else if(n==='ok'||n==='green')endMove(true);return}
+  if(m==='ctx'){
+    const it=CTX();if(n==='up')TV.csel=(TV.csel+it.length-1)%it.length;else if(n==='down')TV.csel=(TV.csel+1)%it.length;else if(n==='ok'){it[TV.csel][2]();return}
+    renderCtx();return}
+  if(m==='cnf'){
+    if(n==='left'||n==='right'||n==='up'||n==='down')TV.cbtn=TV.cbtn?0:1;else if(n==='ok'){cnfPick(TV.cbtn);return}
+    renderCnf();return}
+  if(m==='guide'){
+    const L=TV.list;
+    if(n==='up'&&L.length)TV.gsel=(TV.gsel+L.length-1)%L.length;else if(n==='down'&&L.length)TV.gsel=(TV.gsel+1)%L.length;
+    else if(n==='chup'&&L.length)TV.gsel=Math.min(L.length-1,TV.gsel+GVIS);else if(n==='chdn'&&L.length)TV.gsel=Math.max(0,TV.gsel-GVIS);
+    else if(n==='left'||n==='right'){stepFilter(n==='left'?-1:1);TV.gsel=0;TV.gtop=0}
+    else if(n==='ok'){const c=L[TV.gsel];if(c){tune(c);setMode('watch');banner()}return}
+    else if(n==='green')setMode('edit');else if(n==='blue'||n==='menu'){TV.osel=0;setMode('opts');return}
+    renderGuide();return}
+  if(m==='opts'){
+    const it=optItems();if(n==='up')TV.osel=(TV.osel+it.length-1)%it.length;else if(n==='down')TV.osel=(TV.osel+1)%it.length;else if(n==='ok'){it[TV.osel].fn();return}
+    renderOpts();return}
+  if(m==='setup'){
+    const it=TV.sitems;if(n==='up')TV.ssel=(TV.ssel+it.length-1)%it.length;else if(n==='down')TV.ssel=(TV.ssel+1)%it.length;else if(n==='ok'){it[TV.ssel][1]();return}
+    renderSetup()}}
+function stepFilter(d){const i=FILT.findIndex(f=>f[0]===TV.filter);setFilter(FILT[(i+d+FILT.length)%FILT.length][0])}
+function cnfPick(i){const k=TV.cnf;if(i===0&&k&&k.yes)k.yes();else setMode('edit')}
+window.addEventListener('keydown',onKey,true);window.addEventListener('keyup',onKey,true);
+
+/* ---------- Dış arayüz (fare/dokunmatik) ---------- */
+window.TVUI={open,close,
+  row:i=>{TV.sel=i;const m=TV.mode;if(m==='edit'){TV.csel=0;setMode('ctx')}else if(m==='list'){const c=selCh();if(c){tune(c);setMode('watch');banner()}}},
+  grow:i=>{TV.gsel=i;act('ok')},chip:f=>setFilter(f),opt:i=>{TV.osel=i;act('ok')},ctx:i=>{TV.csel=i;act('ok')},cnfPick,setup:i=>{TV.ssel=i;act('ok')}};
+window.__tvPerm=()=>{if(TV.on)load()};
+window.__tvEv=(t,d)=>{if(!TV.on)return;TV.last=t+':'+d;if(t==='video'){TV.vid=true;TV.fail='';clearTimeout(TV.tt)}else if(t==='novideo'){TV.vid=false;TV.reason=+d}else{TV.vid=false;TV.fail=t;clearTimeout(TV.tt)}sig()};
 
 /* ---------- Launcher'a bağlama ---------- */
 const _layer=layer;layer=function(){const x=_layer();return x||(TV.on?$t('tv'):null)};
 const _back=window.__back;
 window.__back=function(){
   if($('#dlg').classList.contains('show')||$('#modal').classList.contains('show'))return _back();
-  if(TV.on){if(TV.watch){exitWatch();return true}if(TV.tab==='guide'||TV.tab==='search'){setTab('now');setTimeout(focusCur,100);return true}close();return true}
-  return _back()};
+  if(!TV.on)return _back();
+  const m=TV.mode;
+  if(m==='move')endMove(false);else if(m==='ctx'||m==='cnf')setMode('edit');else if(m==='edit')setMode('list');
+  else if(m==='list'||m==='guide'||m==='opts')setMode('watch');else close();
+  return true};
 const _home=window.__home;window.__home=function(){if(TV.on)close();if(_home)_home()};
 const _res=window.__resume;
-window.__resume=function(){if(_res)_res();if(TV.on)setTimeout(()=>{if(TV.tab==='setup'||!TV.all.length)load();else{N('tvMode',{on:true});sendRect();if(TV.curId&&TV.tuned)tune(TV.curId)}},700)};
+window.__resume=function(){if(_res)_res();if(TV.on)setTimeout(()=>{if(TV.mode==='setup'||!TV.all.length)load();else{N('tvMode',{on:true});N('tvRect',{x:0,y:0,w:0,h:0});const c=curCh();if(c&&TV.tuned)tune(c)}},700)};
 const _run=runAct;runAct=function(a){if(a==='tv'){closePanels();TVUI.open();return}_run(a)};
 try{ACTS.tv=['','Canlı TV']}catch(e){}
 (function(){const tr=document.querySelector('.topbar .tr');if(!tr)return;const b=document.createElement('div');b.className='ib';b.setAttribute('data-tvbtn','1');b.setAttribute('onclick','TVUI.open()');b.setAttribute('title','Canlı TV');
