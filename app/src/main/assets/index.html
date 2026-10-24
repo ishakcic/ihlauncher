@@ -305,6 +305,13 @@ body.mv-on .card:not(.moving),body.mv-on .tile:not(.moving){opacity:.55}
 .dki .dke{width:100%;height:100%;border-radius:22%;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,3.6vw,48px);background:linear-gradient(145deg,#3b82f6,#6366f1)}
 .dki:focus{transform:translateY(-22px) scale(1.32);box-shadow:0 18px 30px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.92);z-index:2}
 .dki:focus:after{content:'';position:absolute;bottom:-17px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff}
+
+/* Hızlı mod: zayıf TV'lerde blur / gölge filtresi / animasyon kapalı */
+body.lite :is(.side,.modal,.dlgbox,.toast,.dkbar){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.lite .side,body.lite .modal{background:var(--panel)}
+body.lite .tile:focus .iw{filter:none}
+body.lite .tile,body.lite .card,body.lite .ditem,body.lite .btn,body.lite .chip{transition:none!important}
+body.lite .dki,body.lite .gm-i{transition:none!important}
 </style>
 <link rel="stylesheet" href="tv.css"></head>
 <body data-theme="oneui">
@@ -364,7 +371,7 @@ const ROT={0:'Kapalı',30:'30 dk',60:'1 saat',1440:'Her gün'};
 const LK=[['theme',()=>Object.keys(THEMES)],['accent',()=>Object.keys(ACC)],['icShape',()=>Object.keys(ISH)],['icLabel',()=>Object.keys(ILB)],['iconSize',()=>Object.keys(SIZES)],['tileStyle',()=>Object.keys(TLS)],['topStyle',()=>Object.keys(TOPS)],['blur',()=>Object.keys(BLR)],['focusFx',()=>Object.keys(FXS)],['dock',()=>['0','1']],['idle',()=>Object.keys(IDL)],['rot',()=>Object.keys(ROT)],['wall',()=>['','auto'].concat(Object.keys(SCN).map(k=>'scene:'+k))]];
 const CH=(o,cur,fn)=>'<div class="chips">'+Object.keys(o).map(k=>'<div class="chip'+(String(cur)===String(k)?' on':'')+'" onclick="'+fn+'(\''+k+'\')">'+(Array.isArray(o[k])?o[k][0]:o[k])+'</div>').join('')+'</div>';
 const ROWS={in:'Giriş Kaynakları',tv:'Canlı TV',wg:'Kartlar',fav:'Favoriler',apps:'Tüm Uygulamalar'},ROWI={in:'',tv:'',wg:'',fav:'',apps:''};
-const DEF={fav:[],hidden:[],order:[],folders:{},theme:'ocean',accent:'teal',icShape:'or',icLabel:'focus',wall:'scene:nordic',blur:1,tileStyle:'icon',topStyle:'pill',focusFx:'lift',dock:true,idle:90,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
+const DEF={fav:[],hidden:[],order:[],folders:{},theme:'oneui',accent:'teal',icShape:'sq',icLabel:'focus',wall:'auto',blur:1,tileStyle:'icon',topStyle:'pill',focusFx:'ring',dock:true,idle:90,lite:'auto',liteAuto:false,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
  rmlog:{},updRepo:'ishakcic/ihlauncher',updMode:'ask',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'l',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'tv',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
 let S=JSON.parse(JSON.stringify(DEF));
 if(typeof Native==='undefined'){window.Native={sync:()=>'{}',call:(id,m)=>setTimeout(()=>window.__res(id,m==='apps'?'[]':'{}'),10)}}
@@ -376,7 +383,7 @@ function saveNow(){clearTimeout(svT);Native.sync('setState',JSON.stringify({s:JS
 let svT;function save(){clearTimeout(svT);svT=setTimeout(()=>Native.sync('setState',JSON.stringify({s:JSON.stringify(S)})),250)}
 function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Object.assign(S,s);
  ['nightAuto','nightOn','clock','removed'].forEach(k=>delete S[k]);              /* eski sürüm alanları */
- const FRESH=!S.themeV&&!S.v3&&!S.v5&&!S.v6;if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.calm.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}if(!S.v5){const w=S.wall;Object.assign(S,LOOKS.nova.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v5=1}if(!S.v6){const w=S.wall;Object.assign(S,LOOKS.cam.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v6=1}if(FRESH)Object.assign(S,{theme:'ocean',accent:'teal',icShape:'or',icLabel:'focus',iconSize:'l',tileStyle:'icon',topStyle:'pill',blur:1,focusFx:'lift',dock:true,idle:90,rot:0,wall:'scene:nordic'});S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
+ const FRESH=!S.themeV&&!S.v3&&!S.v5&&!S.v6;if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.calm.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}if(!S.v5){const w=S.wall;Object.assign(S,LOOKS.nova.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v5=1}if(!S.v6){const w=S.wall;Object.assign(S,LOOKS.cam.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v6=1}if(FRESH)Object.assign(S,{theme:'oneui',accent:'teal',icShape:'sq',icLabel:'focus',iconSize:'l',tileStyle:'icon',topStyle:'pill',blur:1,focusFx:'ring',dock:true,idle:90,rot:0,wall:'auto'});S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
  for(const k of ['keymap','keyNames','cecNames','folders','labels','rmlog'])S[k]=S[k]||{};S.docks=Array.isArray(S.docks)?S.docks:[];
  for(const k of ['fav','hidden','order','bootApps','hist','inOrder','widgets'])if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(DEF[k]));
  if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
@@ -392,7 +399,7 @@ const lumOf=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16&255)+.587*(n>
 function buildClip(){if($('#clipSvg'))return;const n=5,N=96,p=[];for(let k=0;k<N;k++){const t=k/N*2*Math.PI,c=Math.cos(t),sn=Math.sin(t);p.push((.5+.5*Math.sign(c)*Math.pow(Math.abs(c),2/n)).toFixed(4)+' '+(.5+.5*Math.sign(sn)*Math.pow(Math.abs(sn),2/n)).toFixed(4))}
  document.body.insertAdjacentHTML('beforeend','<svg id="clipSvg" width="0" height="0" style="position:absolute"><defs><clipPath id="clipSq" clipPathUnits="objectBoundingBox"><path d="M'+p.join('L')+'Z"/></clipPath></defs></svg>')}
 window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&typeof S!=='undefined')applyTheme()},200)});
-function applyTheme(){buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
+function applyTheme(){applyLite();buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
 /* ===== Saat ===== */
 function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
  $('#clock').textContent=t;$('#date').textContent=d;setB('time',t);setB('date2',d)}
@@ -442,11 +449,14 @@ function navigate(dir){let cur=document.activeElement;if(cur&&cur.closest&&cur.c
  if(!vert){const g=cur.closest('.grid');if(g){const t=[...g.children].filter(x=>l.includes(x)),n=t[t.indexOf(cur)+(dir==='r'?1:-1)];if(n){memX=null;focusEl(n)}}}}
 const CK={183:'red',403:'red',184:'green',404:'green',185:'yellow',405:'yellow',186:'blue',406:'blue'},CKN={ColorF0Red:'red',ColorF1Green:'green',ColorF2Yellow:'yellow',ColorF3Blue:'blue'};
 /* OK tuşu: kısa basış = tıkla, 0,5 sn basılı = seçenek menüsü (kumandada tekrar eden tuş olayına bağlı değil) */
-let enterDown=false,enterT=null,lpDone=false;
+let enterDown=false,enterT=null,lpDone=false,navAt=0,navBusy=false,perfS=[];
+function applyLite(){document.body.classList.toggle('lite',S.lite==='on'||(S.lite!=='off'&&!!S.liteAuto))}
+function perfSample(ms){if(S.lite!=='auto'||S.liteAuto)return;perfS.push(ms);if(perfS.length>10)perfS.shift();if(perfS.length>=8&&perfS.reduce((a,b)=>a+b,0)/perfS.length>70){S.liteAuto=true;save();applyLite();toast('⚡','Hızlı mod açıldı: kumanda daha akıcı olacak (Görünüm → Hızlı mod)')}}
+function setLite(v){S.lite=v;S.liteAuto=false;perfS=[];save();applyLite();keepNext();lookView()}
 document.addEventListener('keydown',e=>{const a=document.activeElement,inp=a&&a.tagName==='INPUT'&&!a.readOnly,k=e.key;
  const ck=CK[e.keyCode]||CKN[k];if(ck&&!inp){e.preventDefault();if(!e.repeat&&!layer())runAct(S.colorKeys[ck]);return}
  const D={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r'}[k];
- if(D){if(inp&&(D==='l'||D==='r'))return;e.preventDefault();navigate(D);return}
+ if(D){if(inp&&(D==='l'||D==='r'))return;e.preventDefault();const t0=performance.now();if(e.repeat&&(navBusy||t0-navAt<75))return;navAt=t0;navBusy=true;navigate(D);requestAnimationFrame(()=>requestAnimationFrame(()=>{navBusy=false;perfSample(performance.now()-t0)}));return}
  if(k==='Enter'){
   if(inp){const f=a.dataset.submit;if(f&&window[f]){e.preventDefault();window[f]()}return}
   e.preventDefault();
@@ -693,6 +703,7 @@ function renderSettings(){const I=d=>'<svg class="i" viewBox="0 0 24 24">'+d+'</
   ['Ana Ekran Düzeni','Bölümleri sırala, kartları yönet','#FF9F0A',I('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/>'),layoutView],
   ['Kontrol Odası','Temizlik, gizlilik, güvenlik ve ADB araçları','#BF5AF2',I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),surgeonHome],
   ['Tuş Atama','Kumanda tuşlarını uygulama ve eylemlere bağla','#FF375F',I('<rect x="8" y="2.5" width="8" height="19" rx="4"/><circle cx="12" cy="8" r="1.2"/><path d="M10 13h4M10 16.5h4"/>'),keysView],
+  ['Paneller (Dock)','Tuşa bağlanan hızlı uygulama paneli · '+((S.docks||[]).length)+' panel','#5E5CE6',I('<rect x="3" y="14" width="18" height="6" rx="3"/><rect x="6" y="16" width="2" height="2" rx="1"/><rect x="11" y="16" width="2" height="2" rx="1"/><rect x="16" y="16" width="2" height="2" rx="1"/><path d="M12 3v7M9 7l3-3 3 3"/>'),dockHome],
   ['Görünüm','Tema, simgeler, duvar kağıdı · '+THEMES[S.theme]+' · '+ACC[S.accent][1],'#64D2FF',I('<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5c1 0 2-.7 2-2"/>'),lookView]];
   panelActs=items.map(i=>i[4]);
   $('#settingsPanel').innerHTML='<div class="ph"><div class="pt">Ayarlar</div><div class="btn" onclick="closePanels()">Kapat</div></div>'+items.map((i,k)=>'<div class="pi go" onclick="panelPick('+k+')"><div class="pic" style="background:'+i[2]+'">'+i[3]+'</div><div class="c"><div class="t">'+i[0]+'</div><div class="s">'+esc(i[1])+'</div></div></div>').join('')}
@@ -712,7 +723,7 @@ function lookView(){curView='look';const cur=Object.keys(LOOKS).find(k=>Object.k
   '<div class="sec">Kutucuk stili</div>'+CH(TLS,S.tileStyle,"setLook.bind(null,'tileStyle')")+'<div class="sec">Uygulama paneli (cam zemin)</div>'+CH({0:'Kapalı',1:'Açık'},S.dock?1:0,"setLook.bind(null,'dock')")+
   '<div class="sec">Cam bulanıklığı</div>'+CH(BLR,S.blur,"setLook.bind(null,'blur')")+'<div class="sec">Üst çubuk</div>'+CH(TOPS,S.topStyle,"setLook.bind(null,'topStyle')")+
   '<div class="sec">Odak efekti</div>'+CH(FXS,S.focusFx,"setLook.bind(null,'focusFx')")+'<div class="sec">Boşta solma</div><div class="nf">Belirlenen süre dokunulmazsa ekran öğeleri solar, duvar kağıdı tam görünür. Herhangi bir tuş geri getirir.</div>'+CH(IDL,S.idle,"setLook.bind(null,'idle')")+
-  '<div class="sec">Paylaş</div><span class="btn" onclick="showLookCode()">Görünüm kodumu göster</span><span class="btn" onclick="enterLookCode()">Kod gir</span>'+
+  '<div class="sec">Hızlı mod (akıcı kumanda)</div><div class="nf">Bulanıklık, gölge ve animasyonları kapatır. Otomatik: kumanda gecikirse kendiliğinden açılır.</div>'+CH({auto:'Otomatik',on:'Açık',off:'Kapalı'},S.lite||'auto','setLite')+'<div class="sec">Paylaş</div><span class="btn" onclick="showLookCode()">Görünüm kodumu göster</span><span class="btn" onclick="enterLookCode()">Kod gir</span>'+
   '',null)}
 function setIsz(k){S.iconSize=k;applyTheme();save();renderAll();keepNext();iconSettings()}
 function setIcShape(k){S.icShape=k;applyTheme();save();keepNext();iconSettings()}
@@ -1078,9 +1089,9 @@ function keyRow(id,t){const x=keyTgt(t),c=KCOL[id];
 async function keysView(){curView='keys';const acc=(await N('keyAccess')).v,km=S.keymap||{},ids=Object.keys(km);
  let h='<div class="kh"><div class="kic"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="19" rx="4"/><circle cx="12" cy="8" r="1.2"/><path d="M10 13h4M10 16.5h4"/></svg></div><div class="ktx"><div class="h1">Her tuşa bir görev ver</div><div class="h2">Kumandadaki herhangi bir tuşu bir uygulamaya, launcher eylemine veya sistem eylemine bağla.</div></div><div class="kpill '+(acc?'ok':'bad')+'">'+(acc?'Servis açık':'Servis kapalı')+'</div></div>';
  if(!acc)h+='<div class="nf">Tuş atamanın çalışması için erişilebilirlik servisi açık olmalı.</div><span class="btn g" onclick="runSetup()">Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'a11y\'})">Erişilebilirlik ayarı</span>';
+ h+='<div class="r2 go" onclick="dockHome()"><div><div class="n">🚀 Paneller (Dock)</div><div class="s2">Tuşa bas → altta 10 uygulamaya kadar panel aç. '+S.docks.length+' panel</div></div></div>';
  h+='<div class="kq"><span class="btn b" onclick="keyAdd()">＋ Tuşa basarak ekle</span><span class="btn" onclick="keyListMenu()">Listeden tuş seç</span><span class="btn" onclick="sgColor()">Ana ekran renkli tuşları</span>'+(ids.length?'<span class="btn r" onclick="keyResetAll()">Tümünü sıfırla</span>':'')+'</div>';
  h+='<div class="sec">Atanmış tuşlar'+(ids.length?' ('+ids.length+')':'')+'</div>'+(ids.map(id=>keyRow(id,km[id])).join('')||'<div class="empty">Henüz atanmış tuş yok. “Tuşa basarak ekle”yi seç, sonra kumandada atamak istediğin tuşa bas.</div>');
- h+='<div class="sec">Paneller (dock)'+(S.docks.length?' ('+S.docks.length+')':'')+'</div><div class="nf">Bir tuşa panel ata: tuşa basınca ekranın altında 10 adete kadar uygulama / özellik kısayolu açılır.</div><div><span class="btn b" onclick="dockNew()">＋ Yeni panel</span></div>'+S.docks.map(d=>'<div class="r2" onclick="dockEdit('+q(d.id)+')"><div><div class="n">🚀 '+esc(d.name)+'</div><div class="s2">'+d.items.length+' öğe</div></div><span class="btn">Düzenle</span></div>').join('');
  h+='<div class="sec">Bilmen gerekenler</div><div class="nf">Yön, Tamam, Geri, Menü ve Ana ekran tuşları da atanabilir; ama ihlauncher açıkken bu tuşlar normal çalışmaya devam eder. Böylece yanlış bir atamadan sonra bile ayarlara dönebilirsin.<br>Bazı cihazlar Ana ekran tuşunu uygulamalara hiç iletmez; bu tuşta atama çalışmayabilir.</div>';
  mset('Tuş Atama',h,null)}
 let learnT;
@@ -1259,18 +1270,21 @@ function dockGo(id,k){const d=S.docks.find(x=>x.id===id);if(!d)return;const i=do
 document.addEventListener('focusin',e=>{const t=e.target.closest&&e.target.closest('.dki');if(t)$('#dkt').textContent=t.dataset.dn||''});
 $('#dock').addEventListener('click',e=>{if(e.target===$('#dock'))closeDock()});
 async function dockNew(){const n=await ask('Panel adı','Panel '+((S.docks||[]).length+1));if(!n||!n.trim())return;const d={id:'dock'+Date.now().toString(36),name:n.trim().slice(0,24),items:[]};S.docks.push(d);dsave();dockEdit(d.id)}
-function dockEdit(id){const d=S.docks.find(x=>x.id===id);if(!d){keysView();return}curView='dockedit';
+function dockHome(){curView='dockhome';
+ mset('Paneller (Dock)','<div class="nf">Panel, bir tuşa basınca ekranın altında açılan hızlı uygulama / özellik çubuğudur (10 öğeye kadar). Önce panel oluştur, sonra Tuş Atama → tuşu seç → <b>Özellik / panel…</b> → panelini seç.</div><div><span class="btn b" onclick="dockNew()">＋ Yeni panel</span><span class="btn" onclick="keysView()">🎮 Tuş Atama</span></div>'+
+ ((S.docks||[]).map(d=>'<div class="r2 go" onclick="dockEdit('+q(d.id)+')"><div><div class="n">🚀 '+esc(d.name)+'</div><div class="s2">'+d.items.length+' öğe</div></div></div>').join('')||'<div class="empty">Henüz panel yok. “＋ Yeni panel” ile başla.</div>'),null)}
+function dockEdit(id){const d=S.docks.find(x=>x.id===id);if(!d){dockHome();return}curView='dockedit';
  mset('Panel: '+d.name,'<div class="nf">'+d.items.length+' / 10 öğe. Bu paneli Tuş Atama’dan bir tuşa bağla: Özellik / panel… → Panel: '+esc(d.name)+'</div>'+
  '<div><span class="btn b" onclick="dockAddApp('+q(id)+')">＋ Uygulama</span><span class="btn b" onclick="dockAddFeat('+q(id)+')">＋ Özellik</span><span class="btn g" onclick="openDock('+q(id)+')">▶ Önizle</span></div>'+
  (d.items.length?d.items.map((i,k)=>{const x=dockItem(i.indexOf('act:')===0&&!ACTS[i.slice(4)]?'act:none':i);return '<div class="r2"><div class="n">'+(x.img?'<img src="'+x.img+'" style="width:30px;height:30px;border-radius:8px;vertical-align:middle;margin-right:10px">':(x.e||'')+'  ')+esc(x.n)+'</div><div><span class="btn" onclick="dockMv('+q(id)+','+k+',-1)">▲</span><span class="btn" onclick="dockMv('+q(id)+','+k+',1)">▼</span><span class="btn r" onclick="dockRm('+q(id)+','+k+')">Çıkar</span></div></div>'}).join(''):'<div class="empty">Panel boş. Uygulama veya özellik ekle.</div>')+
- '<div class="sec">Panel</div><div><span class="btn" onclick="dockRename('+q(id)+')">Adı değiştir</span><span class="btn r" onclick="dockDel('+q(id)+')">Paneli sil</span></div>',keysView)}
+ '<div class="sec">Panel</div><div><span class="btn" onclick="dockRename('+q(id)+')">Adı değiştir</span><span class="btn r" onclick="dockDel('+q(id)+')">Paneli sil</span></div>',dockHome)}
 async function dockAddApp(id){const d=S.docks.find(x=>x.id===id);if(d.items.length>=10){toast('⚠️','En fazla 10 öğe');return}const p=await pickApp('Panele eklenecek uygulama');if(!p)return;if(d.items.includes(p)){toast('ℹ️','Zaten panelde');return}d.items.push(p);dsave();dockEdit(id)}
 function dockAddFeat(id){const d=S.docks.find(x=>x.id===id);if(d.items.length>=10){toast('⚠️','En fazla 10 öğe');return}
  menu('Panele eklenecek özellik',Object.entries(ACTS).filter(([a])=>a!=='none'&&a!=='top').map(([a,v])=>[v[0]+'  '+v[1],()=>{if(!d.items.includes('act:'+a)){d.items.push('act:'+a);save()}dockEdit(id)}]))}
 function dockMv(id,k,dr){const d=S.docks.find(x=>x.id===id),n=k+dr;if(n<0||n>=d.items.length)return;[d.items[k],d.items[n]]=[d.items[n],d.items[k]];dsave();dockEdit(id)}
 function dockRm(id,k){const d=S.docks.find(x=>x.id===id);d.items.splice(k,1);dsave();dockEdit(id)}
 async function dockRename(id){const d=S.docks.find(x=>x.id===id);const n=await ask('Panel adı',d.name);if(!n||!n.trim())return;d.name=n.trim().slice(0,24);dsave();dockEdit(id)}
-async function dockDel(id){if(!(await conf('Panel silinsin mi? Bu panele bağlı tuş atamaları da kaldırılır.')))return;S.docks=S.docks.filter(x=>x.id!==id);let ch=false;for(const k of Object.keys(S.keymap))if(S.keymap[k]==='act:'+id){delete S.keymap[k];delete S.keyNames[k];ch=true}for(const k of Object.keys(S.colorKeys))if(S.colorKeys[k]===id)S.colorKeys[k]='none';if(ch)keySave();dsave();keysView()}
+async function dockDel(id){if(!(await conf('Panel silinsin mi? Bu panele bağlı tuş atamaları da kaldırılır.')))return;S.docks=S.docks.filter(x=>x.id!==id);let ch=false;for(const k of Object.keys(S.keymap))if(S.keymap[k]==='act:'+id){delete S.keymap[k];delete S.keyNames[k];ch=true}for(const k of Object.keys(S.colorKeys))if(S.colorKeys[k]===id)S.colorKeys[k]='none';if(ch)keySave();dsave();dockHome()}
 
 init();syncTrap();setTimeout(docksSync,1500);
 </script><script src="tv.js"></script></body></html>

@@ -13,8 +13,8 @@ android {
         applicationId = "com.ihlauncher.tv"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.1.0"
+        versionCode = 5
+        versionName = "1.2.1"
     }
     // Sabit imza: uygulama içi güncellemenin (aynı imza şartı) her derlemede çalışması için.
     if (stableKs != null) {
