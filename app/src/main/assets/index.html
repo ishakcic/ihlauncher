@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ihlauncher</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--isz:86px;--bl:0px;--bw:180px;--bh:101px;--font:Roboto,'Segoe UI',system-ui,sans-serif;--accent:#3E91FF;--onacc:#fff;--ok:#4CC38A;--bad:#F0605A;--warn:#F2A93B;--info:#5AA9F0;--focus:#fff}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);overflow:hidden;user-select:none;-webkit-font-smoothing:antialiased}
+[data-theme]{--t1:#F6F4FA;--t2:#BDB9C8;--t3:#7E7A8E;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.13);--stroke:rgba(255,255,255,.10);--sep:rgba(255,255,255,.09);--shadow:rgba(0,0,0,.55)}
+[data-theme=oneui]{--bg:#0D1117;--panel:#191E2A;--panel-a:rgba(25,30,42,.75)}
+[data-theme=ocean]{--bg:#051318;--panel:#0E2128;--panel-a:rgba(14,33,40,.80)}
+[data-theme=wine]{--bg:#12080F;--panel:#22111B;--panel-a:rgba(34,17,27,.80)}
+.bg{position:fixed;inset:0;z-index:1;background-size:cover;background-position:center}
+.bg.def{background:var(--bg)}
+.bg.wp:after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.16),rgba(0,0,0,.4))}
+:focus{outline:none}
+[tabindex],button{cursor:pointer}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.topbar{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:18px 56px 36px;background:linear-gradient(var(--bg) 78%,transparent);z-index:100}
+.tl{display:flex;align-items:baseline;gap:18px}.tr{display:flex;align-items:center;gap:8px}
+#clock{font-size:46px;font-weight:300;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#date{font-size:17px;color:var(--t2)}
+.ib,.wifi,.search{height:48px;border-radius:24px;transition:background .12s}
+.ib{width:48px;display:flex;align-items:center;justify-content:center;position:relative;color:var(--t1)}
+.wifi{display:flex;align-items:center;gap:10px;padding:0 16px;font-size:15px;color:var(--t2)}
+.search{display:flex;align-items:center;gap:10px;padding:0 18px;width:300px;background:var(--glass);color:var(--t2);margin-right:6px}
+.search input{flex:1;min-width:0;background:transparent;border:none;color:var(--t1);font-size:17px;outline:none;font-family:inherit}.search input::placeholder{color:var(--t3)}
+.ib:focus,.wifi:focus,.search:focus,.search:focus-within{background:var(--glass2);box-shadow:var(--fr);color:var(--t1)}
+.badge{position:absolute;top:2px;right:0;background:var(--accent);color:var(--onacc);font-size:11px;font-weight:700;min-width:20px;padding:2px 6px;border-radius:10px;text-align:center}
+#wsig.off{opacity:.35}
+#content{padding:122px 56px 80px;position:relative;z-index:10;height:100vh;overflow-y:auto}
+#content::-webkit-scrollbar{width:0}
+.row{margin-bottom:34px}
+.rt{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:600;color:var(--t1);margin:0 0 4px 10px;padding:4px 0}
+.rt:before{content:'';width:5px;height:20px;border-radius:3px;background:var(--accent)}
+.rs{display:flex;gap:18px;overflow-x:auto;padding:14px 12px 20px}.rs::-webkit-scrollbar{height:0}
+.card{flex-shrink:0;background:var(--glass);border-radius:22px;padding:20px;position:relative;overflow:hidden;transition:transform .14s,background .14s}
+.card:focus{transform:scale(calc(var(--fs) - .02));background:var(--glass2);box-shadow:var(--fr);z-index:2}
+.hd{width:240px;height:118px;display:flex;flex-direction:column;justify-content:space-between}
+.hd .l{font-size:13px;font-weight:600;color:var(--t2);letter-spacing:.03em;display:flex;align-items:center}
+.hd .l:before{content:'';width:9px;height:9px;border-radius:50%;background:var(--t3);margin-right:9px}
+.hd.on .l:before{background:var(--ok)}.hd .d{font-size:23px;font-weight:500}.hd.off{opacity:.5}
+.wg{width:290px;height:150px}.wg.big{width:430px}
+.wh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.wb{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--wcb,var(--glass2));color:var(--wc,var(--t1))}
+.wb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.wt{font-size:14px;font-weight:600;color:var(--t2);letter-spacing:.04em}
+.wv{font-size:34px;font-weight:500}.wv.big{font-size:54px;font-weight:300;font-variant-numeric:tabular-nums}.ws{font-size:14px;color:var(--t2);margin-top:6px}
+.wn{font-size:17px;line-height:1.4;max-height:84px;overflow:hidden;white-space:pre-wrap}
+.wsc{display:flex;align-items:center;gap:16px;height:110px}.wsc .ico{width:76px;height:76px}.wsc div:last-child{font-size:21px;font-weight:500}
+.bar{height:8px;background:var(--sep);border-radius:4px;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--wc,var(--accent));border-radius:4px;transition:width 1s}
+.addw{width:170px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--t2);background:transparent;box-shadow:inset 0 0 0 2px var(--sep)}.addw:focus{box-shadow:var(--fr)}.addw b{font-size:38px;font-weight:300;line-height:1}
+.fav{width:calc(var(--bw)*1.3);height:calc(var(--bh)*1.3);padding:0}
+.fav .th{position:absolute;inset:0;background-size:cover;background-position:center}.fav .fico{position:absolute;left:50%;top:16px;width:68px;height:68px;margin-left:-34px}
+.fav.hb .nm{display:none}
+.fav .nm{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--isz) + 52px),1fr));gap:12px 10px;padding:10px 8px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:9px;padding:14px 6px 10px;border-radius:24px;transition:transform .14s,background .14s}
+.iw{position:relative;transition:filter .14s}
+.ico,.tile .fi{background:var(--glass2);overflow:hidden;flex-shrink:0;border-radius:22%}
+.tile .ico,.tile .fi{width:var(--isz);height:var(--isz)}
+.ico img{width:100%;height:100%;object-fit:cover;display:block}
+.tl2{font-size:15px;text-align:center;max-width:calc(var(--isz) + 40px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--t1)}
+.tile:focus{background:var(--glass2);transform:scale(var(--fs));box-shadow:var(--fr)}
+.tile:focus .iw{filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))}
+.tile .fi{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:9px}
+.fi img{width:100%;height:100%;border-radius:22%;object-fit:cover}.fi .em{grid-column:1/3;grid-row:1/3}
+body[data-ish=sq] .ico,body[data-ish=sq] .tile .fi{clip-path:url(#clipSq);border-radius:0}
+body[data-ish=ci] .ico,body[data-ish=ci] .tile .fi{border-radius:50%}
+body[data-ish=rd] .ico,body[data-ish=rd] .tile .fi{border-radius:28%}
+body[data-ish=sh] .ico,body[data-ish=sh] .tile .fi{border-radius:10%}
+body[data-ish=or] .ico{background:transparent;border-radius:0}body[data-ish=or] .ico img{object-fit:contain}
+body[data-lb=off] .tl2{display:none}
+body[data-lb=focus] .tl2{visibility:hidden}body[data-lb=focus] .tile:focus .tl2{visibility:visible}
+.icprev{display:flex;gap:16px;flex-wrap:wrap;padding:8px 0 4px}.icprev .tile{pointer-events:none}
+.bdg{position:absolute;top:-6px;right:-6px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:var(--bad);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2}.fav .bdg{top:10px;right:10px}
+.nw{position:absolute;top:-4px;left:-4px;background:var(--accent);color:var(--onacc);font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;z-index:2}.fav .nw{top:10px;left:10px}
+.tile.hid{opacity:.45}
+.qh{display:flex;align-items:center;gap:14px;margin-bottom:16px}.qh .ico{width:56px;height:56px}.qh .qn{font-size:21px;font-weight:600;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qb{display:flex;gap:8px;flex-wrap:wrap}.qa{padding:12px 20px;border-radius:999px;background:var(--glass2);font-size:15px;font-weight:500}
+.qa:focus{background:var(--accent);color:var(--onacc)}
+.vr{display:flex;align-items:center;gap:14px}.vr img{width:44px;height:44px;border-radius:22%;object-fit:cover;flex-shrink:0}.vr .vi{display:none}
+.cd{width:18px;height:18px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:10px}
+.empty{color:var(--t2);padding:18px;font-size:16px}
+.side{position:fixed;top:0;right:-540px;width:450px;height:100vh;background:var(--panel);border-radius:28px 0 0 28px;z-index:9000;transition:right .22s ease,visibility 0s .22s;overflow-y:auto;padding:30px 24px;visibility:hidden;box-shadow:-20px 0 50px var(--shadow)}
+.side.open{right:0;visibility:visible;transition:right .22s ease,visibility 0s}
+.side::-webkit-scrollbar{width:0}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.pt{font-size:30px;font-weight:500}
+.pi{background:var(--glass);border-radius:20px;padding:16px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:background .12s}
+.pi:focus{background:var(--glass2);box-shadow:var(--fr)}
+.pi .t{font-size:18px;font-weight:500;margin-bottom:2px}.pi .s{font-size:13px;color:var(--t2);line-height:1.35}.pi .c{flex:1;min-width:0}
+.pi.go:after{content:'›';font-size:26px;color:var(--t3)}
+.nt{border-left:4px solid var(--accent)}
+.ov2{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:9500;display:none;align-items:center;justify-content:center}.ov2.show{display:flex}
+#dlg{z-index:9800}
+.modal{width:94%;max-width:1100px;max-height:90vh;background:var(--panel);border-radius:30px;padding:30px 36px;overflow-y:auto;position:relative;box-shadow:0 30px 80px var(--shadow)}
+.modal::-webkit-scrollbar{width:0}
+.mt{font-size:30px;font-weight:500;margin:10px 0 18px}
+.sec{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:.03em;margin:22px 0 10px 4px}
+.dlgbox{width:90%;max-width:540px;max-height:84vh;overflow-y:auto;background:var(--panel);border-radius:26px;padding:24px;box-shadow:0 30px 80px var(--shadow)}
+.dlgbox::-webkit-scrollbar{width:0}
+.dt{font-size:20px;font-weight:600;margin-bottom:12px;word-break:break-word}.dm{font-size:15px;color:var(--t2);margin-bottom:14px;line-height:1.5;white-space:pre-wrap}
+.ditem{padding:14px 18px;border-radius:16px;font-size:17px;transition:background .1s}.ditem:focus{background:var(--accent);color:var(--onacc)}
+.dsep{font-size:12px;font-weight:600;color:var(--t3);padding:12px 18px 4px;letter-spacing:.04em}
+.drow{display:flex;gap:8px;margin-top:14px}
+.dlgbox input,.modal input.tx{width:100%;padding:13px 16px;background:var(--glass);border:none;border-radius:14px;color:var(--t1);font-size:17px;outline:none;font-family:inherit}
+.dlgbox input:focus,.modal input.tx:focus{box-shadow:var(--fr)}
+.btn{display:inline-block;padding:11px 22px;border-radius:999px;background:var(--glass2);font-size:15px;font-weight:500;margin:0 8px 8px 0;transition:background .1s}
+.btn:focus{box-shadow:var(--fr)}
+.btn.g{color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--ok);background:transparent}.btn.r{color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad);background:transparent}.btn.b{background:var(--accent);color:var(--onacc)}
+.btn.g:focus,.btn.r:focus{box-shadow:var(--fr)}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sc{background:var(--glass);border-radius:20px;padding:16px 18px;transition:background .12s}
+.sc:focus{background:var(--glass2);box-shadow:var(--fr)}
+.sc .t{font-size:17px;font-weight:500;margin-bottom:3px}.sc .s{font-size:12px;color:var(--t2);line-height:1.35}
+.hero{background:var(--glass);border-radius:22px;padding:20px 22px;margin-bottom:8px}
+.hero .h1{font-size:22px;font-weight:500}.hero .h2{font-size:14px;color:var(--t2);margin-top:4px;line-height:1.5}
+.r2{background:var(--glass);border-radius:18px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .1s}
+.r2:focus{background:var(--glass2);box-shadow:var(--fr)}.r2 .n{font-size:16px}.r2 .p{font-size:11px;color:var(--t3);font-family:ui-monospace,Menlo,monospace;word-break:break-all;margin-top:2px}.r2 .s2{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.35}
+.bd{padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;vertical-align:middle;background:rgba(127,127,127,.16)}.bd.a{color:var(--ok)}.bd.f{color:var(--info)}.bd.u{color:var(--bad)}.bd.w{color:var(--warn)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.chip{padding:9px 18px;border-radius:999px;background:var(--glass);font-size:15px}.chip:focus{box-shadow:var(--fr)}.chip.on{background:var(--accent);color:var(--onacc)}
+.tog{width:50px;height:28px;border-radius:14px;background:var(--glass2);position:relative;flex-shrink:0;transition:.15s}.tog:after{content:'';position:absolute;width:22px;height:22px;border-radius:50%;background:var(--t2);top:3px;left:3px;transition:.15s}.tog.on{background:var(--accent)}.tog.on:after{left:25px;background:var(--onacc)}
+#term{background:#000;color:#e8e8ed;border-radius:14px;padding:14px;font-family:ui-monospace,Menlo,monospace;font-size:13px;height:220px;overflow-y:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--ok)}.nf{color:var(--t2);font-size:14px;margin-bottom:12px;line-height:1.5}
+.kv{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--sep);font-size:16px;gap:20px}.kv span:first-child{color:var(--t2)}
+.toast{position:fixed;bottom:34px;left:50%;transform:translateX(-50%) translateY(140px);background:var(--panel);padding:13px 24px;border-radius:999px;box-shadow:0 12px 34px var(--shadow);z-index:99999;transition:transform .25s ease;display:flex;gap:10px;font-size:16px;max-width:80%}
+.toast.show{transform:translateX(-50%) translateY(0)}
+#ti{font-weight:700}#ti.ok{color:var(--ok)}#ti.bad{color:var(--bad)}#ti.warn{color:var(--warn)}
+.ts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.to{padding:12px;border-radius:20px;background:var(--glass);text-align:center;font-size:15px}.to.on{box-shadow:inset 0 0 0 2px var(--accent)}.to:focus{box-shadow:var(--fr)}
+.pv{display:block;height:64px;border-radius:12px;margin:0 0 10px;box-shadow:inset 0 0 0 1px var(--stroke)}.pv.oneui{background:#0D1117}.pv.ocean{background:#051318}.pv.wine{background:#12080F}
+.acs{display:flex;gap:10px;flex-wrap:wrap}.ac{width:88px;height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}.ac.on{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--t1)}.ac:focus{box-shadow:0 0 0 3px var(--panel),0 0 0 6px var(--focus)}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.wi{background-size:cover;background-position:center}.wi{aspect-ratio:16/9;border-radius:18px;position:relative;overflow:hidden}.wi.on{box-shadow:0 0 0 3px var(--accent)}.wi:focus{box-shadow:var(--fr)}
+.wi b{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;padding:5px;border-radius:10px;font-size:12px;text-align:center;font-weight:500}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.sm{background:var(--glass);border-radius:18px;padding:14px;text-align:center}.sm b{display:block;font-size:28px;font-weight:500}.sm span{font-size:12px;color:var(--t2)}
+.wide{display:block;width:100%}
+ 
+body{--ring:0 0 0 3px var(--focus);--fr:var(--ring);--fs:1.06}
+body[data-fx=glow]{--fr:0 0 0 3px var(--focus),0 0 34px 8px var(--accent-soft)}
+body[data-fx=ring]{--fs:1}
+body[data-fx=lift]{--fr:0 20px 36px rgba(0,0,0,.55);--fs:1.1}
+body.hasw{--glass:rgba(255,255,255,.12);--glass2:rgba(255,255,255,.24);--t2:#C3CAD6}
+#content,.topbar{transition:opacity .35s}
+body.idle #content,body.idle .topbar{opacity:0;transition:opacity 1.4s ease}
+body:not([data-blur="0"]) :is(.side,.modal,.dlgbox,.toast){backdrop-filter:blur(var(--bl));-webkit-backdrop-filter:blur(var(--bl))}
+body:not([data-blur="0"]) :is(.side,.modal,.dlgbox,.toast){background:var(--panel-a)}
+body:not([data-blur="0"])[data-top=pill] .topbar{backdrop-filter:blur(var(--bl));-webkit-backdrop-filter:blur(var(--bl))}
+
+.tile.bn{padding:0;gap:0;border-radius:22px;background:transparent}
+.tile.bn .iw{width:var(--bw);height:var(--bh);border-radius:20px;overflow:hidden;background:var(--glass2)}
+.tile.bn .iw>img.ban{width:100%;height:100%;object-fit:cover;display:block}
+.tile.bn .iw.nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px}
+.tile.bn .iw.nb .ico{width:calc(var(--bh)*.46);height:calc(var(--bh)*.46)}
+.tile.bn .iw.nb .tl2{font-size:13px;max-width:100%}
+.tile.bn:focus{background:transparent;box-shadow:none}
+.tile.bn:focus .iw{box-shadow:var(--fr)}
+.tile.bn .fi{width:var(--bw);height:var(--bh);border-radius:20px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;clip-path:none}
+.tile.bn .fi img{width:34%;height:auto;aspect-ratio:1}
+.tile.bn>.tl2{margin-top:7px}
+.grid.bn{grid-template-columns:repeat(auto-fill,minmax(calc(var(--bw) + 20px),1fr));gap:16px 14px}
+body[data-dock=on] #grid{background:var(--glass);border-radius:32px;padding:20px 16px;margin:0 6px}
+body[data-top=pill] .topbar{left:auto;right:44px;top:22px;padding:6px 8px 6px 22px;border-radius:999px;background:var(--glass);gap:6px}
+body[data-top=pill] #date,body[data-top=pill] #wname{display:none}
+body[data-top=pill] #clock{font-size:26px;font-weight:400}
+body[data-top=pill] .tl{margin-right:6px}
+body[data-top=pill] .search{width:48px;padding:0 12px;margin:0;background:transparent;overflow:hidden;transition:width .2s}
+body[data-top=pill] .search input{display:none}
+body[data-top=pill] .search:focus-within,body[data-top=pill] .search.has{width:260px;background:var(--glass2)}
+body[data-top=pill] .search:focus-within input,body[data-top=pill] .search.has input{display:block}
+body[data-top=pill] .wifi{padding:0 12px}
+body[data-top=pill] #content{padding-top:104px}
+.pre{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.pre .pc{border-radius:22px;padding:18px 20px;background:var(--glass);position:relative;overflow:hidden}.pre .pc:focus{box-shadow:var(--ring)}.pre .pc .t{font-size:19px;font-weight:600;margin-bottom:4px}.pre .pc .s{font-size:13px;color:var(--t2);line-height:1.4}.pre .pc.on{box-shadow:inset 0 0 0 2px var(--accent)}.pre .pc.on:focus{box-shadow:var(--ring)}
+@media (max-width:900px) and (orientation:portrait){.topbar{padding:10px 14px 16px;flex-wrap:wrap;gap:8px}#clock{font-size:30px}#date{display:none}.search{width:150px;height:44px}.ib,.wifi{height:44px}.ib{width:44px}#content{padding:150px 14px 60px}#wname{display:none}.wifi{padding:0 12px}.tl{width:100%}.hd{width:200px}.wg{width:250px}.wg.big{width:340px}.sg{grid-template-columns:1fr}.ts{grid-template-columns:repeat(2,1fr)}.sum{grid-template-columns:repeat(2,1fr)}.side{width:100%;padding:20px 14px;border-radius:0}.modal{padding:18px;width:98%}.mt{font-size:24px}.wgrid{grid-template-columns:repeat(2,1fr)}.rt{font-size:19px}}
+@media (max-height:540px) and (orientation:landscape){
+ .topbar{padding:8px 22px 20px}#clock{font-size:30px}#date{font-size:14px}
+ .ib,.wifi,.search{height:40px;border-radius:20px}.ib{width:40px}.search{width:210px}
+ body[data-top=pill] .topbar{top:10px;right:20px;padding:4px 6px 4px 16px}body[data-top=pill] #clock{font-size:22px}body[data-top=pill] .search{width:40px}body[data-top=pill] .search:focus-within,body[data-top=pill] .search.has{width:200px}
+ #content{padding:78px 22px 40px}body[data-top=pill] #content{padding-top:62px}
+ .row{margin-bottom:18px}.rt{font-size:17px}.rt:before{height:16px}.rs{padding:8px 8px 12px;gap:12px}
+ .hd{width:190px;height:92px}.hd .d{font-size:19px}.wg{width:230px;height:136px}.wg.big{width:340px}.wv{font-size:24px}.wv.big{font-size:38px}.wh{margin-bottom:6px}.wb{width:28px;height:28px}.ws{margin-top:3px;font-size:12px}.bar{margin-top:6px}.card{padding:12px 14px;border-radius:18px}.addw{height:136px;width:130px}
+ .tile{padding:8px 4px 6px;border-radius:18px}.tl2{font-size:12px}.grid{gap:6px 6px}
+ .modal{max-height:96vh;padding:16px 22px;border-radius:22px}.mt{font-size:22px;margin:6px 0 12px}.sg{grid-template-columns:repeat(3,1fr)}.side{width:380px;padding:18px}.pt{font-size:24px}.dlgbox{max-height:94vh;padding:16px}
+ .sum{grid-template-columns:repeat(4,1fr)}.wgrid{grid-template-columns:repeat(3,1fr)}.ts{grid-template-columns:repeat(3,1fr)}.pre{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ===== v2.6 ayarlar ===== */
+.pi{border-radius:22px}
+.pi .pic{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}.pi .pic svg.i{width:25px;height:25px;stroke-width:1.9}
+.r2.go:after{content:'›';font-size:26px;color:var(--t3);margin-left:8px}
+.aptabs{display:flex;gap:6px;padding:6px;background:var(--glass);border-radius:999px;margin:0 0 18px;width:max-content;max-width:100%;overflow-x:auto}.aptabs::-webkit-scrollbar{height:0}
+.aptab{padding:10px 22px;border-radius:999px;font-size:15px;font-weight:500;color:var(--t2);white-space:nowrap;transition:background .12s}
+.aptab:focus{box-shadow:var(--fr);color:var(--t1)}.aptab.on{background:var(--accent);color:var(--onacc)}.aptab.on:focus{color:var(--onacc)}
+.kh{display:flex;align-items:center;gap:18px;padding:22px 24px;border-radius:26px;background:linear-gradient(135deg,var(--accent-soft,rgba(62,145,255,.2)),var(--glass) 72%);margin-bottom:16px}
+.kh .kic{width:60px;height:60px;border-radius:20px;background:var(--accent);color:var(--onacc);display:flex;align-items:center;justify-content:center;flex-shrink:0}.kh .kic svg.i{width:30px;height:30px}
+.kh .ktx{flex:1;min-width:0}.kh .h1{font-size:22px;font-weight:600}.kh .h2{font-size:14px;color:var(--t2);margin-top:4px;line-height:1.45}
+.kpill{padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}.kpill.ok{background:rgba(76,195,138,.18);color:var(--ok)}.kpill.bad{background:rgba(240,96,90,.18);color:var(--bad)}
+.kq{margin:14px 0 4px}
+.kr{gap:16px;justify-content:flex-start}
+.kc{min-width:104px;padding:11px 16px;border-radius:14px;background:var(--glass2);font-size:15px;font-weight:600;text-align:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.28),inset 0 0 0 1px var(--stroke);display:flex;align-items:center;justify-content:center;gap:8px}
+.kd{width:10px;height:10px;border-radius:50%;display:inline-block}
+.kr .ar{color:var(--t3);font-size:24px}
+.kr .kt{display:flex;align-items:center;gap:12px;flex:1;min-width:0}.kr .kt img{width:40px;height:40px;border-radius:10px;flex-shrink:0}
+.kw{font-size:12px;color:var(--warn);white-space:nowrap}
+#splash{position:fixed;inset:0;z-index:99999;pointer-events:none;display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 600px at 20% 10%,rgba(59,130,246,.28),transparent 70%),radial-gradient(900px 600px at 90% 100%,rgba(43,179,255,.2),transparent 70%),#07060F;transition:opacity .5s ease,visibility .5s}
+#splash.hide{opacity:0;visibility:hidden}
+.sp-in{display:flex;flex-direction:column;align-items:center;gap:22px;animation:spIn .7s cubic-bezier(.2,.8,.2,1) both}
+.sp-n{font-size:40px;font-weight:700;letter-spacing:-.03em;color:#F6F4FA}
+.sp-l{width:180px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.sp-l i{display:block;height:100%;width:40%;border-radius:2px;background:linear-gradient(90deg,#60A5FA,#2563EB);animation:spL 1.1s ease-in-out infinite}
+@keyframes spIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes spL{0%{transform:translateX(-100%)}100%{transform:translateX(450%)}}
+/* ===== Tasarım v4 "Cam" — taslak (ihlauncher mockup) görünümü; yalnızca görünüm, mantık değişmez ===== */
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.bg.def:after{content:'';position:absolute;inset:0;background:radial-gradient(900px 560px at 10% -10%,rgba(59,130,246,.22),transparent 70%)}
+.bg.wp:after{background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.30))}
+.tl{display:flex;align-items:baseline;gap:12px}
+#clock{font-size:42px;font-weight:600;letter-spacing:-.02em}
+#date{color:rgba(255,255,255,.85);font-weight:400}
+body[data-top=pill] .topbar{background:rgba(140,155,180,.35);border-radius:40px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25),0 8px 24px rgba(0,0,0,.12)}
+body[data-top=wide] .topbar{background:none}
+body[data-top=wide] .tr{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:40px;background:rgba(140,155,180,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25),0 8px 24px rgba(0,0,0,.12)}
+
+body[data-top] .tr :is(.search,.ib,.wifi){backdrop-filter:none;-webkit-backdrop-filter:none}
+.tr .search{background:rgba(0,0,0,.15);border-radius:20px}
+.tr .ib{background:var(--accent);color:#fff;border-radius:50%}
+.tr .wifi{background:#2563EB;color:#fff;border-radius:20px}
+.tr .ib:focus,.tr .wifi:focus{filter:brightness(1.15)}
+.badge{background:#EF4444;color:#fff;border-radius:50%}
+.rt{font-size:16px;font-weight:600;letter-spacing:0;color:rgba(255,255,255,.9);margin:2px 0 0 10px}
+.rt:before{display:none}
+.card{border-radius:14px;background:rgba(210,220,235,.25);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.12)}
+.card:focus{background:rgba(232,240,252,.38);box-shadow:var(--fr)}
+.hd.on{background:rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 8px 24px rgba(0,0,0,.12)}
+.hd.on:focus{box-shadow:var(--fr)}
+.card.addw:focus{box-shadow:var(--fr)}
+.bar i{background:#3B82F6}
+.tile{border-radius:16px}
+.tile:focus{background:rgba(255,255,255,.26);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+.tile.bn{border-radius:14px}
+body[data-dock=on] #grid{border-radius:22px;background:rgba(210,220,235,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.btn.b,.chip.on{background:#2563EB;color:#fff}
+.tog.on{background:#2563EB}
+.toast{border-radius:14px;border:1px solid rgba(255,255,255,.2)}
+.dlgbox{border-radius:18px;border:1px solid rgba(255,255,255,.18)}
+.ov2{background:rgba(0,0,0,.38)}
+/* Yan panel ve alt ekranlar: sağa yapışık koyu cam panel (taslaktaki gibi), tam ekran değil */
+.side{top:0;height:100vh;right:-640px;border-radius:0;border:0;border-left:1px solid rgba(255,255,255,.18);background:var(--panel);box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+.side.open{right:0}
+.pt{font-weight:600;letter-spacing:0;background:none;color:var(--t1)}
+.pi{border-radius:12px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.sec{font-size:14px;font-weight:600;letter-spacing:0;text-transform:none;color:rgba(255,255,255,.85)}
+#modal.ov2{align-items:stretch;justify-content:flex-end;padding:0}
+#modal .modal{width:640px;max-width:100vw;height:100vh;max-height:none;margin:0;border-radius:0;border:0;border-left:1px solid rgba(255,255,255,.18);box-shadow:-10px 0 30px rgba(0,0,0,.4);animation:mIn .3s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mIn{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+#modal .sg,#modal .ts,#modal .wgrid,#modal .sum{grid-template-columns:repeat(2,1fr)}
+#modal .pre{grid-template-columns:1fr}
+
+/* ===== v2: taşı modu, gruplu menü, odak kilidi ===== */
+body.trap #content,body.trap .topbar{pointer-events:none}
+.moving{transform:scale(1.13)!important;z-index:60!important;opacity:1!important;box-shadow:0 0 0 4px var(--accent),0 28px 56px rgba(0,0,0,.65),0 0 56px var(--accent-soft)!important;animation:mvp .9s ease-in-out infinite alternate}
+@keyframes mvp{from{filter:brightness(1)}to{filter:brightness(1.18)}}
+body.mv-on .card:not(.moving),body.mv-on .tile:not(.moving){opacity:.55}
+#mvbar{position:fixed;left:50%;bottom:16px;transform:translate(-50%,160px);z-index:99998;display:flex;gap:26px;padding:10px 26px;border-radius:999px;background:var(--panel-a,var(--panel));border:1px solid var(--stroke);box-shadow:0 18px 44px var(--shadow);font-size:16px;color:var(--t2);transition:transform .22s}
+#mvbar.show{transform:translate(-50%,0)}
+#mvbar b{color:var(--t1);background:var(--glass2);padding:3px 11px;border-radius:9px;margin-right:8px;font-size:15px}
+.gm-h{display:flex;align-items:center;gap:20px;padding:4px 4px 8px}
+.gm-ic{width:84px;height:84px;flex-shrink:0;box-shadow:0 14px 28px -10px rgba(0,0,0,.6)}
+.gm-t{min-width:0;flex:1}.gm-n{font-size:28px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm-s{font-size:13px;color:var(--t3);font-family:ui-monospace,Menlo,monospace;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm-c{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.gm-b{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(127,127,127,.18)}.gm-b.a{color:var(--ok)}.gm-b.w{color:var(--warn)}.gm-b.f{color:var(--info)}.gm-b.u{color:var(--bad)}
+.gm-g{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:20px 0 10px 4px}
+.gm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gm-i{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:96px;padding:12px 8px;border-radius:20px;background:var(--glass);border:1px solid var(--stroke);text-align:center;transition:background .12s,transform .12s}
+.gm-i:focus{background:var(--accent);color:var(--onacc);transform:scale(1.05);box-shadow:var(--fr)}
+.gm-e{font-size:32px;line-height:1}.gm-l{font-size:15px;font-weight:600;line-height:1.2}
+.gm-i.dng{color:var(--bad)}.gm-i.dng:focus{background:var(--bad);color:#fff}
+@media (max-height:540px) and (orientation:landscape){.gm-grid{grid-template-columns:repeat(5,1fr)}.gm-i{min-height:74px}.gm-e{font-size:24px}.gm-ic{width:60px;height:60px}.gm-n{font-size:22px}}
+@media (max-width:900px) and (orientation:portrait){.gm-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Uzun basma menüsü: sağ kenara yapışık panel */
+#dlg.rside{justify-content:flex-end;align-items:stretch;background:rgba(0,0,0,.35)}
+#dlg.rside .dlgbox{width:440px;max-width:46vw!important;height:100vh;max-height:100vh;border-radius:0;border:0;border-left:1px solid rgba(255,255,255,.18);box-shadow:-10px 0 30px rgba(0,0,0,.45);padding:22px 20px;animation:rsin .18s ease-out}
+#dlg.rside .gm-grid{grid-template-columns:repeat(2,1fr)}
+#dlg.rside .gm-ic{width:64px;height:64px}#dlg.rside .gm-n{font-size:22px}
+@keyframes rsin{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:900px) and (orientation:portrait){#dlg.rside .dlgbox{width:88vw;max-width:88vw!important}}
+/* Seçim listeleri: seçili satır net görünür */
+.r2.pk{border:2px solid transparent;cursor:pointer}
+.r2.pk .cb{width:34px;height:34px;border-radius:10px;border:3px solid var(--t3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:transparent;transition:.12s}
+.r2.pk.sel{background:rgba(37,99,235,.22);border-color:#2563EB}
+.r2.pk.sel .cb{background:#2563EB;border-color:#2563EB;color:#fff}
+.r2.pk:not(.sel){opacity:.72}
+.r2.pk:focus{opacity:1}
+.selbar{position:sticky;bottom:-4px;margin-top:14px;padding:12px 14px;border-radius:18px;background:var(--panel);box-shadow:0 -8px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);z-index:3}
+.selbar .sn{font-size:15px;margin-bottom:10px;font-weight:600}
+
+/* Panel (dock) */
+.dkov{position:fixed;inset:0;z-index:9700;display:none;flex-direction:column;align-items:center;justify-content:flex-end;background:linear-gradient(to top,rgba(0,0,0,.62),rgba(0,0,0,.12) 55%,transparent);padding-bottom:5vh}
+.dkov.show{display:flex;animation:dkin .2s ease-out}
+@keyframes dkin{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.dkt{font-size:26px;font-weight:700;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.7);height:40px;margin-bottom:34px;letter-spacing:-.01em}
+.dkbar{display:flex;gap:clamp(8px,1.1vw,18px);padding:22px clamp(14px,2vw,30px) 18px;border-radius:34px;background:rgba(28,30,38,.6);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,255,255,.2);box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.15);max-width:96vw}
+.dki{position:relative;width:clamp(58px,7.4vw,98px);height:clamp(58px,7.4vw,98px);border-radius:22%;display:flex;align-items:center;justify-content:center;outline:none;transition:transform .16s cubic-bezier(.2,.9,.3,1.2),box-shadow .16s;flex-shrink:0}
+.dki img{width:100%;height:100%;border-radius:22%;object-fit:cover;display:block}
+.dki .dke{width:100%;height:100%;border-radius:22%;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,3.6vw,48px);background:linear-gradient(145deg,#3b82f6,#6366f1)}
+.dki:focus{transform:translateY(-22px) scale(1.32);box-shadow:0 18px 30px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.92);z-index:2}
+.dki:focus:after{content:'';position:absolute;bottom:-17px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff}
+</style>
+<link rel="stylesheet" href="tv.css"></head>
+<body data-theme="oneui">
+<div id="splash"><div class="sp-in"><svg viewBox="0 0 108 108" width="132" height="132"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><rect x="6" y="6" width="96" height="96" rx="28" fill="url(#spg)"/><path d="M44,36L44,72L75,54z" fill="#fff"/></svg><div class="sp-n">ihlauncher</div><div class="sp-l"><i></i></div></div></div>
+<script>(function(){var s=document.getElementById('splash');function h(){if(!s)return;s.className='hide';setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s)},700)}window.addEventListener('load',function(){setTimeout(h,700)});setTimeout(h,3500)})()</script>
+
+<div id="errbar" onclick="this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#FF453A;color:#fff;font:600 15px/1.35 sans-serif;padding:8px 14px;word-break:break-all"></div>
+<script>
+window.__errs=[];
+window.__rep=function(m){window.__errs.push(m);var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent=''+m+'  ('+window.__errs.length+' hata • kapatmak için dokun)'}};
+window.addEventListener('error',function(e){window.__rep((e.message||'hata')+' @'+String(e.filename||'').split('/').pop()+':'+(e.lineno||0))});
+window.addEventListener('unhandledrejection',function(e){window.__rep('Promise: '+((e.reason&&e.reason.message)||e.reason))});
+</script>
+<div class="bg def" id="bg"></div>
+<div class="topbar">
+ <div class="tl"><div id="clock">--:--</div><div id="date"></div></div>
+ <div class="tr">
+  <div class="search" onclick="actInput($('#q'))"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" placeholder="Uygulama ara" readonly inputmode="none" oninput="renderGrid()" data-submit="searchEnter"></div>
+  <div class="wifi" onclick="N('openSettings',{k:'net'})"><span id="wsig"><svg class="i" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01"/></svg></span><span id="wname">…</span></div>
+  <div class="ib" onclick="openPanel('notif')"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="badge" id="nb" style="display:none">0</span></div>
+  <div class="ib" id="mic" onclick="voice()"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg></div>
+  <div class="ib" onclick="openPanel('settings')"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></div>
+ </div>
+</div>
+<div class="side" id="notifPanel"></div>
+<div class="side" id="settingsPanel"></div>
+<div id="content">
+ <div class="row" id="row-in"><div class="rt" data-row="in">Giriş Kaynakları</div><div class="rs" id="inRow"></div></div>
+ <div class="row" id="row-tv"><div class="rt" data-row="tv" id="tvHead" onclick="TVUI.strip()"></div><div class="rs" id="tvRow"></div></div>
+ <div class="row" id="row-wg"><div class="rt" data-row="wg">Kartlar</div><div class="rs" id="wgRow"></div></div>
+ <div class="row" id="row-fav"><div class="rt" data-row="fav">Favoriler</div><div class="rs" id="favRow"></div></div>
+ <div class="row" id="row-apps"><div class="rt" data-row="apps">Tüm Uygulamalar</div><div class="grid" id="grid"></div></div>
+</div>
+<div class="ov2" id="modal"><div class="modal"><div id="mbody"></div></div></div>
+<div id="dock" class="dkov"><div class="dkt" id="dkt"></div><div class="dkbar" id="dkbar"></div></div>
+<div class="ov2" id="dlg"><div class="dlgbox" id="dlgbox"></div></div>
+<div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
+<script src="db.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const q=s=>esc(JSON.stringify(String(s)));   /* HTML attribute içine güvenli JS string */
+const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'};
+const THEMES={oneui:'One UI',ocean:'Okyanus',wine:'Şarap'};
+const ACC={blue:['#3B82F6','Mavi'],teal:['#27BDAE','Turkuaz'],green:['#4DB862','Yeşil'],orange:['#FF9A3D','Turuncu'],pink:['#EE6A9B','Pembe'],purple:['#9A7DFF','Mor']};
+const SIZES={s:['Küçük',72],m:['Orta',86],l:['Büyük',100],xl:['Çok büyük',116]};
+const ISH={sq:'Squircle (One UI)',ci:'Daire',rd:'Yuvarlak kare',sh:'Köşeli kare',or:'Orijinal'},ILB={always:'Hep görünsün',focus:'Sadece seçilince',off:'Gizli'};
+const BLR={0:['Kapalı',0],1:['Hafif',12],2:['Orta',22],3:['Güçlü',34]},TOPS={pill:'Yüzen hap',wide:'Geniş'},FXS={scale:'Büyüt',glow:'Parlama',ring:'Halka',lift:'Yüksel'},TLS={icon:'Simge',banner:'Banner'},IDL={0:'Kapalı',20:'20 sn',45:'45 sn',90:'90 sn'};
+const LOOKS={
+ cam:{n:'Cam',d:'Açık cam kartlar, mavi vurgu, geniş üst bar ve sağdan açılan koyu panel',v:{theme:'oneui',accent:'blue',tileStyle:'icon',topStyle:'wide',blur:2,focusFx:'scale',dock:false,wall:'scene:lake',icLabel:'always'}},
+ nova:{n:'Nova',d:'Gece gölü manzarası, mor vurgu, ışıldayan cam kartlar ve yüzen dock',v:{theme:'oneui',accent:'purple',tileStyle:'icon',topStyle:'pill',blur:2,focusFx:'glow',dock:true,wall:'scene:lake',icLabel:'always'}},
+ calm:{n:'Sakin',d:'Gün doğumu manzarası, cam panel içinde simgeler, adlar sadece odakta',v:{theme:'oneui',accent:'blue',tileStyle:'icon',topStyle:'pill',blur:2,focusFx:'ring',dock:true,wall:'scene:dawn',icLabel:'focus'}},
+ twilight:{n:'Alacakaranlık',d:'Mor-turuncu gökyüzü, şarap tonlu cam, pembe vurgu, parlayan banner kutucuklar',v:{theme:'wine',accent:'pink',tileStyle:'banner',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:twilight',icLabel:'focus'}},
+ nordic:{n:'Kuzey',d:'Kuzey ışıkları ve buzlu göl, okyanus tonlu derin cam, turkuaz vurgu',v:{theme:'ocean',accent:'teal',tileStyle:'banner',topStyle:'pill',blur:3,focusFx:'ring',dock:true,wall:'scene:nordic',icLabel:'focus'}}};
+const ROT={0:'Kapalı',30:'30 dk',60:'1 saat',1440:'Her gün'};
+const LK=[['theme',()=>Object.keys(THEMES)],['accent',()=>Object.keys(ACC)],['icShape',()=>Object.keys(ISH)],['icLabel',()=>Object.keys(ILB)],['iconSize',()=>Object.keys(SIZES)],['tileStyle',()=>Object.keys(TLS)],['topStyle',()=>Object.keys(TOPS)],['blur',()=>Object.keys(BLR)],['focusFx',()=>Object.keys(FXS)],['dock',()=>['0','1']],['idle',()=>Object.keys(IDL)],['rot',()=>Object.keys(ROT)],['wall',()=>['','auto'].concat(Object.keys(SCN).map(k=>'scene:'+k))]];
+const CH=(o,cur,fn)=>'<div class="chips">'+Object.keys(o).map(k=>'<div class="chip'+(String(cur)===String(k)?' on':'')+'" onclick="'+fn+'(\''+k+'\')">'+(Array.isArray(o[k])?o[k][0]:o[k])+'</div>').join('')+'</div>';
+const ROWS={in:'Giriş Kaynakları',tv:'Canlı TV',wg:'Kartlar',fav:'Favoriler',apps:'Tüm Uygulamalar'},ROWI={in:'',tv:'',wg:'',fav:'',apps:''};
+const DEF={fav:[],hidden:[],order:[],folders:{},theme:'ocean',accent:'teal',icShape:'or',icLabel:'focus',wall:'scene:nordic',blur:1,tileStyle:'icon',topStyle:'pill',focusFx:'lift',dock:true,idle:90,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
+ rmlog:{},updRepo:'ishakcic/ihlauncher',updMode:'ask',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'l',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'tv',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
+let S=JSON.parse(JSON.stringify(DEF));
+if(typeof Native==='undefined'){window.Native={sync:()=>'{}',call:(id,m)=>setTimeout(()=>window.__res(id,m==='apps'?'[]':'{}'),10)}}
+const pend={};let seq=0;
+function N(m,a){return new Promise(r=>{const id='c'+(++seq);pend[id]=r;try{Native.call(id,m,JSON.stringify(a||{}))}catch(e){delete pend[id];r({error:String(e)})}})}
+window.__res=(id,s)=>{const r=pend[id];delete pend[id];let o;try{o=JSON.parse(s)}catch(e){o={error:s}}if(r)r(o)};
+function NS(m,a){try{return JSON.parse(Native.sync(m,JSON.stringify(a||{})))}catch(e){return {}}}
+function saveNow(){clearTimeout(svT);Native.sync('setState',JSON.stringify({s:JSON.stringify(S)}))}
+let svT;function save(){clearTimeout(svT);svT=setTimeout(()=>Native.sync('setState',JSON.stringify({s:JSON.stringify(S)})),250)}
+function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Object.assign(S,s);
+ ['nightAuto','nightOn','clock','removed'].forEach(k=>delete S[k]);              /* eski sürüm alanları */
+ const FRESH=!S.themeV&&!S.v3&&!S.v5&&!S.v6;if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.calm.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}if(!S.v5){const w=S.wall;Object.assign(S,LOOKS.nova.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v5=1}if(!S.v6){const w=S.wall;Object.assign(S,LOOKS.cam.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v6=1}if(FRESH)Object.assign(S,{theme:'ocean',accent:'teal',icShape:'or',icLabel:'focus',iconSize:'l',tileStyle:'icon',topStyle:'pill',blur:1,focusFx:'lift',dock:true,idle:90,rot:0,wall:'scene:nordic'});S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
+ for(const k of ['keymap','keyNames','cecNames','folders','labels','rmlog'])S[k]=S[k]||{};S.docks=Array.isArray(S.docks)?S.docks:[];
+ for(const k of ['fav','hidden','order','bootApps','hist','inOrder','widgets'])if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(DEF[k]));
+ if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
+ for(const r of DEF.rows)if(!S.rows.some(x=>x.id===r.id))S.rows.push({id:r.id,on:true});
+ if(!S.v5){const i=S.rows.findIndex(r=>r.id==='tv'),t=i>=0?S.rows.splice(i,1)[0]:{id:'tv',on:true},j=S.rows.findIndex(r=>r.id==='in');S.rows.splice(j>=0?j+1:0,0,t);S.v5=1}
+ if(!S.wseq)S.wseq=S.widgets.length+3}
+const TI={'\u2705':['\u2713','ok'],'\u274C':['\u2715','bad'],'\u26D4':['\u2715','bad'],'\u26A0':['!','warn'],'\u23F3':['\u2026','']};
+let tt;function toast(i,m){const t=TI[String(i).replace(/\uFE0F/g,'')]||['',''],ti=$('#ti');ti.textContent=t[0];ti.className=t[1];$('#tm').textContent=m;$('#toast').classList.add('show');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('show'),3300)}
+window.__toast=toast;
+/* ===== Tema ===== */
+const lumOf=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255};
+/* Squircle: |x|^n+|y|^n=1 (n=5) eğrisinden üretilen kırpma yolu */
+function buildClip(){if($('#clipSvg'))return;const n=5,N=96,p=[];for(let k=0;k<N;k++){const t=k/N*2*Math.PI,c=Math.cos(t),sn=Math.sin(t);p.push((.5+.5*Math.sign(c)*Math.pow(Math.abs(c),2/n)).toFixed(4)+' '+(.5+.5*Math.sign(sn)*Math.pow(Math.abs(sn),2/n)).toFixed(4))}
+ document.body.insertAdjacentHTML('beforeend','<svg id="clipSvg" width="0" height="0" style="position:absolute"><defs><clipPath id="clipSq" clipPathUnits="objectBoundingBox"><path d="M'+p.join('L')+'Z"/></clipPath></defs></svg>')}
+window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&typeof S!=='undefined')applyTheme()},200)});
+function applyTheme(){buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
+/* ===== Saat ===== */
+function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+ $('#clock').textContent=t;$('#date').textContent=d;setB('time',t);setB('date2',d)}
+function setB(k,v){$$('[data-b="'+k+'"]').forEach(e=>e.textContent=v)}
+/* ===== Odak / D-pad ===== */
+const SEL='[onclick],button,input';
+function fx(){document.querySelectorAll(SEL).forEach(e=>{if(e.tagName==='INPUT'){if(e!==document.activeElement&&!e.dataset.rd){e.readOnly=true;e.inputMode='none';e.dataset.rd='1'}}else if(e.tagName!=='BUTTON'&&!e.hasAttribute('tabindex'))e.setAttribute('tabindex','0')})}
+new MutationObserver(()=>requestAnimationFrame(fx)).observe(document.body,{childList:true,subtree:true});
+/* Yazı kutuları: odak yalnızca vurgular; klavye ancak OK'a basılınca / dokunulunca açılır */
+let imeBusy=false;
+function actInput(el){if(!el)return;imeBusy=true;el.readOnly=false;el.inputMode='text';el.focus({preventScroll:true});try{el.setSelectionRange(el.value.length,el.value.length)}catch(x){}imeBusy=false;N('ime',{v:1})}
+document.addEventListener('focusout',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&!imeBusy){t.readOnly=true;t.inputMode='none';N('ime',{v:0})}});
+document.addEventListener('click',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.readOnly)actInput(t)});
+let idleT=null;
+function bump(){document.body.classList.remove('idle');clearTimeout(idleT);if(S.idle>0)idleT=setTimeout(()=>{if(!layer()&&!panel&&document.activeElement.tagName!=='INPUT')document.body.classList.add('idle')},S.idle*1000)}
+['keydown','mousemove','touchstart','click'].forEach(ev=>document.addEventListener(ev,bump,true));
+let panel=null,opener=null;
+function layer(){if($('#dlg').classList.contains('show'))return $('#dlg');if($('#dock').classList.contains('show'))return $('#dock');if($('#modal').classList.contains('show'))return $('#modal');if(panel)return $('#'+panel+'Panel');return null}
+function focusables(){const L=layer();let els=[...(L||document.body).querySelectorAll(SEL)];if(!L)els=els.filter(e=>!e.closest('.side,.ov2'));return els.filter(e=>!e.disabled&&!(e.tagName==='INPUT'&&e.closest('.search'))&&e.getClientRects().length>0)}
+let navigating=false,memX=null,memY=null;
+document.addEventListener('focusin',()=>{if(!navigating){memX=null;memY=null}});
+function ensureVisible(e){const c=$('#content'),L=layer();
+ if(!L&&c.contains(e)){const r=e.getBoundingClientRect(),top=innerHeight<540?78:112,bot=innerHeight-30;
+  if(r.top<top)c.scrollTop+=r.top-top-12;else if(r.bottom>bot)c.scrollTop+=r.bottom-bot+12;
+  const f=[...c.querySelectorAll('.row')].find(x=>x.offsetParent);if(f&&f.contains(e))c.scrollTop=0;
+  const rs=e.closest('.rs');if(rs){const a=rs.getBoundingClientRect(),b=e.getBoundingClientRect();if(b.left<a.left+24)rs.scrollLeft+=b.left-a.left-40;else if(b.right>a.right-24)rs.scrollLeft+=b.right-a.right+40}}
+ else try{e.scrollIntoView({block:'nearest',inline:'nearest'})}catch(x){}}
+function focusEl(e){navigating=true;try{e.focus({preventScroll:true})}catch(x){}navigating=false;ensureVisible(e)}
+function focusFirst(){fx();const l=focusables();if(l.length)focusEl(l.find(e=>e.tagName!=='INPUT')||l[0])}
+let fkeep=null;function keepNext(){const i=focusables().indexOf(document.activeElement);fkeep=i<0?null:i}
+function afterOpen(){if(fkeep!=null){fx();const l=focusables();const i=fkeep;fkeep=null;if(l[i]){focusEl(l[i]);return}}focusFirst()}
+/* Yön tuşları: AOSP FocusFinder mantığı — önce aynı hattaki (ışın içi) en yakın öğe; sütun/satır hafızası var */
+function navigate(dir){let cur=document.activeElement;if(cur&&cur.closest&&cur.closest('.search'))cur=cur.closest('.search');
+ const l=focusables();if(!cur||!l.includes(cur)){focusFirst();return}
+ const r=cur.getBoundingClientRect(),vert=dir==='u'||dir==='d',cx=r.left+r.width/2,cy=r.top+r.height/2;let rx=cx,ry=cy;
+ if(vert){if(memX==null)memX=cx;rx=memX;memY=null}else{if(memY==null)memY=cy;ry=memY;memX=null}
+ let best=null,bb=false,bs=Infinity;
+ for(const e of l){if(e===cur||e.contains(cur)||cur.contains(e))continue;
+  const b=e.getBoundingClientRect(),bx=b.left+b.width/2,by=b.top+b.height/2;let major,minor,beam;
+  if(vert){const dy=dir==='d'?by-cy:cy-by;if(dy<=Math.min(r.height,b.height)*.35)continue;
+   major=dir==='d'?Math.max(0,b.top-r.bottom):Math.max(0,r.top-b.bottom);minor=Math.abs(bx-rx);beam=b.right>rx-r.width/2&&b.left<rx+r.width/2}
+  else{const dx=dir==='r'?bx-cx:cx-bx;if(dx<=Math.min(r.width,b.width)*.35)continue;
+   beam=b.bottom>ry-r.height/2&&b.top<ry+r.height/2;if(!beam)continue;
+   major=dir==='r'?Math.max(0,b.left-r.right):Math.max(0,r.left-b.right);minor=Math.abs(by-ry)}
+  const sc=13*major*major+minor*minor;if((beam&&!bb)||(beam===bb&&sc<bs)){best=e;bb=beam;bs=sc}}
+ if(best){focusEl(best);return}
+ if(!vert){const g=cur.closest('.grid');if(g){const t=[...g.children].filter(x=>l.includes(x)),n=t[t.indexOf(cur)+(dir==='r'?1:-1)];if(n){memX=null;focusEl(n)}}}}
+const CK={183:'red',403:'red',184:'green',404:'green',185:'yellow',405:'yellow',186:'blue',406:'blue'},CKN={ColorF0Red:'red',ColorF1Green:'green',ColorF2Yellow:'yellow',ColorF3Blue:'blue'};
+/* OK tuşu: kısa basış = tıkla, 0,5 sn basılı = seçenek menüsü (kumandada tekrar eden tuş olayına bağlı değil) */
+let enterDown=false,enterT=null,lpDone=false;
+document.addEventListener('keydown',e=>{const a=document.activeElement,inp=a&&a.tagName==='INPUT'&&!a.readOnly,k=e.key;
+ const ck=CK[e.keyCode]||CKN[k];if(ck&&!inp){e.preventDefault();if(!e.repeat&&!layer())runAct(S.colorKeys[ck]);return}
+ const D={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r'}[k];
+ if(D){if(inp&&(D==='l'||D==='r'))return;e.preventDefault();navigate(D);return}
+ if(k==='Enter'){
+  if(inp){const f=a.dataset.submit;if(f&&window[f]){e.preventDefault();window[f]()}return}
+  e.preventDefault();
+  if(a&&a.tagName==='INPUT'){if(!e.repeat)actInput(a);return}
+  if(!e.repeat&&!enterDown){enterDown=true;lpDone=false;const t=a;clearTimeout(enterT);enterT=setTimeout(()=>{if(enterDown&&t&&t!==document.body){lpDone=true;longPress(t)}},500)}
+  return}
+ if((k==='ContextMenu'||k==='Info'||k==='F1')&&!inp){e.preventDefault();longPress(a);return}
+ if(k==='Escape'||(k==='Backspace'&&!inp)){e.preventDefault();window.__back()}
+});
+document.addEventListener('keyup',e=>{if(e.key!=='Enter')return;clearTimeout(enterT);if(!enterDown)return;enterDown=false;const a=document.activeElement;if(!lpDone&&a&&a!==document.body&&a.tagName!=='INPUT')a.click();lpDone=false});
+/* dokunmatik / fare ile uzun basma */
+const LPSEL='[data-p],[data-fold],[data-nk],[data-in],[data-w],[data-row],[data-addw]';
+let lpT=null,lpFired=false;
+document.addEventListener('touchstart',e=>{lpFired=false;clearTimeout(lpT);const t=e.target.closest(LPSEL);if(!t)return;lpT=setTimeout(()=>{lpFired=true;longPress(t)},550)},{passive:true});
+['touchend','touchmove','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(lpT),{passive:true}));
+document.addEventListener('click',e=>{if(lpFired){e.stopPropagation();e.preventDefault();lpFired=false}},true);
+document.addEventListener('contextmenu',e=>{e.preventDefault();longPress(e.target)});
+function longPress(a){if(!a||!a.closest)return;let t;const rid=(a.closest('.row')||{id:''}).id.slice(4);
+ if(t=a.closest('[data-p]')){if(S.quickBar)quickBar(t.dataset.p,rid);else appMenu(t.dataset.p,rid);return}
+ if(t=a.closest('[data-fold]')){folderMenu(t.dataset.fold);return}
+ if(t=a.closest('[data-nk]')){N('notifCancel',{k:t.dataset.nk}).then(loadNotifs);return}
+ if(t=a.closest('[data-in]')){inputMenu(+t.dataset.in);return}
+ if(t=a.closest('[data-w]')){widgetMenu(t.dataset.w);return}
+ if(t=a.closest('[data-addw]')){addWidgetMenu();return}
+ if(t=a.closest('[data-row]')){rowMenu(t.dataset.row)}}
+/* ===== Diyalog / modal ===== */
+let dlgOpener=null,dlgKey='';
+function markOpener(){if($('#dlg').classList.contains('show'))return;const a=document.activeElement;dlgOpener=a&&a!==document.body?a:null;dlgKey=(a&&a.dataset&&a.dataset.p)||''}
+function showDlg(){markOpener();$('#dlg').classList.add('show');setTimeout(focusFirst,30)}
+/* Pencere kapanınca odak, açan öğeye geri döner (kumandada başa zıplamasın) */
+function closeDlg(){if(window.__learnActive){window.__learnActive=false;clearTimeout(learnT);N('keyLearnStop')}$('#dlg').classList.remove('show','rside');$('#dlgbox').style.maxWidth='';
+ const o=dlgOpener,k=dlgKey;dlgOpener=null;dlgKey='';
+ if(o&&o.isConnected){try{o.focus({preventScroll:true})}catch(e){}}
+ setTimeout(()=>{if(layer()&&layer()!==$('#dlg')&&!layer().contains(document.activeElement))return;const a=document.activeElement;if(!a||a===document.body){const e=k&&document.querySelector('[data-p="'+k.replace(/"/g,'\\"')+'"]');if(e&&e.getClientRects().length)focusEl(e);else{const f=document.querySelector('#favRow .card,#grid .tile');if(f)focusEl(f)}}},90)}
+let menuActs=[],qActs=[];
+function quickBar(p,rid){const isF=S.fav.includes(p),hid=S.hidden.includes(p),a=APPS.find(x=>x.p===p),sys=a?a.s:false;
+ const chips=[];if(isF)chips.push(['★ Favori','a']);if(hid)chips.push(['Gizli','w']);if(sys)chips.push(['Sistem uygulaması','u']);
+ gmenu({icon:icon(p),title:lab(p),sub:p,chips,groups:[
+  {t:'Hızlı eylemler',items:[['▶️','Aç',()=>launch(p)],[isF?'💔':'⭐',isF?'Favoriden çıkar':'Favorilere ekle',()=>toggleFav(p)],['↔️','Taşı',()=>startMove(rid==='fav'?'fav':'app',p)],[hid?'👁️':'🙈',hid?'Göster':'Gizle',()=>toggleHide(p)]]},
+  {t:'Diğer',items:[['❄️','Dondur',()=>pmDo('freeze',p)],['🗑️','Kaldır',()=>uninstallApp(p,sys),'dng'],['⋯','Tüm seçenekler',()=>appMenu(p,rid)]]}]})}
+function qaPick(k){closeDlg();qActs[k]()}
+function menu(title,items){$('#dlg').classList.remove('rside');menuActs=items.map(i=>typeof i==='string'?null:i[1]);
+ $('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div>'+items.map((i,k)=>typeof i==='string'?'<div class="dsep">'+esc(i)+'</div>':'<div class="ditem" onclick="menuPick('+k+')">'+i[0]+'</div>').join('');showDlg()}
+function menuPick(k){closeDlg();menuActs[k]()}
+let askRes=null;
+function ask(t,def){return new Promise(r=>{askRes=r;$('#dlg').classList.remove('rside');markOpener();$('#dlgbox').innerHTML='<div class="dt">'+esc(t)+'</div><input id="ain" value="'+esc(def||'')+'" data-submit="askOk"><div class="drow"><div class="btn b" onclick="askDone(true)">Tamam</div><div class="btn" onclick="askDone(false)">İptal</div></div>';$('#dlg').classList.add('show');setTimeout(()=>{const i=$('#ain');actInput(i);i.select()},40)})}
+function askOk(){askDone(true)}
+function askDone(ok){const v=$('#ain')?$('#ain').value:'';N('ime',{v:0});closeDlg();if(askRes)askRes(ok?v:null);askRes=null}
+function conf(msg){return new Promise(r=>{askRes=r;$('#dlg').classList.remove('rside');$('#dlgbox').innerHTML='<div class="dm">'+esc(msg)+'</div><div class="drow"><div class="btn g" onclick="confDone(true)">Evet</div><div class="btn r" onclick="confDone(false)">Hayır</div></div>';showDlg()})}
+function confDone(v){closeDlg();if(askRes)askRes(v);askRes=null}
+function info(title,text){$('#dlg').classList.remove('rside');$('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div><div class="dm">'+esc(text)+'</div><div class="drow"><div class="btn b" onclick="closeDlg()">Tamam</div></div>';showDlg()}
+let modalBack=null;
+function mset(title,html,back){if(!$('#modal').classList.contains('show'))opener=document.activeElement;modalBack=back||null;
+ const nav=back?'<div class="btn" onclick="modalBackGo()">‹ Geri</div>':'<div class="btn" onclick="closeModal()">Kapat</div>';
+ $('#mbody').innerHTML='<div>'+nav+'</div><div class="mt">'+title+'</div><div>'+html+'</div>';$('#modal').classList.add('show');setTimeout(afterOpen,40)}
+function modalBackGo(){const b=modalBack;if(b)b();else closeModal()}
+function closeModal(){$('#modal').classList.remove('show');modalBack=null;curView='';$('#mbody').innerHTML='';if(opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}opener=null}
+let curView='';
+window.__back=function(){if(MV){mvEnd(false);return true}if($('#dock').classList.contains('show')&&!$('#dlg').classList.contains('show')){closeDock();return true}if($('#dlg').classList.contains('show')){closeDlg();if(askRes){askRes(null);askRes=null}return true}
+ if($('#modal').classList.contains('show')){if(modalBack)modalBack();else closeModal();return true}
+ if(panel){closePanels();return true}
+ {const ai=document.activeElement;if(ai&&ai.tagName==='INPUT'&&!ai.readOnly){ai.blur();return true}}
+ const c=$('#content');if($('#q').value){$('#q').value='';renderGrid();return true}
+ if(c.scrollTop>10){c.scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}
+ return true};
+window.__home=function(){closeDlg();closeModal();closePanels();$('#content').scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)};
+function openPanel(n){closePanels();opener=document.activeElement;panel=n;$('#'+n+'Panel').classList.add('open');if(n==='notif')loadNotifs();else renderSettings();setTimeout(focusFirst,80)}
+function closePanels(){const had=panel;$$('.side').forEach(s=>s.classList.remove('open'));panel=null;if(had&&opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}}
+/* ===== Uygulamalar ===== */
+let APPS=[],ALL=[],INP=[];
+const baseLab=p=>(APPS.find(a=>a.p===p)||ALL.find(a=>a.p===p)||{l:p}).l;
+const lab=p=>S.labels[p]||baseLab(p);
+const icon=(p,b)=>'https://appicon.local/'+(b?'banner':'icon')+'/'+p;
+function sortedApps(){const o=S.order||[];return [...APPS].sort((a,b)=>{const ia=o.indexOf(a.p),ib=o.indexOf(b.p);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return -1;if(ib>=0)return 1;return lab(a.p).localeCompare(lab(b.p),'tr')})}
+let APPERR='';
+function safe(n,f){try{return f()}catch(e){window.__rep(n+': '+(e&&e.message||e))}}
+async function loadApps(){const r=await N('apps');if(Array.isArray(r)){APPS=r;APPERR=''}else{APPS=[];APPERR=String((r&&r.error)||'yanıt alınamadı')}
+ safe('detectNew',detectNew);renderAll()}
+function detectNew(){if(!APPS.length)return;if(!S.seen.length){S.seen=APPS.map(a=>a.p);save();return}
+ const seen=new Set(S.seen),now=Date.now();for(const k in S.newApps)if(now-S.newApps[k]>6048e5||!APPS.some(a=>a.p===k))delete S.newApps[k];
+ const fresh=APPS.filter(a=>!seen.has(a.p));if(fresh.length){fresh.forEach(a=>{S.seen.push(a.p);S.newApps[a.p]=now});toast('🆕',fresh.length===1?'Yeni uygulama: '+lab(fresh[0].p):fresh.length+' yeni uygulama eklendi')}save()}
+function renderAll(){safe('renderFavs',renderFavs);safe('renderGrid',renderGrid);safe('updateRowVis',updateRowVis)}
+function launch(p){if(S.newApps[p]){delete S.newApps[p];save();applyBadges()}N('launch',{p}).then(r=>{if(!r.ok)toast('❌',lab(p)+' açılamadı')})}
+function tile(a){const hid=S.hidden.includes(a.p)?' hid':'',p=esc(a.p),nm=esc(lab(a.p));
+ if(S.tileStyle==='banner')return '<div class="tile bn'+hid+'" data-p="'+p+'" onclick="launch('+q(a.p)+')">'+(a.b?'<div class="iw"><img class="ban" src="'+icon(a.p,true)+'" alt=""></div>':'<div class="iw nb"><div class="ico"><img src="'+icon(a.p)+'" alt=""></div><div class="tl2">'+nm+'</div></div>')+'</div>';
+ return '<div class="tile'+hid+'" data-p="'+p+'" onclick="launch('+q(a.p)+')"><div class="iw"><div class="ico"><img src="'+icon(a.p)+'" alt=""></div></div><div class="tl2">'+nm+'</div></div>'}
+function renderGrid(){const qq=($('#q').value||'').toLowerCase().trim(),inF=new Set(Object.values(S.folders).flat());let h='',list;
+ const vis=a=>S.showHidden||!S.hidden.includes(a.p);
+ if(qq)list=APPS.filter(a=>(lab(a.p).toLowerCase().includes(qq)||a.l.toLowerCase().includes(qq))&&vis(a));
+ else{list=sortedApps().filter(a=>vis(a)&&!inF.has(a.p));
+  for(const n in S.folders)h+='<div class="tile'+(S.tileStyle==='banner'?' bn':'')+'" data-fold="'+esc(n)+'" onclick="openFolder(this.dataset.fold)"><div class="fi">'+(S.folders[n].slice(0,4).map(p=>'<img src="'+icon(p)+'" alt="">').join('')||'<span class="em"></span>')+'</div><div class="tl2">'+esc(n)+' ('+S.folders[n].length+')</div></div>'}
+ h+=list.map(tile).join('');$('#grid').className='grid'+(S.tileStyle==='banner'?' bn':'');document.querySelector('.search').classList.toggle('has',!!qq);$('#grid').innerHTML=h||(APPERR?'<div class="empty">Uygulama listesi alınamadı: '+esc(APPERR)+'<br><br><span class="btn b" onclick="loadApps()">Yeniden dene</span></div>':(APPS.length?'<div class="empty">Aramayla eşleşen uygulama yok</div>':'<div class="empty">Cihazda başlatılabilir uygulama bulunamadı (0). <span class="btn b" onclick="loadApps()">Yeniden dene</span></div>'));safe('badges',applyBadges)}
+function searchEnter(){const qq=($('#q').value||'').toLowerCase().trim();const a=APPS.find(x=>lab(x.p).toLowerCase().includes(qq)&&(S.showHidden||!S.hidden.includes(x.p)));if(a&&qq)launch(a.p);else focusFirst()}
+function renderFavs(){const f=S.fav.map(p=>APPS.find(a=>a.p===p)).filter(Boolean);
+ $('#favRow').innerHTML=f.map(a=>'<div class="card fav'+(a.b?' hb':'')+'" data-p="'+esc(a.p)+'" onclick="launch('+q(a.p)+')">'+(a.b?'<div class="th" style="background-image:url('+icon(a.p,true)+')"></div>':'<div class="fico ico"><img src="'+icon(a.p)+'" alt=""></div>')+'<div class="nm">'+esc(lab(a.p))+'</div></div>').join('');applyBadges()}
+function toggleFav(p){const i=S.fav.indexOf(p);if(i>=0)S.fav.splice(i,1);else S.fav.push(p);save();renderFavs();updateRowVis();toast('⭐',lab(p)+(i>=0?' favorilerden çıkarıldı':' favorilere eklendi'))}
+function toggleHide(p){const i=S.hidden.indexOf(p);if(i>=0)S.hidden.splice(i,1);else S.hidden.push(p);save();renderGrid();toast('👁️',lab(p)+(i>=0?' gösterildi':' gizlendi (Launcher Ayarları’ndan geri getirilir)'))}
+function toggleBoot(p){const i=S.bootApps.indexOf(p);if(i>=0)S.bootApps.splice(i,1);else S.bootApps.push(p);save();toast('🚀',lab(p)+(i>=0?': açılışta başlatma kapalı':': açılışta başlayacak'))}
+async function renameApp(p){const v=await ask('Yeni ad (boş bırak = orijinal ad)',lab(p));if(v===null)return;if(v.trim()&&v.trim()!==baseLab(p))S.labels[p]=v.trim();else delete S.labels[p];save();renderAll()}
+function moveApp(p,d){S.order=sortedApps().map(a=>a.p);const i=S.order.indexOf(p),j=i+d;if(i<0||j<0||j>=S.order.length)return;S.order.splice(j,0,S.order.splice(i,1)[0]);save();renderGrid();const e=$('#grid [data-p="'+p+'"]');if(e)focusEl(e)}
+function appMenu(p,rid){const isF=S.fav.includes(p),hid=S.hidden.includes(p),a=APPS.find(x=>x.p===p),sys=a?a.s:false,boot=S.bootApps.includes(p);
+ const hq=[['▶️','Aç',()=>launch(p)],[isF?'💔':'⭐',isF?'Favoriden çıkar':'Favorilere ekle',()=>toggleFav(p)]];
+ if(rid==='fav')hq.push(['↔️','Taşı',()=>startMove('fav',p)]);
+ else{hq.push(['↔️','Taşı',()=>startMove('app',p)]);if(isF)hq.push(['🔀','Favorilerde taşı',()=>startMove('fav',p)])}
+ hq.push([hid?'👁️':'🙈',hid?'Göster':'Gizle',()=>toggleHide(p)]);
+ const ed=[['📁','Klasör',()=>addToFolder(p)],['✏️','Adı değiştir',()=>renameApp(p)],['⏪','Öne al',()=>moveApp(p,-1)],['⏩','Geriye al',()=>moveApp(p,1)],[boot?'🚫':'🚀',boot?'Açılışta başlatma: kapat':'Açılışta başlat',()=>toggleBoot(p)]];
+ if(rid&&ROWS[rid])ed.push(['🧩','Bölümü taşı',()=>rowMenu(rid)]);
+ const bi=[['ℹ️','Ayrıntılar',()=>appDetail(p)],['⚙️','Android bilgisi',()=>N('appSettings',{p})],['🔐','İzinler',()=>permsFor(p)],['🛍️','Mağazada aç',()=>N('market',{p})]];
+ const ad=[['❄️','Dondur',()=>pmDo('freeze',p)],['⏹️','Zorla durdur',()=>pmDo('stop',p)],['🔋','Arka planı kısıtla',()=>pmDo('bgRestrict',p)],['🔓','Kısıtı kaldır',()=>pmDo('bgAllow',p)],['🧹','Verileri temizle',()=>pmDo('clear',p)],['🗑️','Kaldır',()=>uninstallApp(p,sys),'dng']];
+ const chips=[];if(isF)chips.push(['★ Favori','a']);if(hid)chips.push(['Gizli','w']);if(boot)chips.push(['Açılışta başlar','f']);if(sys)chips.push(['Sistem uygulaması','u']);
+ gmenu({icon:icon(p),title:lab(p),sub:p,chips,groups:[{t:'Hızlı',items:hq},{t:'Düzenle',items:ed},{t:'Bilgi',items:bi},{t:'Yönet (ADB)',items:ad}]})}
+async function appDetail(p){const r=await N('appInfo',{p});if(r.error){toast('❌',String(r.error).slice(0,80));return}const d=t=>t?new Date(t).toLocaleDateString('tr-TR'):'-';
+ info(lab(p),['Paket: '+r.p,'Sürüm: '+r.v+' ('+r.c+')','Tür: '+(r.sys?'Sistem uygulaması':'Kullanıcı uygulaması'),'Hedef SDK: '+r.sdk,'Kurulum: '+d(r.first),'Güncelleme: '+d(r.upd),'Durum: '+(r.enabled?'Aktif':'Dondurulmuş'),'APK: '+r.apk].join('\n'))}
+async function uninstallApp(p,sys){if(isProt(p)){toast('⛔','Kritik paket korunuyor');return}
+ const st=await N('adbStatus');
+ if(!st.ready){if(sys){info('ADB gerekli','Sistem uygulamaları yalnızca ADB / Shizuku ile kaldırılabilir. Kontrol Odası → ADB Terminal’den bağlan.');return}
+  if(await conf(lab(p)+' kaldırılsın mı?'))N('uninstallUi',{p});return}
+ pmDo('uninstall',p,sys)}
+async function addToFolder(p){const names=Object.keys(S.folders);
+ menu('Klasör seç',[...names.map(n=>[''+n,()=>{removeFromFolders(p);S.folders[n].push(p);save();renderGrid()}]),['Yeni klasör',async()=>{const n=await ask('Klasör adı','');if(n&&n.trim()){removeFromFolders(p);S.folders[n.trim()]=(S.folders[n.trim()]||[]).concat([p]);save();renderGrid()}}],['Klasörden çıkar',()=>{removeFromFolders(p);save();renderGrid()}]])}
+function removeFromFolders(p){for(const n in S.folders){S.folders[n]=S.folders[n].filter(x=>x!==p);if(!S.folders[n].length)delete S.folders[n]}}
+function openFolder(n){const l=(S.folders[n]||[]).map(p=>APPS.find(a=>a.p===p)).filter(Boolean);mset(''+esc(n),'<div class="grid">'+l.map(tile).join('')+'</div>',null)}
+function folderMenu(n){menu(''+n,[['Yeniden adlandır',async()=>{const v=await ask('Yeni ad',n);if(v&&v.trim()&&v!==n){S.folders[v.trim()]=S.folders[n];delete S.folders[n];save();renderGrid()}}],['Klasörü sil (uygulamalar kalır)',()=>{delete S.folders[n];save();renderGrid()}],...rowItems('apps')])}
+let PICK=[],pickRes=null;
+function pickApp(title){return new Promise(res=>{pickRes=res;PICK=sortedApps();$('#dlgbox').innerHTML='<div class="dt">'+esc(title)+'</div>'+PICK.map((a,k)=>'<div class="ditem" onclick="pickDone('+k+')">'+esc(lab(a.p))+'</div>').join('')+'<div class="ditem" onclick="pickDone(-1)">İptal</div>';showDlg()})}
+function pickDone(k){closeDlg();if(pickRes)pickRes(k>=0?PICK[k].p:null);pickRes=null}
+/* ===== Bölümler: sırala / gizle ===== */
+function applyRows(){const c=$('#content');for(const r of S.rows)c.appendChild($('#row-'+r.id));updateRowVis()}
+function updateRowVis(){for(const r of S.rows){const e=$('#row-'+r.id);if(!e)continue;e.style.display=(!r.on||(r.id==='in'&&!INP.length)||(r.id==='tv'&&!(window.__tvHas&&window.__tvHas()))||(r.id==='fav'&&!S.fav.length))?'none':''}}
+function moveRow(id,dir,lay){const a=S.rows,i=a.findIndex(r=>r.id===id);if(i<0)return;const j=dir==='up'?i-1:dir==='down'?i+1:dir==='top'?0:a.length-1;if(j<0||j>=a.length||j===i){toast('↕️','Bölüm zaten orada');return}
+ const r=a.splice(i,1)[0];a.splice(j,0,r);save();applyRows();toast('↕️',ROWS[id]+' taşındı');
+ if(lay){keepNext();layoutView()}else{const h=$('#row-'+id+' .rt');if(h)focusEl(h)}}
+function rowToggle(id,lay){const r=S.rows.find(x=>x.id===id);r.on=!r.on;save();updateRowVis();if(lay){keepNext();layoutView()}else toast('👁️',ROWS[id]+(r.on?' gösterildi':' gizlendi (Ana Ekran Düzeni’nden geri getirilir)'))}
+function rowItems(id){return ['Bölüm: '+ROWS[id],['Yukarı taşı',()=>moveRow(id,'up')],['Aşağı taşı',()=>moveRow(id,'down')],['En üste al',()=>moveRow(id,'top')],['En alta al',()=>moveRow(id,'bottom')],['Bölümü gizle',()=>rowToggle(id)],['Ana ekran düzeni…',layoutView]]}
+function rowMenu(id){const x=[];
+ if(id==='wg')x.push('Kartlar',['Kart ekle',addWidgetMenu],['Varsayılan kartlara dön',resetWidgets]);
+ if(id==='fav')x.push('Favoriler',['Favori ekle',async()=>{const p=await pickApp('Favorilere eklenecek uygulama');if(p&&!S.fav.includes(p))toggleFav(p)}]);
+ if(id==='apps')x.push('Uygulamalar',[S.showHidden?'Gizlileri sakla':'Gizlileri göster',()=>{S.showHidden=!S.showHidden;save();renderGrid()}],['Sıralamayı A–Z’ye sıfırla',()=>{S.order=[];save();renderGrid()}]);
+ menu(ROWS[id],[...x,...rowItems(id)])}
+function layoutView(){curView='layout';mset('Ana Ekran Düzeni','<div class="nf">Bölümleri sırala veya gizle. Ana ekranda bir bölüm başlığına (ör. “Kartlar”) uzun basarak da taşıyabilirsin.</div>'+
+ S.rows.map(r=>'<div class="r2"><div class="n">'+ROWI[r.id]+'  '+ROWS[r.id]+'</div><div><span class="btn" onclick="moveRow(\''+r.id+'\',\'up\',1)">▲ Yukarı</span><span class="btn" onclick="moveRow(\''+r.id+'\',\'down\',1)">▼ Aşağı</span><span class="btn '+(r.on?'g':'')+'" onclick="rowToggle(\''+r.id+'\',1)">'+(r.on?'Görünür':'Gizli')+'</span></div></div>').join('')+
+ '<div class="sec">Kartlar</div>'+(S.widgets.map(w=>'<div class="r2"><div class="n">'+WT[w.t].i+'  '+WT[w.t].n+(w.t==='weather'&&w.city?' • '+esc(w.city):'')+'</div><div><span class="btn" onclick="moveW(\''+w.id+'\',-1,1)">‹</span><span class="btn" onclick="moveW(\''+w.id+'\',1,1)">›</span><span class="btn r" onclick="delW(\''+w.id+'\',1)">Sil</span></div></div>').join('')||'<div class="empty">Kart yok</div>')+
+ '<div style="margin-top:8px"><span class="btn b" onclick="addWidgetMenu()">Kart ekle</span><span class="btn" onclick="resetWidgets()">Varsayılan kartlar</span></div>',null)}
+/* ===== Giriş kaynakları (HDMI/CEC) ===== */
+let INPS=[];
+async function loadInputs(){const r=await N('inputs');INP=Array.isArray(r)?r:[];const o=S.inOrder;INPS=[...INP].sort((a,b)=>{const x=o.indexOf(a.id),y=o.indexOf(b.id);return(x<0?999:x)-(y<0?999:y)});updateRowVis();
+ const st=['BAĞLI','BEKLEMEDE','BAĞLI DEĞİL'];
+ $('#inRow').innerHTML=INPS.map((i,k)=>'<div class="card hd '+(i.state===2?'off':(i.state===0?'on':''))+'" data-in="'+k+'" onclick="goInput('+k+')"><div class="l">'+esc(i.type===1007?'HDMI'+(i.port>0?' '+i.port:''):'GİRİŞ')+' • '+(st[i.state]||'')+'</div><div class="d">'+esc(S.cecNames[i.id]||i.cec||i.label)+'</div></div>').join('')}
+function goInput(k){N('switchInput',{id:INPS[k].id});toast('📺','Giriş: '+(S.cecNames[INPS[k].id]||INPS[k].label))}
+async function renameInput(k){const i=INPS[k];const v=await ask('Giriş adı',S.cecNames[i.id]||i.cec||i.label);if(v!==null){if(v.trim())S.cecNames[i.id]=v.trim();else delete S.cecNames[i.id];save();loadInputs()}}
+function moveInput(k,d){const ids=INPS.map(i=>i.id),j=k+d;if(j<0||j>=ids.length)return;ids.splice(j,0,ids.splice(k,1)[0]);S.inOrder=ids;save();loadInputs().then(()=>{const e=$('#inRow [data-in="'+j+'"]');if(e)focusEl(e)})}
+async function cecState(){if(!(await adbReady()))return null;const r=await N('adb',{c:'echo A:$(settings get global hdmi_control_auto_device_off_enabled); echo E:$(settings get global hdmi_control_enabled)'});const m={};(r.out||'').split('\n').forEach(l=>{const x=l.indexOf(':');if(x>0)m[l.slice(0,x).trim()]=l.slice(x+1).trim()});return m}
+const cecOff=v=>'settings put global hdmi_control_auto_device_off_enabled '+v;
+const cecEn=v=>'cmd hdmi_control cec_setting set hdmi_cec_enabled '+v+' || settings put global hdmi_control_enabled '+v;
+async function cecRun(c,okMsg){const r=await N('adb',{c});const bad=r.code!==0||/Exception|Error|Unknown/i.test(r.out||'');toast(bad?'❌':'✅',bad?String(r.out||r.error||'ADB bağlı değil').slice(0,90):okMsg);return !bad}
+async function cecRestart(){toast('⏳','CEC yeniden başlatılıyor…');await cecRun(cecEn(0)+'; sleep 2; '+cecEn(1),'CEC yeniden başlatıldı')}
+async function inputMenu(k){const st=await cecState(),A=st&&st.A==='1';
+ menu(S.cecNames[INPS[k].id]||INPS[k].cec||INPS[k].label,[['Bu girişe geç (CEC cihazı çoğu zaman uyanır)',()=>goInput(k)],['Adı değiştir',()=>renameInput(k)],['↔️ Taşı (yön tuşlarıyla)',()=>startMove('in',INPS[k].id)],['Sola taşı',()=>moveInput(k,-1)],['Sağa taşı',()=>moveInput(k,1)],
+  'CEC (ADB)',[A?'TV uyurken cihazları kapatma: AÇIK → kapat':'TV uyurken bağlı cihazları da kapat',async()=>{if(await cecRun(cecOff(A?0:1),A?'Otomatik cihaz kapatma kapatıldı':'TV uyuyunca bağlı cihazlara kapanma komutu gider'));}],['CEC’i yeniden başlat (cihaz tanınmıyorsa)',cecRestart],...rowItems('in')])}
+/* ===== Kartlar / widget ===== */
+const WI={sys:'<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',storage:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',net:'<path d="M8 4v14M8 18l-3-3M8 18l3-3M16 20V6M16 6l-3 3M16 6l3 3"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',weather:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',note:'<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>',shortcut:'<path d="M7 17L17 7M9 7h8v8"/>',notif:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'};
+const WC={sys:'#5B9DFF',storage:'#A58BFF',net:'#2FC4B2',clock:'#7FA8FF',weather:'#FFC94D',note:'#6BD08A',shortcut:'#F27BA5',notif:'#FFA24D'};
+const WH=(t,n)=>'<div class="wh"><span class="wb"><svg viewBox="0 0 24 24">'+WI[t]+'</svg></span><span class="wt">'+n+'</span></div>',wcs=t=>'--wc:'+(WC[t]||'#888')+';--wcb:'+hexA(WC[t]||'#888888',.18);
+const WT={sys:{i:'',n:'Sistem',d:'CPU ve RAM'},storage:{i:'',n:'Depolama',d:'Dolu alan'},net:{i:'',n:'Ağ & Sıcaklık',d:'İndirme hızı, ısı'},clock:{i:'',n:'Saat',d:'Büyük saat ve tarih'},weather:{i:'',n:'Hava Durumu',d:'Şehre göre'},note:{i:'',n:'Not',d:'Hızlı not'},shortcut:{i:'',n:'Uygulama Kısayolu',d:'Tek tuşla aç'},notif:{i:'',n:'Bildirimler',d:'Sayı ve son bildirim'}};
+const WX={};
+const WMO=c=>c===0?['','Açık']:c<=2?['','Parçalı bulutlu']:c===3?['','Kapalı']:c<=48?['','Sisli']:c<=57?['','Çiseleme']:c<=67?['','Yağmurlu']:c<=77?['','Karlı']:c<=82?['','Sağanak']:c<=86?['','Kar sağanağı']:['','Fırtına'];
+function wHtml(w){const c='card wg'+(w.big?' big':''),at='data-w="'+w.id+'" onclick="wClick(\''+w.id+'\')" style="'+wcs(w.t)+'"';
+ switch(w.t){
+ case 'sys':return '<div class="'+c+'" '+at+'>'+WH('sys','SİSTEM')+'<div class="wv">CPU <span data-b="cpu">–</span></div><div class="bar"><i data-b="cpuB"></i></div><div class="ws" data-b="ram"></div></div>';
+ case 'storage':return '<div class="'+c+'" '+at+'>'+WH('storage','DEPOLAMA')+'<div class="wv" data-b="st">–</div><div class="bar"><i data-b="stB"></i></div><div class="ws" data-b="stS"></div></div>';
+ case 'net':return '<div class="'+c+'" '+at+'>'+WH('net','AĞ / SICAKLIK')+'<div class="wv" data-b="dl">–</div><div class="ws" data-b="temp"></div></div>';
+ case 'clock':return '<div class="'+c+'" '+at+'>'+WH('clock','SAAT')+'<div class="wv big" data-b="time"></div><div class="ws" data-b="date2"></div></div>';
+ case 'weather':return '<div class="'+c+'" '+at+'>'+WH('weather','HAVA DURUMU')+'<div data-wx="'+w.id+'"></div></div>';
+ case 'note':return '<div class="'+c+'" '+at+'>'+WH('note','NOT')+'<div class="wn">'+esc(w.text||'Not eklemek için tıkla')+'</div></div>';
+ case 'shortcut':return '<div class="'+c+'" '+at+'>'+(w.p?'<div class="wsc"><div class="ico"><img src="'+icon(w.p)+'" alt=""></div><div>'+esc(lab(w.p))+'</div></div>':''+WH('shortcut','KISAYOL')+'<div class="ws">Uygulama seçmek için tıkla</div>')+'</div>';
+ case 'notif':return '<div class="'+c+'" '+at+'>'+WH('notif','BİLDİRİMLER')+'<div class="wv" data-b="ncount">0</div><div class="ws" data-b="nlast"></div></div>'}
+ return ''}
+function renderWidgets(){$('#wgRow').innerHTML=S.widgets.map(wHtml).join('')+'<div class="card addw" data-addw="1" onclick="addWidgetMenu()"><b>+</b><span>Kart ekle</span></div>';
+ for(const w of S.widgets)if(w.t==='weather'){renderWx(w);const d=WX[w.id];if(!d||Date.now()-d.t>900000)loadWx(w)}
+ tick();pollN();poll()}
+async function loadWx(w){WX[w.id]=WX[w.id]||{t:0};WX[w.id].t=Date.now();
+ try{if(!w.lat){const g=await(await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(w.city)+'&count=1&language=tr')).json();if(!g.results||!g.results.length)throw new Error('Şehir bulunamadı');w.lat=g.results[0].latitude;w.lon=g.results[0].longitude;w.cname=g.results[0].name;save()}
+  const r=await(await fetch('https://api.open-meteo.com/v1/forecast?latitude='+w.lat+'&longitude='+w.lon+'&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto')).json();const c=r.current;
+  WX[w.id]={t:Date.now(),temp:c.temperature_2m,code:c.weather_code,wind:c.wind_speed_10m}}
+ catch(e){WX[w.id]={t:Date.now(),err:(e&&e.message)||'Bağlantı hatası'}}
+ if(S.wall==='auto')applyWall();renderWx(w)}
+function renderWx(w){const e=$('[data-wx="'+w.id+'"]');if(!e)return;const d=WX[w.id];
+ if(!d||(!d.err&&d.temp==null)){e.innerHTML='<div class="ws">Yükleniyor…</div>';return}
+ if(d.err){e.innerHTML='<div class="ws">'+esc(d.err)+'</div>';return}
+ const m=WMO(d.code);e.innerHTML='<div class="wv">'+Math.round(d.temp)+'°</div><div class="ws">'+esc(w.cname||w.city)+' • '+m[1]+' • '+Math.round(d.wind)+' km/sa</div>'}
+const wget=id=>S.widgets.find(w=>w.id===id);
+async function wEdit(id){const w=wget(id);if(!w)return;
+ if(w.t==='note'){const v=await ask('Not metni',w.text||'');if(v!==null){w.text=v;save();renderWidgets()}}
+ else if(w.t==='weather'){const v=await ask('Şehir adı',w.city||'');if(v&&v.trim()){w.city=v.trim();delete w.lat;delete w.lon;delete w.cname;delete WX[w.id];save();renderWidgets()}}
+ else if(w.t==='shortcut'){const p=await pickApp('Hangi uygulama?');if(p){w.p=p;save();renderWidgets()}}}
+function wClick(id){const w=wget(id);if(!w)return;
+ if(w.t==='note'||w.t==='shortcut'&&!w.p)wEdit(id);else if(w.t==='shortcut')launch(w.p);
+ else if(w.t==='weather'){delete WX[w.id];renderWx(w);loadWx(w)}
+ else if(w.t==='notif')openPanel('notif');
+ else if(w.t==='storage')N('openSettings',{k:'storage'});else if(w.t==='net')N('openSettings',{k:'net'});else if(w.t==='sys')surgeonHome()}
+function focusW(id){const e=$('#wgRow [data-w="'+id+'"]');if(e)focusEl(e)}
+function moveW(id,d,lay){const a=S.widgets,i=a.findIndex(w=>w.id===id),j=i+d;if(i<0||j<0||j>=a.length)return;a.splice(j,0,a.splice(i,1)[0]);save();renderWidgets();if(lay){keepNext();layoutView()}else focusW(id)}
+async function delW(id,lay){const w=wget(id);if(!w||!(await conf('“'+WT[w.t].n+'” kartı silinsin mi?')))return;S.widgets=S.widgets.filter(x=>x.id!==id);save();renderWidgets();if(lay){keepNext();layoutView()}else{const e=$('#wgRow .card');if(e)focusEl(e)}toast('🗑️','Kart silindi')}
+async function resetWidgets(){if(!(await conf('Kartlar varsayılana (Sistem, Depolama, Ağ) döndürülsün mü?')))return;S.widgets=JSON.parse(JSON.stringify(DEF.widgets));S.wseq=3;save();renderWidgets();if(curView==='layout')layoutView()}
+function addWidgetMenu(){menu('Kart ekle',Object.keys(WT).map(t=>[WT[t].i+'  '+WT[t].n+' — '+WT[t].d,()=>addWidget(t)]))}
+async function addWidget(t){const w={id:'w'+(++S.wseq),t};
+ if(t==='weather'){const c=await ask('Şehir adı (ör. İstanbul)','');if(!c||!c.trim())return;w.city=c.trim()}
+ if(t==='note'){const c=await ask('Not metni','');if(c===null)return;w.text=c}
+ if(t==='shortcut'){const p=await pickApp('Hangi uygulama?');if(!p)return;w.p=p}
+ S.widgets.push(w);save();renderWidgets();setTimeout(()=>focusW(w.id),60);toast('✅','Kart eklendi: '+WT[t].n);if(curView==='layout'){keepNext();layoutView()}}
+function widgetMenu(id){const w=wget(id);if(!w)return;const x=[];
+ if(['note','weather','shortcut'].includes(w.t))x.push(['Düzenle',()=>wEdit(id)]);
+ if(w.t==='weather')x.push(['Yenile',()=>wClick(id)]);
+ x.push([w.big?'Küçült':'Genişlet',()=>{w.big=!w.big;save();renderWidgets();focusW(id)}],['↔️ Taşı (yön tuşlarıyla)',()=>startMove('w',id)],['Sola taşı',()=>moveW(id,-1)],['Sağa taşı',()=>moveW(id,1)],['Kartı sil',()=>delW(id)],['Kart ekle',addWidgetMenu],...rowItems('wg'));
+ menu(WT[w.t].n,x)}
+const gb=b=>(b/1073741824).toFixed(1)+' GB';
+const spd=b=>b>1048576?(b/1048576).toFixed(1)+' MB/s':Math.round(b/1024)+' KB/s';
+const needStats=()=>S.widgets.some(w=>['sys','storage','net'].includes(w.t));
+async function poll(){if(document.hidden)return;const r=await N('stats',{full:needStats()});if(!r||r.error)return;
+ $('#wname').textContent=r.net;$('#wsig').classList.toggle('off',r.lvl<0);if(!needStats())return;
+ const c=r.cpu;setB('cpu',c>=0?Math.round(c)+'%':(c===-2?'…':'ADB?'));$$('[data-b="cpuB"]').forEach(e=>e.style.width=(c>=0?c:0)+'%');
+ const ru=r.ramT-r.ramF;setB('ram','RAM: '+gb(ru)+' / '+gb(r.ramT));
+ const su=r.stT-r.stF;setB('st',Math.round(su/r.stT*100)+'%');$$('[data-b="stB"]').forEach(e=>e.style.width=(su/r.stT*100)+'%');setB('stS',gb(su)+' / '+gb(r.stT));
+ setB('dl','↓ '+spd(r.rxBps));setB('temp',r.temp>0?'Sıcaklık: '+Math.round(r.temp)+'°C':'Sıcaklık: ADB gerekli')}
+let NOTIFS=[];
+function applyBadges(){const c={};NOTIFS.forEach(n=>{c[n.p]=(c[n.p]||0)+1});
+ $$('#grid [data-p],#favRow [data-p]').forEach(e=>{const p=e.dataset.p,n=c[p]||0,host=e.classList.contains('fav')?e:e.querySelector('.iw');if(!host)return;
+  let b=host.querySelector('.bdg');if(!n){if(b)b.remove()}else{if(!b){b=document.createElement('span');b.className='bdg';host.appendChild(b)}b.textContent=n>9?'9+':String(n)}
+  let w=host.querySelector('.nw');if(S.newApps[p]){if(!w){w=document.createElement('span');w.className='nw';w.textContent='YENİ';host.appendChild(w)}}else if(w)w.remove()})}
+async function pollN(){if(document.hidden)return;const r=await N('notifs');if(!r||r.error)return;NOTIFS=r.items||[];applyBadges();const n=NOTIFS.length;$('#nb').style.display=n?'':'none';$('#nb').textContent=n;
+ setB('ncount',String(n));setB('nlast',n?NOTIFS[0].a+': '+(NOTIFS[0].t||NOTIFS[0].x):'Yeni bildirim yok')}
+function ago(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return 'şimdi';if(m<60)return m+' dk önce';const h=Math.round(m/60);if(h<24)return h+' sa önce';return Math.round(h/24)+' gün önce'}
+async function loadNotifs(){const r=await N('notifs');const p=$('#notifPanel');let h='<div class="ph"><div class="pt">Bildirimler</div><div class="btn" onclick="closePanels()">Kapat</div></div>';
+ if(!r.access)h+='<div class="pi"><div class="c"><div class="t">Bildirim erişimi gerekli</div><div class="s">ADB ile otomatik verilebilir.</div></div></div><span class="btn g" onclick="runSetup()">Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'notif\'})">Ayarlar</span>';
+ else if(!(r.items||[]).length)h+='<div class="empty">Bildirim yok</div>';
+ else h+='<span class="btn r" onclick="N(\'notifCancel\',{k:\'\'}).then(loadNotifs)">Hepsini temizle</span>'+r.items.map(n=>'<div class="pi nt" data-nk="'+esc(n.k)+'" onclick="launch('+q(n.p)+')"><div class="c"><div class="s">'+esc(n.a)+' • '+ago(n.w)+'</div><div class="t">'+esc(n.t)+'</div><div class="s">'+esc(n.x)+'</div></div></div>').join('');
+ p.innerHTML=h;if(panel==='notif')setTimeout(focusFirst,50);pollN()}
+/* ===== Ayarlar paneli / tema / duvar kağıdı ===== */
+let panelActs=[];
+function renderSettings(){const I=d=>'<svg class="i" viewBox="0 0 24 24">'+d+'</svg>';
+ const items=[
+  ['Android Ayarları','Wi-Fi, ekran, ses ve cihazın kendi ayarları','#30D158',I('<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/>'),()=>N('openSettings',{k:'android'})],
+  ['Launcher Ayarları','Gizli uygulamalar, açılış, varsayılan ana ekran','#0A84FF',I('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>'),launcherSettings],
+  ['Ana Ekran Düzeni','Bölümleri sırala, kartları yönet','#FF9F0A',I('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/>'),layoutView],
+  ['Kontrol Odası','Temizlik, gizlilik, güvenlik ve ADB araçları','#BF5AF2',I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),surgeonHome],
+  ['Tuş Atama','Kumanda tuşlarını uygulama ve eylemlere bağla','#FF375F',I('<rect x="8" y="2.5" width="8" height="19" rx="4"/><circle cx="12" cy="8" r="1.2"/><path d="M10 13h4M10 16.5h4"/>'),keysView],
+  ['Görünüm','Tema, simgeler, duvar kağıdı · '+THEMES[S.theme]+' · '+ACC[S.accent][1],'#64D2FF',I('<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5c1 0 2-.7 2-2"/>'),lookView]];
+  panelActs=items.map(i=>i[4]);
+  $('#settingsPanel').innerHTML='<div class="ph"><div class="pt">Ayarlar</div><div class="btn" onclick="closePanels()">Kapat</div></div>'+items.map((i,k)=>'<div class="pi go" onclick="panelPick('+k+')"><div class="pic" style="background:'+i[2]+'">'+i[3]+'</div><div class="c"><div class="t">'+i[0]+'</div><div class="s">'+esc(i[1])+'</div></div></div>').join('')}
+function panelPick(k){const f=panelActs[k];closePanels();f()}
+function tg(on){return '<div class="tog'+(on?' on':'')+'"></div>'}
+const APT=[['look','Genel'],['theme','Tema ve renk'],['icons','Simgeler'],['wall','Duvar kağıdı']];
+const apBar=t=>'<div class="aptabs">'+APT.map(x=>'<div class="aptab'+(x[0]===t?' on':'')+'" onclick="apGo(\''+x[0]+'\')">'+x[1]+'</div>').join('')+'</div>';
+function apGo(t){keepNext();({look:lookView,theme:openTheme,icons:iconSettings,wall:openWall})[t]()}
+function openTheme(){curView='theme';mset('Görünüm',apBar('theme')+'<div class="sec">Tema</div><div class="ts">'+Object.keys(THEMES).map(k=>'<div class="to'+(S.theme===k?' on':'')+'" onclick="setTheme(\''+k+'\')"><i class="pv '+k+'"></i>'+THEMES[k]+'</div>').join('')+'</div>'+
+ '<div class="sec">Vurgu rengi</div><div class="acs">'+Object.keys(ACC).map(k=>'<div class="ac'+(S.accent===k?' on':'')+'" style="background:'+ACC[k][0]+'" onclick="setAccent(\''+k+'\')">'+ACC[k][1]+'</div>').join('')+'</div>',null)}
+function setTheme(t){S.theme=t;applyTheme();save();keepNext();openTheme();toast('🎨','Tema: '+THEMES[t])}
+function setAccent(a){S.accent=a;applyTheme();save();keepNext();openTheme()}
+function applyPreset(k){const p=LOOKS[k];if(!p)return;Object.assign(S,p.v);save();applyTheme();applyWall();renderAll();toast('✅',p.n+' görünümü uygulandı');keepNext();lookView()}
+function setLook(key,v){S[key]=(key==='blur'||key==='idle')?+v:(key==='dock'?v==='1':v);save();applyTheme();if(key==='tileStyle'||key==='dock')renderAll();bump();keepNext();lookView()}
+function lookView(){curView='look';const cur=Object.keys(LOOKS).find(k=>Object.keys(LOOKS[k].v).every(x=>S[x]===LOOKS[k].v[x]));
+ mset('Görünüm',apBar('look')+'<div class="sec">Hazır görünümler</div><div class="pre">'+Object.keys(LOOKS).map(k=>'<div class="pc'+(cur===k?' on':'')+'" onclick="applyPreset(\''+k+'\')"><div class="t">'+LOOKS[k].n+'</div><div class="s">'+LOOKS[k].d+'</div></div>').join('')+'</div>'+
+  '<div class="sec">Kutucuk stili</div>'+CH(TLS,S.tileStyle,"setLook.bind(null,'tileStyle')")+'<div class="sec">Uygulama paneli (cam zemin)</div>'+CH({0:'Kapalı',1:'Açık'},S.dock?1:0,"setLook.bind(null,'dock')")+
+  '<div class="sec">Cam bulanıklığı</div>'+CH(BLR,S.blur,"setLook.bind(null,'blur')")+'<div class="sec">Üst çubuk</div>'+CH(TOPS,S.topStyle,"setLook.bind(null,'topStyle')")+
+  '<div class="sec">Odak efekti</div>'+CH(FXS,S.focusFx,"setLook.bind(null,'focusFx')")+'<div class="sec">Boşta solma</div><div class="nf">Belirlenen süre dokunulmazsa ekran öğeleri solar, duvar kağıdı tam görünür. Herhangi bir tuş geri getirir.</div>'+CH(IDL,S.idle,"setLook.bind(null,'idle')")+
+  '<div class="sec">Paylaş</div><span class="btn" onclick="showLookCode()">Görünüm kodumu göster</span><span class="btn" onclick="enterLookCode()">Kod gir</span>'+
+  '',null)}
+function setIsz(k){S.iconSize=k;applyTheme();save();renderAll();keepNext();iconSettings()}
+function setIcShape(k){S.icShape=k;applyTheme();save();keepNext();iconSettings()}
+function setIcLabel(k){S.icLabel=k;applyTheme();save();keepNext();iconSettings()}
+function iconSettings(){curView='icons';const pv=APPS.slice(0,5);
+ mset('Görünüm',apBar('icons')+'<div class="icprev">'+(pv.length?pv.map(a=>'<div class="tile"><div class="iw"><div class="ico"><img src="'+icon(a.p)+'" alt=""></div></div><div class="tl2">'+esc(lab(a.p))+'</div></div>').join(''):'<div class="empty">Önizleme için uygulama listesi yüklenmeli</div>')+'</div>'+
+  '<div class="sec">Şekil</div>'+CH(ISH,S.icShape,'setIcShape')+'<div class="sec">Boyut (banner kutucuklarda da geçerli)</div>'+CH(SIZES,S.iconSize,'setIsz')+'<div class="sec">Uygulama adı (simge stilinde)</div>'+CH(ILB,S.icLabel,'setIcLabel'),null)}
+/* ===== Yerleşik duvar kağıtları: kod ile üretilen illüstrasyon sahneleri (görsel dosyası yok) ===== */
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const SCN={
+ dawn:{n:'Gün doğumu',sky:['#4C5C8F','#E8A96C','#F8E3A3'],sun:[1280,560,70,'#FFF3C2'],L:[[620,60,'#A9B76E'],[730,55,'#7FA05B'],[850,45,'#58874A',1],[960,40,'#356038',1]],mist:1,seed:11},
+ lake:{n:'Gece gölü',sky:['#0A1230','#17295A','#31508C'],sun:[1500,190,46,'#EEF2FF'],stars:1,L:[[560,150,'#263E74'],[650,120,'#1B2F5E',1],[740,70,'#12224A',1]],water:['#10204A','#070F28'],mist:1,seed:5},
+ desert:{n:'Çöl akşamı',sky:['#2B1B47','#C45C5C','#F7B267'],sun:[900,640,95,'#FFE2A8'],L:[[700,70,'#B5543F'],[790,60,'#8C3B3A'],[890,50,'#5B2634'],[990,40,'#2F1730']],seed:3},
+ forest:{n:'Orman sisi',sky:['#CFE3D4','#9FC4A8','#5F8F78'],sun:[1420,300,70,'#F6FCE9'],L:[[600,70,'#7FA88B'],[700,60,'#5C8D74',1],[820,50,'#3B6C57',1],[940,40,'#1C4237',1]],mist:2,seed:9},
+ snow:{n:'Karlı dağlar',sky:['#8FAACC','#C7DAEE','#F1F6FB'],L:[[500,170,'#E8F0F9'],[620,140,'#C3D5E8'],[760,90,'#98B1CE',1],[900,60,'#4B6786',1]],mist:1,seed:21},
+ ocean:{n:'Okyanus',sky:['#1B2A5E','#B2557A','#F6A66A'],sun:[960,620,80,'#FFE3B0'],sea:['#7A4670','#1A2150'],seed:2},
+ city:{n:'Şehir gecesi',sky:['#0B1030','#2A2766','#C06A8A'],city:1,seed:8},
+ aurora:{n:'Kutup ışığı',sky:['#030A1A','#07203A','#0C3A4E'],stars:1,aur:['#2FE6B8','#3BC7FF','#8B6BFF'],L:[[780,90,'#04101C',1],[900,60,'#020912',1]],seed:4},
+ day:{n:'Gündüz',sky:['#4F8FDB','#9CCBF2','#E6F3FC'],sun:[1400,230,58,'#FFF8D6'],L:[[640,70,'#8DBB6A'],[740,60,'#6BA35A',1],[860,45,'#4C8A4A',1],[960,35,'#32683A',1]],mist:1,seed:14},
+ rain:{n:'Yağmur',sky:['#232C3A','#475669','#7C8B9B'],L:[[620,70,'#5C7185'],[730,55,'#44596C',1],[850,45,'#2F4455',1],[960,35,'#1D2D3A',1]],mist:2,rain:1,seed:17},
+ mist1:{n:'Buzlu mavi',sky:['#08242C','#0E5560','#1B8A8C'],blob:['#5FE0C8','#2E8FD8','#0B3A55','#9FF0E0'],seed:6},
+ twilight:{n:'Alacakaranlık',sky:['#1E1B4B','#7C3A8C','#F59E6B'],sun:[1240,610,84,'#FFD9A0'],stars:1,L:[[640,80,'#5B2A6E'],[740,65,'#3E1D5A',1],[860,50,'#26123F',1],[970,40,'#150A28',1]],mist:1,seed:31},
+ nordic:{n:'Kuzey',sky:['#020617','#0B2447','#19566B'],stars:1,aur:['#34D399','#22D3EE','#A78BFA'],sun:[1560,170,34,'#E0F2FE'],L:[[700,110,'#1E3A5F'],[800,80,'#12263F',1],[920,55,'#0A1628',1]],water:['#0B1E3A','#040B18'],mist:1,seed:44},
+ mist2:{n:'Sıcak sis',sky:['#1B1030','#4A1F4F','#9A3F5B'],blob:['#FF9F6B','#C0407A','#5B2A8A','#FFC58A'],seed:12}
+};
+function sceneSvg(id){const c=SCN[id]||SCN.lake,r=rng(c.seed||1),W=1920,H=1080;let o='';
+ const ys=(base,amp,p1,p2,f1,f2)=>x=>base+amp*(.62*Math.sin(x*f1+p1)+.38*Math.sin(x*f2+p2));
+ o+='<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c.sky[0]+'"/><stop offset=".55" stop-color="'+c.sky[1]+'"/><stop offset="1" stop-color="'+c.sky[2]+'"/></linearGradient>'+
+  '<radialGradient id="s"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+  '<linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'+
+  '<filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="80"/></filter></defs><rect width="'+W+'" height="'+H+'" fill="url(#g)"/>';
+ if(c.stars){for(let i=0;i<150;i++){const x=r()*W,y=r()*H*.55,q=r();o+='<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="'+(q>.93?2.2:q>.7?1.4:.9)+'" fill="#fff" opacity="'+(.35+r()*.6).toFixed(2)+'"/>'}}
+ if(c.blob){c.blob.forEach((col,i)=>{o+='<ellipse cx="'+(300+i*480+r()*160).toFixed(0)+'" cy="'+(260+r()*520).toFixed(0)+'" rx="'+(420+r()*200).toFixed(0)+'" ry="'+(180+r()*160).toFixed(0)+'" fill="'+col+'" opacity=".55" filter="url(#b)" transform="rotate('+(r()*40-20).toFixed(0)+' 960 540)"/>'})}
+ if(c.aur){c.aur.forEach((col,i)=>{o+='<path d="M0 '+(330+i*70)+' C 400 '+(140+i*40)+' 800 '+(520+i*30)+' 1200 '+(240+i*50)+' S 1700 '+(300+i*20)+' 1920 '+(200+i*60)+' L1920 '+(520+i*70)+' C 1500 '+(640+i*40)+' 900 '+(420+i*20)+' 0 '+(620+i*30)+'Z" fill="'+col+'" opacity=".42" filter="url(#b)"/>'})}
+ if(c.sun){const[x,y,rd,col]=c.sun;o+='<circle cx="'+x+'" cy="'+y+'" r="'+rd*5+'" fill="url(#s)"/><circle cx="'+x+'" cy="'+y+'" r="'+rd+'" fill="'+col+'"/>'}
+ if(c.sea){const hz=640;o+='<rect y="'+hz+'" width="'+W+'" height="'+(H-hz)+'" fill="url(#sea)"/><defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c.sea[0]+'"/><stop offset="1" stop-color="'+c.sea[1]+'"/></linearGradient></defs>';
+  for(let i=0;i<26;i++){const y=hz+12+i*i*.55+r()*8,w=60+i*26*(.6+r()*.8);o+='<rect x="'+(960-w/2+r()*40-20).toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+w.toFixed(0)+'" height="'+(2+i*.18).toFixed(1)+'" rx="2" fill="#FFE3B0" opacity="'+Math.max(.08,.5-i*.018).toFixed(2)+'"/>'}}
+ if(c.city){for(let l=0;l<2;l++){let x=-20;const col=l?'#0A0C24':'#1A1A48';while(x<W){const w=50+r()*90,h=(l?160:260)+r()*(l?300:380),y=H-h;o+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+w.toFixed(0)+'" height="'+h.toFixed(0)+'" fill="'+col+'"/>';
+   if(l)for(let wy=y+16;wy<H-20;wy+=26)for(let wx=x+10;wx<x+w-12;wx+=22)if(r()>.62)o+='<rect x="'+wx.toFixed(0)+'" y="'+wy.toFixed(0)+'" width="8" height="12" fill="#FFD27A" opacity="'+(.5+r()*.5).toFixed(2)+'"/>';x+=w+(l?4:10)}}}
+ (c.L||[]).forEach((L,i)=>{const[base,amp,col,pines]=L,f=ys(base,amp,r()*6.28,r()*6.28,.0014+r()*.001,.0042+r()*.003);let d='M0 '+H+' L0 '+f(0).toFixed(0);
+  for(let x=24;x<=W;x+=24)d+=' L'+x+' '+f(x).toFixed(0);d+=' L'+W+' '+H+'Z';
+  if(c.mist&&i>0)o+='<rect y="'+(base-amp-60)+'" width="'+W+'" height="'+(180+amp)+'" fill="url(#m)" opacity="'+(c.mist===2?1:.7)+'"/>';
+  o+='<path d="'+d+'" fill="'+col+'"/>';
+  if(pines){for(let x=10+r()*30;x<W;x+=26+r()*46){const y=f(x)+6,h=46+r()*70+i*10,w=h*.34;o+='<path d="M'+x.toFixed(0)+' '+(y-h).toFixed(0)+' L'+(x+w*.62).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x+w*.3).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x+w).toFixed(0)+' '+y.toFixed(0)+' L'+(x-w).toFixed(0)+' '+y.toFixed(0)+' L'+(x-w*.3).toFixed(0)+' '+(y-h*.52).toFixed(0)+' L'+(x-w*.62).toFixed(0)+' '+(y-h*.52).toFixed(0)+'Z" fill="'+col+'"/>'}}});
+ if(c.rain){for(let i=0;i<150;i++){const x=r()*W,y=r()*H;o+='<line x1="'+x.toFixed(0)+'" y1="'+y.toFixed(0)+'" x2="'+(x-16).toFixed(0)+'" y2="'+(y+54).toFixed(0)+'" stroke="#D5E4F2" stroke-width="1.6" opacity="'+(.12+r()*.2).toFixed(2)+'"/>'}}
+ if(c.water){o+='<rect y="800" width="'+W+'" height="280" fill="url(#w)"/><defs><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c.water[0]+'"/><stop offset="1" stop-color="'+c.water[1]+'"/></linearGradient></defs>';
+  if(c.sun)o+='<ellipse cx="'+c.sun[0]+'" cy="880" rx="'+(c.sun[2]*1.4)+'" ry="26" fill="'+c.sun[3]+'" opacity=".28"/>'}
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid slice">'+o+'</svg>'}
+const SCNCACHE={};
+function autoScene(){const h=new Date().getHours(),night=h>=20||h<6,dusk=h>=18&&h<20,dawn=h>=6&&h<9,wx=Object.values(WX).find(d=>d&&d.code!=null),c=wx?wx.code:-1;
+ if((c>=71&&c<=77)||c===85||c===86)return 'snow';if((c>=51&&c<=67)||(c>=80&&c<=82)||c>=95)return 'rain';if(c===3||(c>=45&&c<=48))return night?'mist1':'forest';
+ return night?'lake':dusk?'desert':dawn?'dawn':'day'}
+function wallCss(v){if(v==='auto')v='scene:'+autoScene();if(!v)return '';if(v.indexOf('scene:')===0){const id=v.slice(6);if(!SCN[id])return '';return SCNCACHE[id]||(SCNCACHE[id]='url(\'data:image/svg+xml;utf8,'+encodeURIComponent(sceneSvg(id)).replace(/\'/g,'%27')+'\') center/cover')}
+ if(v.indexOf('file')===0)return 'url(\''+v+'\') center/cover';if(v.indexOf('linear')===0)return v;return ''}
+
+const WP=Object.keys(SCN).map(k=>[SCN[k].n,'scene:'+k]);
+function openWall(){curView='wall';mset('Görünüm',apBar('wall')+'<span class="btn b" onclick="N(\'pickWallpaper\')">Galeriden seç</span><span class="btn" onclick="setWall(\'\')">Düz renk (temaya göre)</span>'+
+ '<div class="sec">Otomatik</div><div class="nf">Saate ve (Kartlar’a Hava Durumu eklediysen) havaya göre manzara kendiliğinden değişir.</div><div class="wgrid" style="margin-top:0"><div class="wi'+(S.wall==='auto'?' on':'')+'" style="background:'+wallCss('auto')+'" onclick="setWall(\'auto\')"><b>Hava ve saate göre</b></div></div>'+
+ '<div class="sec">Manzaralar</div><div class="wgrid" style="margin-top:0">'+WP.map((w,k)=>'<div class="wi'+(S.wall===w[1]?' on':'')+'" style="background:'+wallCss(w[1])+'" onclick="setWall(WP['+k+'][1])"><b>'+w[0]+'</b></div>').join('')+'</div>'+
+ '<div class="sec">Manzara döngüsü</div>'+CH(ROT,S.rot,'setRot'),null)}
+function setRot(m){S.rot=+m;S.rotAt=Date.now();save();keepNext();openWall()}
+function rotTick(){if(!S.rot)return;if(Date.now()-(S.rotAt||0)>=S.rot*60000){const k=Object.keys(SCN),cur=(S.wall||'').indexOf('scene:')===0?k.indexOf(S.wall.slice(6)):-1;S.wall='scene:'+k[(cur+1)%k.length];S.rotAt=Date.now();save();applyWall()}}
+// görünüm kodu: 13 karakter, başka cihazda aynı görünümü kurar
+function lookCode(){return LK.map(([k,f])=>{const v=k==='dock'?(S.dock?'1':'0'):String(S[k]);const i=f().indexOf(v);return i<0?'z':i.toString(36)}).join('').toUpperCase().replace(/(.{4})(?=.)/g,'$1-')}
+function applyCode(c){c=String(c).replace(/[^0-9A-Za-z]/g,'').toLowerCase();if(c.length!==LK.length)return false;const o={};
+ for(let j=0;j<LK.length;j++){if(c[j]==='z')continue;const arr=LK[j][1](),i=parseInt(c[j],36);if(!(i>=0&&i<arr.length))return false;o[LK[j][0]]=arr[i]}
+ for(const k in o)S[k]=k==='dock'?o[k]==='1':(k==='blur'||k==='idle'||k==='rot')?+o[k]:o[k];S.rotAt=Date.now();save();applyTheme();applyWall();renderAll();return true}
+function showLookCode(){info('Görünüm kodun',lookCode()+'\n\nBaşka bir cihazda Ayarlar → Görünüm → “Kod gir” ile aynı görünümü kurabilirsin.')}
+async function enterLookCode(){const v=await ask('Görünüm kodu (örn. 0000-1011-...)','');if(v===null)return;if(applyCode(v)){toast('✅','Görünüm uygulandı');lookView()}else toast('❌','Kod geçersiz')}
+
+function setWall(v){S.wall=v;S.rot=0;save();applyWall();applyTheme();toast('🖼️','Duvar kağıdı güncellendi');keepNext();openWall()}
+window.__wall=function(u){if(!u||typeof u!=='string'){toast('❌','Duvar kağıdı okunamadı');return}S.wall=u;S.rot=0;S.rotAt=Date.now();save();applyWall();applyTheme();bump();toast('🖼️','Duvar kağıdı uygulandı');if(curView==='wall')openWall()};
+function applyWall(){const b=$('#bg'),c=wallCss(S.wall);if(c){b.className='bg wp';b.style.background=c}else{b.className='bg def';b.style.background=''}document.body.classList.toggle('hasw',!!c)}
+const rw=(t,d,fn,tog)=>'<div class="r2'+(tog===undefined?' go':'')+'" onclick="'+fn+'"><div><div class="n">'+t+'</div>'+(d?'<div class="s2">'+d+'</div>':'')+'</div>'+(tog===undefined?'':tg(tog))+'</div>';
+function launcherSettings(){curView='ls';mset('Launcher Ayarları',
+ '<div class="nf">Kumandada bir uygulamanın seçeneklerini açmak için <b>OK tuşunu yarım saniye basılı tut</b> (Menü/Info tuşu da çalışır).</div>'+
+ '<div class="sec">Ana ekran</div>'+
+ rw('Gizli uygulamaları göster','Gizlediğin uygulamalar da listede görünür.','S.showHidden=!S.showHidden;save();renderGrid();keepNext();launcherSettings()',!!S.showHidden)+
+ rw('Uzun basınca hızlı eylem çubuğu','Kapalıysa uzun basma doğrudan tam menüyü açar.','S.quickBar=!S.quickBar;save();keepNext();launcherSettings()',!!S.quickBar)+
+ rw('Açılışta Canlı TV','Launcher açılınca doğrudan TV açılır. Ana ekran tuşu ana sayfaya döner.','S.tvBoot=S.tvBoot!==true;save();keepNext();launcherSettings()',S.tvBoot===true)+
+ rw('Açılışta başlayacak uygulamalar','Cihaz açılınca kendiliğinden çalışır.','sgBoot()')+
+ '<div class="sec">Sistem bağlantısı</div>'+
+ rw('Tek tuş kurulum','Bildirim, erişilebilirlik ve konum izinlerini ADB ile verir.','runSetup()')+
+ rw('Varsayılan ana ekran yap','ADB ile ihlauncher ana ekran olarak ayarlanır.','setHome()')+
+ rw('Ekran koruyucu: ihlauncher saat','ADB ile ayarlanır.','setSaver()')+
+ rw('Ekran koruyucu ayarlarını aç','Cihazın kendi ekran koruyucu ayarı.',"N('openSettings',{k:'dream'})")+
+ '<div class="sec">Uygulama</div>'+
+ rw('Güncelleme kontrolü','Yeni sürüm var mı bakar.','updView()')+
+ rw('Tanı bilgisi','Sorun bildirirken ekran görüntüsü almak için.','diagView()')+
+ '<div class="sec">Sıfırla</div>'+
+ rw('Ana ekran düzenini sıfırla','Bölümler ve kartlar varsayılana döner.','resetLayout()'),null)}
+function toggleBlur2(){S.blur=S.blur?0:2;applyTheme();save();keepNext();launcherSettings()}
+async function resetLayout(){if(!(await conf('Bölüm sırası ve kartlar varsayılana dönsün mü?')))return;S.rows=JSON.parse(JSON.stringify(DEF.rows));S.widgets=JSON.parse(JSON.stringify(DEF.widgets));S.wseq=3;save();applyRows();renderWidgets();toast('♻️','Düzen sıfırlandı')}
+async function setSaver(){const r=await N('screensaver');toast(r.code===0?'✅':'❌',r.code===0?'Ekran koruyucu ayarlandı':(r.out||r.error||'ADB bağlı değil').slice(0,80))}
+async function setHome(){const r=await N('setHome');toast(r.code===0?'✅':'❌',r.code===0?'Varsayılan ana ekran ayarlandı':(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+async function runSetup(){if(!(await conf('ADB ile şunlar verilecek: konum izni, kullanım istatistiği (kullanılmayan uygulama önerisi), bildirim erişimi, erişilebilirlik (tuş atama). Devam?')))return;toast('⏳','Kurulum çalışıyor…');const r=await N('setup');
+ if(r.error||!Array.isArray(r)){info('Kurulum başarısız',r.error||'ADB bağlı değil. Kontrol Odası → ADB Terminal’den bağlan.');return}
+ info('Kurulum sonucu',r.map(x=>(x.code===0?'✅ ':'❌ ')+x.c+(x.out?'\n   '+x.out.slice(0,80):'')).join('\n'));pollN()}
+/* ===== Kontrol Odası ===== */
+const adbReady=async()=>!!(await N('adbStatus')).ready;
+const NEEDADB='<div class="nf">ADB / Shizuku bağlı değil: tarama çalışır ama uygulama işlemleri yapılamaz. <span class="btn g" onclick="sgAdb()">Bağlan</span></div>';
+const SGS=[
+ ['Analiz & Güvenlik',[['','#5E5CE6','Cihaz Analizi','Cihazı tanır, paketleri sınıflandırır',()=>sgScan()],['','#30D158','Akıllı Debloat','Zararlı/gereksiz paketler, risk etiketli',()=>sgDebloat()],['','#FF9F0A','Telemetri & Gizlilik','Veri toplamayı azalt',()=>sgTele()],['','#FF453A','Güvenlik Denetimi','Erişilebilirlik, izin, ADB durumu',()=>sgAudit()],['','#64D2FF','Geri Alma Merkezi','Dondurulan / kaldırılanları geri getir',()=>sgRecover()]]],
+ ['Uygulamalar',[['','#0A84FF','Uygulama Yöneticisi','Dondur, çöz, kaldır, geri yükle',()=>sgApps()],['','#BF5AF2','İzin Yöneticisi','Çalışma izinleri ver/al',()=>sgPerms()],['','#FF9F0A','Açılışta Başlat','Cihaz açılınca çalışsın',()=>sgBoot()],['','#30D158','Önbellek Temizle','Tüm uygulama önbellekleri',()=>trimCaches()],['','#64D2FF','Otomatik Temizlik','Zamanlı önbellek temizliği',()=>sgAuto()],['','#8E8E93','Kullanılmayan Uygulamalar','Uzun süredir açılmayanları dondur',()=>sgUnused()]]],
+ ['Ağ & Ekran',[['','#0A84FF','Özel DNS','AdGuard, Cloudflare, Google',()=>sgDns()],['','#64D2FF','HDMI-CEC / Girişler','Giriş adlarını düzenle',()=>sgCec()],['','#8E8E93','Çözünürlük','wm size / density',()=>sgRes()],['','#FFD60A','Performans','Animasyon, arka plan',()=>sgPerf()]]],
+ ['Araçlar',[['','#1C1C1E','ADB Terminal','Bağlantı, komutlar, geçmiş',()=>sgAdb()],['','#30D158','Yedekle / Geri Yükle','Ayarlar JSON',()=>sgBackup()],['','#8E8E93','Cihaz Bilgisi','Model, Android, IP',()=>sgInfo()],['','#FF9F0A','Erişim Kurulumu','Tek tuş kurulum',()=>runSetup()]]]];
+const SGF=SGS.flatMap(s=>s[1]);
+function surgeonHome(){closePanels();curView='';let k=0;
+ mset('Kontrol Odası','<div class="hero"><div class="h1" id="sgH1">Cihaz</div><div class="h2" id="sgH2">Yükleniyor…</div></div>'+SGS.map(s=>'<div class="sec">'+s[0]+'</div><div class="sg">'+s[1].map(x=>'<div class="sc" onclick="SGF['+(k++)+'][4]()"><div class="t">'+x[2]+'</div><div class="s">'+x[3]+'</div></div>').join('')+'</div>').join(''),null);
+ Promise.all([N('profile'),N('adbStatus')]).then(([p,a])=>{const h1=$('#sgH1');if(!h1)return;h1.textContent=(p.man||'')+' '+(p.model||'');
+  $('#sgH2').innerHTML='Android '+esc(p.rel||'?')+' (API '+esc(p.sdk||'?')+') • '+esc(vendorOf(p))+' • ADB: <b style="color:'+(a.ready?'var(--ok)':'var(--bad)')+'">'+(a.ready?'bağlı ('+esc(a.mode)+')':'bağlı değil')+'</b>'})}
+const backSG=()=>{curView='';surgeonHome()};
+async function pmRun(op,p,sys){const r=await N('pm',{op,p});if(r&&r.ok){if(op==='freeze'||(op==='uninstall'&&sys!==false))S.rmlog[p]=op;else if(op==='unfreeze'||op==='restore')delete S.rmlog[p];save()}return r}
+async function pmDo(op,p,sys){if(isProt(p)&&!['unfreeze','restore','stop','bgAllow'].includes(op)){toast('⛔','Kritik paket korunuyor');return false}
+ const msg={freeze:'dondurulsun (geri alınabilir)',uninstall:sys?'kaldırılsın (sistem uygulaması: kullanıcı 0’dan kalkar, Geri Alma Merkezi ile geri yüklenebilir)':'tamamen kaldırılsın (geri alınamaz)',clear:'verileri silinsin (giriş bilgileri/ayarlar gider)'}[op];
+ if(msg&&!(await conf(lab(p)+' '+msg+'?')))return false;
+ toast('⏳','İşleniyor…');const r=await pmRun(op,p,sys);toast(r.ok?'✅':'❌',r.ok?'Tamam: '+lab(p):String(r.out||r.error||'hata').slice(0,90));
+ await loadApps();if(curView==='apps'){ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];amRender()}return r.ok}
+async function trimCaches(){if(!(await conf('Tüm uygulamaların önbelleği temizlensin mi? (veri silinmez)')))return;toast('⏳','Temizleniyor…');const r=await N('trimCaches');toast(r.ok?'✅':'❌',r.ok?'Önbellekler temizlendi':String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+/* --- Tanı --- */
+async function diagView(){curView='diag';const[me,ad]=await Promise.all([N('appInfo',{p:'com.ihlauncher.tv'}),N('adbStatus')]);const ua=(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
+ const kv=(a,b)=>'<div class="kv"><span>'+a+'</span><span style="text-align:right;word-break:break-all">'+esc(b)+'</span></div>';
+ mset('Tanı bilgisi',kv('Sürüm',me.v||'?')+kv('WebView',ua)+kv('Ekran',innerWidth+'×'+innerHeight+' @'+devicePixelRatio)+kv('Uygulama sayısı',APPS.length+(APPERR?' (hata: '+APPERR+')':''))+kv('Giriş kaynağı',INP.length)+kv('Bulanıklık',S.blur?'açık':'kapalı')+kv('ADB',ad.ready?'bağlı ('+ad.mode+')':'bağlı değil')+kv('Kart / Bölüm',S.widgets.length+' / '+S.rows.filter(r=>r.on).length)+
+ '<div class="sec">Hatalar ('+__errs.length+')</div>'+(__errs.length?__errs.map(e=>'<div class="r2"><div class="s2" style="word-break:break-all">'+esc(e)+'</div></div>').join(''):'<div class="empty">Hata kaydı yok</div>')+
+ '<div style="margin-top:12px"><span class="btn" onclick="loadApps()">Uygulamaları yeniden yükle</span><span class="btn r" onclick="resetState()">Ayarları sıfırla</span></div>',launcherSettings)}
+async function resetState(){if(!(await conf('Tüm launcher ayarları (favoriler, düzen, kartlar, tema…) sıfırlansın mı? Uygulamalar silinmez.')))return;Native.sync('setState',JSON.stringify({s:'{}'}));location.reload()}
+/* --- Launcher güncelleme kontrolü (GitHub Releases) --- */
+const verNums=v=>String(v||'').replace(/^v/i,'').split(/[^0-9]+/).filter(Boolean).map(Number);
+function verCmp(a,b){a=verNums(a);b=verNums(b);for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0}
+async function updFetch(){const me=await N('appInfo',{p:'com.ihlauncher.tv'}),cur=me.v||'0';
+ const r=await fetch('https://api.github.com/repos/'+S.updRepo+'/releases/latest',{headers:{'Accept':'application/vnd.github+json'}});
+ if(r.status===404)throw new Error('Sürüm yayını (Release) bulunamadı. Depoda en az bir yayın olmalı.');if(!r.ok)throw new Error('GitHub HTTP '+r.status);
+ const j=await r.json(),tag=j.tag_name||'',ast=(j.assets||[]).find(a=>/\.apk$/i.test(a.name))||{};S.updAt=Date.now();save();
+ return{tag,cur,apk:ast.browser_download_url||'',sha:ast.digest||'',url:j.html_url,body:j.body||'',newer:verCmp(tag,cur)>0}}
+async function updCheck(manual){if(!S.updRepo){if(manual)updView();return null}
+ try{const r=await updFetch();
+  if(r.newer){window.updR=r;if(manual||S.updSkip!==r.tag)updShow(r)}else if(manual)toast('✅','Güncelsin ('+r.cur+')');
+  return r.newer}
+ catch(e){if(manual)toast('❌',String(e.message||e).slice(0,90));return null}}
+/* Otomatik kontrol: 6 saatte bir; mod “auto” ise sormadan indirir ve kurar (ADB bağlıysa onay penceresi de çıkmaz) */
+async function updAuto(force){if(S.updMode==='off'||!S.updRepo||window.__updBusy)return;if(!force&&Date.now()-S.updAt<216e5)return;window.__updBusy=1;
+ try{const r=await updFetch();if(!r.newer||S.updSkip===r.tag)return;window.updR=r;
+  if(S.updMode==='auto'&&r.apk){toast('⬇️','Yeni sürüm '+r.tag+' indiriliyor…');await updInstall(true)}
+  else if(!layer()&&!panel)updShow(r);else toast('⬆️','Yeni sürüm var: '+r.tag+' • Launcher Ayarları → Güncelleme')}
+ catch(e){}finally{window.__updBusy=0}}
+function updShow(r){const body=String(r.body||'').replace(/[#*`]/g,'').trim().slice(0,500);
+ $('#dlgbox').innerHTML='<div class="dt">Yeni sürüm: '+esc(r.tag)+'</div><div class="dm">Mevcut: '+esc(r.cur)+(body?'\n\n'+esc(body):'')+'</div><div class="drow" style="flex-wrap:wrap">'+(r.apk?'<div class="btn b" onclick="updInstall()">İndir ve kur</div>':'')+'<div class="btn" onclick="closeDlg();N(\'openUrl\',{u:updR.url})">İndirme sayfasını aç</div>'+(r.apk?'<div class="btn" onclick="updApk()">APK adresi</div>':'')+'<div class="btn" onclick="S.updSkip=updR.tag;save();closeDlg()">Bu sürümü atla</div></div>';window.updR=r;showDlg()}
+async function updInstall(auto){closeDlg();const r=window.updR;if(!r||!r.apk)return;
+ const silent=await adbReady();
+ if(silent){await N('adb',{c:'appops set com.ihlauncher.tv REQUEST_INSTALL_PACKAGES allow'})}
+ else{const c=await N('canInstall');if(!c.ok){if(auto){toast('⚠️','Otomatik kurulum için “Bilinmeyen uygulamalar” izni ya da ADB gerekli');return}
+   if(await conf('Güncellemeyi kurabilmek için bu uygulamaya “Bilinmeyen uygulamaları yükle” izni vermelisin. Ayar ekranı açılsın mı?'))N('unknownSources');return}}
+ if(!auto)toast('⬇️','İndiriliyor…');
+ const res=await N('installApk',{url:r.apk,sha:r.sha||'',silent});
+ if(res.error){if(res.error==='NEED_PERM'){if(await conf('Güncellemeyi kurmak için ihlauncher’a “bilinmeyen uygulama yükleme” izni vermelisin. İzin ekranı açılsın mı?'))N('openSettings',{k:'install'});return}toast('❌',String(res.error).slice(0,100));return}
+ toast(res.mode==='silent'?'✅':'📦',res.mode==='silent'?'Güncellendi, yeniden başlıyor…':'Kurulum onayı açılıyor…')}
+window.__dl=p=>toast('⬇️','İndiriliyor %'+p);
+function updApk(){closeDlg();info('APK adresi','TV’de “Downloader” gibi bir uygulamayla bu adresi girip indirebilirsin:\n\n'+updR.apk)}
+const UPM={off:'Kapalı',ask:'Haber ver ve sor',auto:'Otomatik indir ve kur'};
+function setUpdMode(m){S.updMode=m;save();keepNext();updView();if(m!=='off')updAuto(true)}
+function updView(){curView='upd';N('appInfo',{p:'com.ihlauncher.tv'}).then(me=>mset('Güncelleme (GitHub)','<div class="nf">Yeni sürümler GitHub Releases’ten alınır. Depoya kod gönderince derleme akışı APK’yı otomatik yayınlar; launcher 6 saatte bir bakar.</div>'+
+ '<div class="sec">Güncelleme modu</div>'+CH(UPM,S.updMode,'setUpdMode')+'<div class="nf">'+(S.updMode==='auto'?'ADB bağlıysa kurulum sessizce yapılır ve launcher yeniden başlar. ADB yoksa sistem onay penceresi çıkar.':S.updMode==='ask'?'Yeni sürüm bulununca “İndir ve kur” penceresi açılır.':'Otomatik kontrol kapalı; yalnızca “Şimdi kontrol et” çalışır.')+'</div>'+
+ '<div class="kv"><span>Yüklü sürüm</span><span>'+esc(me.v||'?')+'</span></div><div class="kv"><span>GitHub deposu</span><span>'+esc(S.updRepo||'ayarlanmadı')+'</span></div><div class="kv"><span>Son kontrol</span><span>'+(S.updAt?new Date(S.updAt).toLocaleString('tr-TR'):'—')+'</span></div>'+
+ '<div style="margin-top:14px"><span class="btn" onclick="updRepoSet()">Depo ayarla</span><span class="btn b" onclick="updCheck(true)">Şimdi kontrol et</span></div>',launcherSettings))}
+async function updRepoSet(){const v=await ask('GitHub deposu (kullanıcı/depo)',S.updRepo||'');if(v===null)return;const t=v.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/+$/,'');
+ if(t&&!/^[\w.-]+\/[\w.-]+$/.test(t)){toast('❌','Biçim: kullanıcı/depo');return}S.updRepo=t;S.updSkip='';save();updView()}
+/* --- Kullanılmayan uygulamalar --- */
+let USAGE=[],UNSEL=new Set(),UND=60;
+const unProt=p=>S.fav.includes(p)||S.bootApps.includes(p)||Object.values(S.keymap).includes(p)||(S.docks||[]).some(d=>d.items.includes(p))||S.widgets.some(w=>w.p===p);
+function unList(){const lim=Date.now()-UND*864e5;return USAGE.filter(a=>a.ins<lim&&(!a.last||a.last<lim)&&!unProt(a.p)).sort((x,y)=>(x.last||0)-(y.last||0))}
+async function sgUnused(){curView='unused';UNSEL=new Set();mset('Kullanılmayan Uygulamalar','<div class="nf">Taranıyor…</div>',backSG);const r=await N('usage',{days:90});if(curView!=='unused')return;adbOk=await adbReady();
+ if(r.error||!r.access){mset('Kullanılmayan Uygulamalar','<div class="nf">Kullanım istatistiği erişimi gerekli (ADB ile otomatik verilir).</div><span class="btn g" onclick="runSetup().then(sgUnused)">Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'usage\'})">Ayarı aç</span>',backSG);return}
+ USAGE=r.items||[];unRender()}
+function unRender(){const l=unList(),d=t=>t?new Date(t).toLocaleDateString('tr-TR'):'90+ gündür';
+ mset('Kullanılmayan Uygulamalar','<div class="nf">Seçilen süredir açılmayan, son '+UND+' günde kurulmamış kullanıcı uygulamaları. Favoriler, açılışta başlayanlar ve tuş atamaları listelenmez. Sistem kullanım verisini yaklaşık tuttuğu için önce <b>dondur</b>.</div>'+(adbOk?'':NEEDADB)+
+ '<div class="chips">'+[30,60,90].map(x=>'<div class="chip'+(UND===x?' on':'')+'" onclick="UND='+x+';UNSEL=new Set();keepNext();unRender()">'+x+'+ gün</div>').join('')+'</div>'+
+ (l.length?'<div><span class="btn" onclick="UNSEL=new Set(unList().map(a=>a.p));keepNext();unRender()">Hepsini seç</span><span class="btn" onclick="UNSEL=new Set();keepNext();unRender()">Temizle</span></div>'+l.map(a=>'<div class="r2 pk'+(UNSEL.has(a.p)?' sel':'')+'" data-up="'+esc(a.p)+'" onclick="unTog('+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="s2">Son kullanım: '+d(a.last)+' • Kurulum: '+d(a.ins)+'</div></div><div class="cb">✓</div></div>').join('')+
+ '<div class="selbar"><div class="sn"><span id="unc">'+UNSEL.size+'</span> uygulama seçili</div><span class="btn b" onclick="unRun(\'freeze\')">❄️ Seçilenleri dondur</span><span class="btn r" onclick="unRun(\'uninstall\')">🗑️ Seçilenleri kaldır</span></div>':'<div class="empty">Bu süredir kullanılmayan uygulama yok </div>'),backSG)}
+function unTog(p){if(UNSEL.has(p))UNSEL.delete(p);else UNSEL.add(p);const e=$('[data-up="'+p+'"]');if(e)e.classList.toggle('sel',UNSEL.has(p));const c=$('#unc');if(c)c.textContent=UNSEL.size}
+async function unRun(op){const sel=[...UNSEL];if(!sel.length){toast('ℹ️','Önce seç');return}if(!(await adbReady())){info('ADB gerekli','İşlem için ADB / Shizuku bağlı olmalı.');return}
+ if(!(await conf(sel.length+' uygulama '+(op==='freeze'?'dondurulacak (Geri Alma Merkezi’nden çözülebilir).':'TAMAMEN kaldırılacak (geri alınamaz).')+'\n\nDevam edilsin mi?')))return;
+ let ok=0;for(let k=0;k<sel.length;k++){toast('⏳',(k+1)+' / '+sel.length);const r=await pmRun(op,sel[k],false);if(r.ok){ok++;USAGE=USAGE.filter(a=>a.p!==sel[k])}}
+ UNSEL=new Set();await loadApps();toast(ok===sel.length?'✅':'⚠️',ok+' / '+sel.length+' işlem başarılı');unRender()}
+async function unusedHint(){if(Date.now()-S.unusedAt<6048e5)return;const r=await N('usage',{days:90});if(!r||!r.access)return;USAGE=r.items||[];S.unusedAt=Date.now();save();const n=unList().length;if(n>=3)toast('🕸️',n+' uygulama '+UND+'+ gündür açılmadı • Kontrol Odası → Kullanılmayan Uygulamalar')}
+/* --- Zamanlı otomatik temizlik --- */
+async function autoCleanRun(manual){const a=S.auto;if(!(await adbReady())){if(manual)toast('⚠️','ADB bağlı değil');return false}
+ const r=await N('trimCaches');let ok=!!r.ok;if(a.bg){const k=await N('perf',{v:'kill'});ok=ok&&!!k.ok}
+ a.last=Date.now();save();if(manual)toast(ok?'✅':'❌',ok?'Temizlik tamamlandı':String(r.out||r.error||'başarısız').slice(0,80));return ok}
+function autoCheck(){if(document.hidden)return;const a=S.auto,b=S.autoBackup;
+ if(a.on&&Date.now()-(a.last||0)>=a.h*3600000)autoCleanRun(false);
+ if(b.on&&Date.now()-(b.last||0)>=b.days*864e5)backupNow(false)}
+function sgAuto(){curView='auto';const a=S.auto,l=a.last?new Date(a.last).toLocaleString('tr-TR'):'henüz çalışmadı';
+ mset('Otomatik Temizlik','<div class="nf">Seçtiğin aralıkta tüm uygulama önbelleklerini temizler (veri silinmez). ADB bağlı olmalı ve launcher çalışıyor olmalıdır; kontrol her 10 dakikada ve ana ekrana dönüşte yapılır.</div>'+
+ '<div class="r2" onclick="autoSet(\'on\')"><div class="n">Otomatik temizlik</div>'+tg(a.on)+'</div>'+
+ '<div class="sec">Aralık</div><div class="chips">'+[3,6,12,24].map(h=>'<div class="chip'+(a.h===h?' on':'')+'" onclick="autoSet(\'h\','+h+')">'+h+' saat</div>').join('')+'</div>'+
+ '<div class="r2" onclick="autoSet(\'bg\')"><div><div class="n">Arka plan uygulamalarını da kapat</div><div class="s2">Çalışan arka plan işlemlerini sonlandırır; bildirim bekleyen uygulamalar yeniden başlayana kadar bildirim göndermeyebilir.</div></div>'+tg(a.bg)+'</div>'+
+ '<div class="nf" style="margin-top:12px">Son çalışma: '+esc(l)+'</div><span class="btn b" onclick="autoCleanRun(true).then(()=>{keepNext();sgAuto()})">Şimdi çalıştır</span>',backSG)}
+function autoSet(k,v){const a=S.auto;if(k==='on'){a.on=!a.on;if(a.on)a.last=Date.now()}else if(k==='h')a.h=v;else if(k==='bg')a.bg=!a.bg;save();keepNext();sgAuto()}
+/* --- Tarama / sınıflandırma --- */
+let SCAN=null;
+async function scanSys(){const[p,all]=await Promise.all([N('profile'),N('allPkgs')]);ALL=Array.isArray(all)?all:[];const prof=p&&!p.error?p:{};
+ SCAN={prof,vendor:vendorOf(prof),items:ALL.filter(a=>a.s&&a.inst).map(a=>({p:a.p,l:a.l,en:a.en,c:classify(a.p,a.l)})),t:Date.now()};return SCAN}
+const cands=()=>SCAN.items.filter(i=>i.en&&i.c.cat!=='core'&&(i.c.src==='db'||i.c.src==='fam'||i.c.src==='heur')&&i.c.risk!=='critical'&&i.c.risk!=='unknown');
+async function sgScan(){curView='scan';mset('Cihaz Analizi','<div class="nf">Cihaz ve sistem paketleri taranıyor…</div>',backSG);await scanSys();if(curView!=='scan')return;
+ const P=SCAN.prof,it=SCAN.items,cnt=r=>it.filter(i=>i.c.risk===r&&i.en).length,cd=cands(),st=await N('adbStatus'),dns=await N('getDns'),tele=cd.filter(i=>i.c.cat==='tele'),safe=cd.filter(i=>i.c.risk==='safe');
+ const rec=[];const us=await N('usage',{days:90});if(us&&us.access){USAGE=us.items||[];const un=unList().length;if(un)rec.push(['',un+' uygulama '+UND+'+ gündür kullanılmadı','Dondurarak yer ve bellek kazanabilirsin.','İncele',sgUnused])}
+ if(!st.ready)rec.push(['','ADB bağlı değil','Dondurma/kaldırma ve telemetri ayarları için gerekli.','Bağlan',sgAdb]);
+ if(P.home&&P.home!=='com.ihlauncher.tv')rec.push(['','ihlauncher varsayılan ana ekran değil','Şu an: '+P.home,'Yap',setHome]);
+ if(tele.length)rec.push(['',tele.length+' telemetri/reklam paketi bulundu','Dondurulabilir (geri alınabilir).','Telemetri',()=>dbOpenList('tele')]);
+ if(safe.length)rec.push(['',safe.length+' güvenli temizlenebilir paket','Kaybedeceğin bir özellik yok.','Debloat',()=>dbOpenList('safe')]);
+ if(dns&&dns.code===0&&(dns.out||'').split('\n')[0]==='off')rec.push(['','Özel DNS kapalı','AdGuard DNS reklam/telemetri alan adlarını engeller.','Aç',()=>sgDns()]);
+ if(P.patch){const age=(Date.now()-new Date(P.patch).getTime())/2592000000;if(age>18)rec.push(['','Güvenlik yaması eski ('+P.patch+')','Üretici güncelleme yayınlamıyor olabilir; ağ ve uygulama güvenliğine dikkat.','Denetim',sgAudit])}
+ if(P.sdk&&P.sdk<28)rec.push(['','Android sürümü eski (API '+P.sdk+')','Bazı modern uygulamalar ve güvenlik özellikleri desteklenmez.','','']);
+ mset('Cihaz Analizi','<div class="hero"><div class="h1">'+esc((P.man||'')+' '+(P.model||''))+'</div><div class="h2">Üretici ailesi: <b>'+esc(SCAN.vendor)+'</b><br>Android '+esc(P.rel||'?')+' (API '+esc(P.sdk||'?')+') • '+esc(P.abi||'')+' • RAM '+gb(P.ramT||0)+' • Yama '+esc(P.patch||'-')+'<br>'+(P.tv?'TV modu':'TV modu değil')+' • '+(P.gtv?'Google TV arayüzü':(P.atv?'Android TV arayüzü':'Stok arayüz bilinmiyor'))+' • '+(P.gms?'Google servisleri var':'Google servisleri yok')+' • Yapı: '+esc(P.type||'')+'</div></div>'+
+ '<div class="sum"><div class="sm"><b>'+it.length+'</b><span>Sistem paketi</span></div><div class="sm"><b style="color:var(--ok)">'+cnt('safe')+'</b><span>Güvenli temizlik</span></div><div class="sm"><b style="color:var(--warn)">'+cnt('caution')+'</b><span>Dikkat gerektiren</span></div><div class="sm"><b style="color:var(--bad)">'+cnt('risky')+'</b><span>Riskli</span></div></div>'+
+ '<div class="nf">'+cnt('critical')+' kritik, '+cnt('unknown')+' tanımsız paket var. Tanımsız ve kritik paketlere otomatik hiçbir işlem yapılmaz.</div><div class="sec">Öneriler</div>'+
+ (rec.length?rec.map((r,k)=>'<div class="r2" onclick="SCANREC['+k+'][4]&&SCANREC['+k+'][4]()"><div><div class="n">'+r[0]+'  '+esc(r[1])+'</div><div class="s2">'+esc(r[2])+'</div></div>'+(r[3]?'<span class="btn b">'+r[3]+'</span>':'')+'</div>').join(''):'<div class="empty">Öneri yok — cihaz temiz görünüyor </div>'),backSG);window.SCANREC=rec}
+/* --- Akıllı Debloat --- */
+let DBSEL=new Set(),DBF='all';
+async function sgDebloat(){curView='debloat';mset('Akıllı Debloat','<div class="nf">Cihaz taranıyor…</div>',backSG);DBSEL=new Set();await scanSys();adbOk=await adbReady();if(curView==='debloat')dbHome()}
+function dbList(){const f=DBF;return cands().filter(i=>f==='all'||i.c.risk===f||i.c.cat===f).sort((a,b)=>['safe','caution','risky'].indexOf(a.c.risk)-['safe','caution','risky'].indexOf(b.c.risk)||a.c.title.localeCompare(b.c.title,'tr'))}
+const dbHomeBack=()=>{if(SCAN){curView='debloat';dbHome()}else sgDebloat()};
+/* 1) Ana sayfa: ne yapmak istediğini seç */
+function dbHome(){curView='debloat';const cd=cands(),unk=SCAN.items.filter(i=>i.c.risk==='unknown'&&i.en).length,safeN=quickList().length,teleN=cd.filter(i=>i.c.cat==='tele').length;
+ mset('Akıllı Debloat','<div class="hero"><div class="h1">'+esc(SCAN.vendor)+'</div><div class="h2">'+cd.length+' aday paket • '+safeN+' güvenli • '+teleN+' telemetri/reklam • '+unk+' tanımsız (dokunulmaz)</div></div>'+(adbOk?'':NEEDADB)+
+ '<div class="nf">Önce <b>dondur</b> (geri alınabilir). Sorun çıkmazsa kaldır. Hepsi Geri Alma Merkezi’nden geri getirilir.</div>'+
+ '<div class="r2" onclick="dbQuick()"><div><div class="n">Güvenli temizlik</div><div class="s2">Yerleşik listede “Güvenli” etiketli '+safeN+' paketi tek seferde dondurur. Riskli ve uzak liste paketlerine dokunmaz.</div></div><span class="btn g">Başlat</span></div>'+
+ '<div class="r2" onclick="dbOpenList(\'all\')"><div><div class="n">Paketleri incele ve seç</div><div class="s2">Tüm adaylar; risk ve türe göre süzülür, istediklerini işaretlersin.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="dbOpenList(\'tele\')"><div><div class="n">Telemetri ve reklam paketleri</div><div class="s2">'+teleN+' paket bulundu.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="dbSettings()"><div><div class="n">Liste kaynağı</div><div class="s2">'+DB.filter(d=>!d[5]).length+' yerleşik kural'+(S.dbRemote?' + '+S.dbRemote.n+' uzak (v'+esc(S.dbRemote.v||'?')+')':'')+' • GitHub JSON adresi ile güncellenir.</div></div><span class="btn">Ayarla</span></div>',backSG)}
+/* 2) Paket listesi */
+async function dbOpenList(f){DBF=f;DBSEL=new Set();curView='dblist';if(!SCAN){mset('Paketler','<div class="nf">Taranıyor…</div>',dbHomeBack);await scanSys();adbOk=await adbReady()}if(curView==='dblist')dbRender()}
+function dbRender(){curView='dblist';const l=dbList(),F=[['all','Tümü'],['safe','Güvenli'],['caution','Dikkat'],['risky','Riskli'],['tele','Telemetri & Reklam'],['vendor','Üretici'],['google','Google']];
+ mset('Paketler',(adbOk?'':NEEDADB)+
+ '<div class="chips">'+F.map(c=>'<div class="chip'+(DBF===c[0]?' on':'')+'" onclick="DBF=\''+c[0]+'\';keepNext();dbRender()">'+c[1]+'</div>').join('')+'</div>'+
+ '<div><span class="btn g" onclick="dbPick(\'safe\')">Güvenlileri seç</span><span class="btn" onclick="dbPick(\'tele\')">Telemetri/reklamı seç</span><span class="btn" onclick="dbPick(\'none\')">Seçimi temizle</span></div>'+
+ (l.length?l.map(i=>'<div class="r2 pk'+(DBSEL.has(i.p)?' sel':'')+'" data-dp="'+esc(i.p)+'" onclick="dbTog('+q(i.p)+')"><div style="min-width:0"><div class="n">'+esc(i.c.title)+' <span class="bd '+RISK[i.c.risk].c+'">'+RISK[i.c.risk].t+'</span> <span class="bd f">'+CATS[i.c.cat]+'</span>'+(i.c.remote?' <span class="bd w">UZAK LİSTE</span>':'')+'</div><div class="p">'+esc(i.p)+'</div>'+(i.c.note?'<div class="s2">'+esc(i.c.note)+'</div>':'')+'</div><div class="cb">✓</div></div>').join(''):'<div class="empty">Bu filtrede aday paket yok</div>')+
+ '<div class="selbar"><div class="sn"><span id="dbc">'+DBSEL.size+'</span> paket seçili</div><span class="btn b" onclick="dbRun(\'freeze\')">❄️ Seçilenleri dondur</span><span class="btn r" onclick="dbRun(\'uninstall\')">🗑️ Seçilenleri kaldır</span></div>',dbHomeBack)}
+/* 3) Liste kaynağı ayarları */
+function dbSettings(){curView='dbset';
+ mset('Liste kaynağı','<div class="nf">Yerleşik kurallara ek olarak, kendi GitHub deposundaki bir JSON dosyasından paket kuralları yükleyebilirsin. Uzak listedeki paketler “Güvenli temizlik”e dahil edilmez.</div>'+
+ '<div class="r2" onclick="dbUpdate(true)"><div><div class="n">'+DB.filter(d=>!d[5]).length+' yerleşik'+(S.dbRemote?' + '+S.dbRemote.n+' uzak (v'+esc(S.dbRemote.v||'?')+')':'')+'</div><div class="s2">'+(S.dbUrl?esc(S.dbUrl):'Adres ayarlanmadı')+(S.dbRemote?' • Güncelleme: '+new Date(S.dbRemote.t).toLocaleDateString('tr-TR'):'')+'</div></div><span class="btn b">'+(S.dbUrl?'Güncelle':'Adres gir')+'</span></div>'+
+ (S.dbUrl?'<div><span class="btn" onclick="dbUrlSet()">Adresi değiştir</span>'+(S.dbRemote?'<span class="btn r" onclick="dbRemoteClear()">Uzak listeyi kaldır</span>':'')+'</div>':''),dbHomeBack)}
+let adbOk=false;
+function ghRaw(u){u=u.trim();const m=u.match(/^https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/(.+)$/);return m?'https://raw.githubusercontent.com/'+m[1]+'/'+m[2]:u}
+async function dbUrlSet(){const v=await ask('Debloat listesi adresi (https://… .json, GitHub raw veya blob)',S.dbUrl||'https://raw.githubusercontent.com/KULLANICI/REPO/main/debloat-list.json');if(v===null)return;const u=ghRaw(v);
+ if(!/^https:\/\/[^\s]+$/.test(u)){toast('❌','Adres https:// ile başlamalı');return}S.dbUrl=u;save();dbUpdate(true)}
+async function dbUpdate(manual){if(!S.dbUrl){dbUrlSet();return}if(manual)toast('⏳','Liste indiriliyor…');
+ try{const r=await fetch(S.dbUrl,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const c=applyRemote(j);
+  if(!c.n&&!c.f)throw new Error('Geçerli kayıt bulunamadı');
+  S.dbRemote={v:String(j.version||''),n:c.n,f:c.f,t:Date.now(),data:{entries:j.entries,family:j.family}};save();if(manual)toast('✅',c.n+' paket + '+c.f+' üretici kuralı yüklendi');
+  if(SCAN){SCAN.items.forEach(i=>{i.c=classify(i.p,i.l)});DBSEL=new Set()}if(curView==='dbset'){keepNext();dbSettings()}}
+ catch(e){if(manual)toast('❌',String(e.message||e).slice(0,90))}}
+function dbRemoteClear(){S.dbRemote=null;applyRemote(null);save();if(SCAN){SCAN.items.forEach(i=>{i.c=classify(i.p,i.l)});DBSEL=new Set()}toast('🗑️','Uzak liste kaldırıldı');keepNext();dbSettings()}
+const quickList=()=>cands().filter(i=>!i.c.remote&&i.c.risk==='safe'&&i.c.src==='db');
+async function dbQuick(){if(!(await adbReady())){info('ADB gerekli','Temizlik için ADB veya Shizuku bağlı olmalı. Kontrol Odası → ADB Terminal.');return}
+ const l=quickList();if(!l.length){toast('👍','Güvenle temizlenecek paket yok');return}DBSEL=new Set(l.map(i=>i.p));await dbRun('freeze')}
+function dbPick(w){if(w==='none')DBSEL=new Set();else cands().filter(i=>!i.c.remote&&(w==='safe'?(i.c.risk==='safe'&&i.c.src==='db'):(i.c.cat==='tele'&&i.c.src==='db'&&i.c.risk!=='risky'))).forEach(i=>DBSEL.add(i.p));keepNext();dbRender()}
+function dbTog(p){if(DBSEL.has(p))DBSEL.delete(p);else DBSEL.add(p);const e=$('[data-dp="'+p+'"]');if(e)e.classList.toggle('sel',DBSEL.has(p));const c=$('#dbc');if(c)c.textContent=DBSEL.size}
+async function dbRun(op){const sel=[...DBSEL];if(!sel.length){toast('ℹ️','Önce seç');return}
+ if(!(await adbReady())){info('ADB gerekli','Dondurma/kaldırma için ADB veya Shizuku bağlı olmalı. Kontrol Odası → ADB Terminal.');return}
+ const its=SCAN.items.filter(i=>DBSEL.has(i.p)),risky=its.filter(i=>i.c.risk==='risky');
+ if(its.some(i=>LAUNCHERS.includes(i.p))&&SCAN.prof.home!=='com.ihlauncher.tv'){info('Önce ana ekranı değiştir','Stok launcher seçili ama ihlauncher varsayılan ana ekran değil. Launcher Ayarları → “Varsayılan ana ekran yap”.');return}
+ let msg=sel.length+' paket '+(op==='freeze'?'dondurulacak (geri alınabilir).':'kullanıcı 0’dan kaldırılacak (Geri Alma Merkezi ile geri yüklenebilir).')+'\n\n'+its.slice(0,10).map(i=>'• '+i.c.title).join('\n')+(its.length>10?'\n… +'+(its.length-10)+' paket daha':'');
+ if(risky.length)msg+='\n\n'+risky.length+' RİSKLİ paket var: '+risky.slice(0,5).map(i=>i.c.title).join(', ')+(risky.length>5?'…':'')+'\nBunlar arayüzü veya özellikleri bozabilir.';
+ if(!(await conf(msg+'\n\nDevam edilsin mi?')))return;
+ let ok=0;const bad=[];for(let k=0;k<sel.length;k++){toast('⏳',(k+1)+' / '+sel.length+' işleniyor…');const r=await pmRun(op,sel[k],true);if(r.ok)ok++;else bad.push(sel[k]+': '+String(r.out||r.error||'hata').slice(0,60))}
+ await loadApps();DBSEL=new Set();await scanSys();adbOk=true;toast(bad.length?'⚠️':'✅',ok+' başarılı, '+bad.length+' başarısız');if(bad.length)info('Başarısız olanlar',bad.join('\n'));if(curView==='dblist')dbRender();else if(curView==='debloat')dbHome()}
+/* --- Telemetri & Gizlilik --- */
+const TELE=[
+ {i:'',t:'Arka plan Wi-Fi / Bluetooth taraması',d:'Konum amaçlı sürekli tarama kapatılır.',get:'$(settings get global wifi_scan_always_enabled)/$(settings get global ble_scan_always_enabled)',on:v=>v==='0/0',cOn:'settings put global wifi_scan_always_enabled 0; settings put global ble_scan_always_enabled 0',cOff:'settings put global wifi_scan_always_enabled 1; settings put global ble_scan_always_enabled 1',risk:'safe'},
+ {i:'',t:'Uygulama hata raporu gönderimi',d:'Çöken uygulamaların “hata bildir” akışını kapatır.',get:'$(settings get global send_action_app_error)',on:v=>v==='0',cOn:'settings put global send_action_app_error 0',cOff:'settings put global send_action_app_error 1',risk:'safe'},
+ {i:'',t:'Bağlantı denetimi (captive portal) kapat',d:'Sistem, internet var mı diye periyodik sunucu isteği atmaz. Bazı TV’lerde “internet yok” uyarısı çıkarabilir.',get:'$(settings get global captive_portal_mode)',on:v=>v==='0',cOn:'settings put global captive_portal_mode 0',cOff:'settings put global captive_portal_mode 1',risk:'caution'}];
+const GMS_COMP=['com.google.android.gms.analytics.AnalyticsService','com.google.android.gms.analytics.AnalyticsReceiver','com.google.android.gms.analytics.AnalyticsJobService','com.google.android.gms.analytics.CampaignTrackingService'];
+async function sgTele(){curView='tele';mset('Telemetri & Gizlilik','<div class="nf">Durum okunuyor…</div>',backSG);
+ adbOk=await adbReady();let vals=[];
+ if(adbOk){const r=await N('adb',{c:TELE.map((t,k)=>'echo T'+k+':'+t.get).join('; ')+'; echo D:$(settings get global private_dns_mode)/$(settings get global private_dns_specifier)'});const m={};(r.out||'').split('\n').forEach(l=>{const x=l.indexOf(':');if(x>0)m[l.slice(0,x).trim()]=l.slice(x+1).trim()});vals=TELE.map((t,k)=>m['T'+k]);window.__dnsNow=m.D||''}
+ if(curView!=='tele')return;await scanSys();if(curView!=='tele')return;
+ const tc=cands().filter(i=>i.c.cat==='tele');
+ mset('Telemetri & Gizlilik','<div class="nf">Hiçbir ayar kalıcı değildir; hepsi geri alınabilir. Telemetriyi tamamen sıfırlamak mümkün değildir — burada yapılabilenler listelenir.</div>'+(adbOk?'':NEEDADB)+
+ '<div class="sec">Sistem ayarları</div>'+TELE.map((t,k)=>'<div class="r2" data-tk="'+k+'" onclick="teleTog('+k+')"><div><div class="n">'+t.i+'  '+t.t+' <span class="bd '+RISK[t.risk].c+'">'+RISK[t.risk].t+'</span></div><div class="s2">'+t.d+'</div></div>'+tg(vals[k]!==undefined&&t.on(vals[k]))+'</div>').join('')+
+ '<div class="sec">Alan adı engelleme</div><div class="r2" onclick="dnsSet(0).then(sgTele)"><div><div class="n">AdGuard DNS aç</div><div class="s2">Cihazın tamamında reklam ve izleyici alan adlarını engeller. Şu an: '+esc(window.__dnsNow||'bilinmiyor')+'</div></div><span class="btn b">Aç</span></div>'+
+ '<div class="sec">Paketler</div><div class="r2" onclick="dbOpenList(\'tele\')"><div><div class="n">Telemetri / reklam paketleri</div><div class="s2">'+tc.length+' paket bulundu — incele ve dondur.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="sec">Google</div><div class="r2" onclick="N(\'startAction\',{a:\'com.google.android.gms.settings.ADS_PRIVACY\'})"><div><div class="n">Reklam kimliği ayarları</div><div class="s2">Reklam kimliğini sıfırla / kişiselleştirmeyi kapat (Google ayar ekranı).</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="N(\'startAction\',{a:\'android.settings.PRIVACY_SETTINGS\'})"><div><div class="n">Gizlilik ayarları</div><div class="s2">Kullanım ve tanılama dahil sistem gizlilik ekranı.</div></div><span class="btn">Aç</span></div>'+
+ '<div class="r2" onclick="gmsAn(true)"><div><div class="n">Deneysel: GMS analitik bileşenlerini kapat</div><div class="s2">Google Analytics servis bileşenleri devre dışı bırakılır. Cihaza göre çalışmayabilir; güncellemeden sonra geri gelebilir.</div></div><span class="btn">Uygula</span></div>'+
+ '<div class="r2" onclick="gmsAn(false)"><div><div class="n">GMS analitik bileşenlerini geri aç</div></div><span class="btn">Uygula</span></div>',backSG)}
+async function teleTog(k){if(!adbOk){toast('⚠️','ADB bağlı değil');return}const t=TELE[k],e=$('#mbody [data-tk="'+k+'"]'),tgl=e&&e.querySelector('.tog'),turnOn=!(tgl&&tgl.classList.contains('on'));
+ const r=await N('adb',{c:turnOn?t.cOn:t.cOff});if(r.code===0){tgl&&tgl.classList.toggle('on',turnOn);toast('✅',turnOn?'Uygulandı':'Geri alındı')}else toast('❌',String(r.out||r.error||'başarısız').slice(0,90))}
+async function gmsAn(off){if(!adbOk){toast('⚠️','ADB bağlı değil');return}toast('⏳','Uygulanıyor…');let ok=0;const bad=[];
+ for(const c of GMS_COMP){const r=await N('adb',{c:(off?'pm disable ':'pm enable ')+'com.google.android.gms/'+c});if(r.code===0&&!/Exception|Error|Unknown/i.test(r.out||''))ok++;else bad.push(c.split('.').pop()+': '+String(r.out||r.error||'').slice(0,50))}
+ toast(ok?'✅':'❌',ok+' / '+GMS_COMP.length+' bileşen '+(off?'kapatıldı':'açıldı'));if(bad.length)info('Bazı bileşenler değişmedi',bad.join('\n')+'\n\nBu cihaz bileşen değişikliğine izin vermiyor olabilir.')}
+/* --- Güvenlik denetimi --- */
+async function sgAudit(){curView='audit';mset('Güvenlik Denetimi','<div class="nf">Denetleniyor…</div>',backSG);const r=await N('audit');if(curView!=='audit')return;
+ if(r.error){mset('Güvenlik Denetimi','<div class="empty">'+esc(r.error)+'</div>',backSG);return}
+ const row=(c,t,s,b)=>'<div class="r2"><div><div class="n">'+c+'  '+t+'</div>'+(s?'<div class="s2">'+s+'</div>':'')+'</div>'+(b||'')+'</div>';
+ const ext=a=>!a.s&&a.p!=='com.ihlauncher.tv';
+ mset('Güvenlik Denetimi','<div class="sec">Durum</div>'+row(r.adb?'':'','USB/Ağ hata ayıklama (ADB)',r.adb?'Açık. Ağdaki herkes erişemez ama yetkili cihazlar komut çalıştırabilir. İşin bitince kapat.':'Kapalı','<span class="bd '+(r.adb?'w':'a')+'">'+(r.adb?'AÇIK':'KAPALI')+'</span>')+
+ row(r.dev?'':'','Geliştirici seçenekleri',r.dev?'Açık':'Kapalı','<span class="bd '+(r.dev?'f':'a')+'">'+(r.dev?'AÇIK':'KAPALI')+'</span>')+
+ '<div class="sec">Erişilebilirlik hizmetleri ('+r.a11y.length+')</div><div class="nf">Bu hizmetler ekranı okuyabilir ve tuşları yakalayabilir. Tanımadığın hizmetleri kapat.</div>'+
+ (r.a11y.map(a=>row(ext(a)?'':'',esc(a.l),esc(a.p),'<span class="bd '+(a.p==='com.ihlauncher.tv'?'a':(a.s?'f':'w'))+'">'+(a.p==='com.ihlauncher.tv'?'BU UYGULAMA':(a.s?'SİSTEM':'3. TARAF'))+'</span>')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Bildirim dinleyicileri ('+r.listeners.length+')</div><div class="nf">Bildirimlerin içeriğini okuyabilir.</div>'+
+ (r.listeners.map(a=>row(ext(a)?'':'',esc(a.l),esc(a.p),'<span class="bd '+(a.p==='com.ihlauncher.tv'?'a':(a.s?'f':'w'))+'">'+(a.p==='com.ihlauncher.tv'?'BU UYGULAMA':(a.s?'SİSTEM':'3. TARAF'))+'</span>')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Hassas izinli kullanıcı uygulamaları ('+r.apps.length+')</div><div class="nf">Dokun: izinleri incele / geri al.</div>'+
+ (r.apps.map(a=>'<div class="r2" onclick="permsFor('+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="s2">'+esc(a.perms.join(', '))+'</div></div><span class="bd w">'+a.perms.length+' izin</span></div>').join('')||'<div class="empty">Yok</div>')+
+ '<div style="margin-top:10px"><span class="btn" onclick="N(\'openSettings\',{k:\'a11y\'})">Erişilebilirlik ayarı</span><span class="btn" onclick="N(\'openSettings\',{k:\'notif\'})">Bildirim erişimi</span><span class="btn" onclick="N(\'openSettings\',{k:\'dev\'})">Geliştirici seçenekleri</span></div>',backSG)}
+/* --- Geri Alma Merkezi --- */
+async function sgRecover(){curView='recover';mset('Geri Alma Merkezi','<div class="nf">Taranıyor…</div>',backSG);ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];if(curView!=='recover')return;adbOk=await adbReady();
+ const by=(a,b)=>a.l.localeCompare(b.l,'tr'),fr=ALL.filter(a=>a.inst&&!a.en).sort(by),mine=ALL.filter(a=>!a.inst&&S.rmlog[a.p]).sort(by),other=ALL.filter(a=>!a.inst&&!S.rmlog[a.p]).sort(by).slice(0,120);
+ const R=(a,op,t)=>'<div class="r2" onclick="recOne('+q(op)+','+q(a.p)+')"><div style="min-width:0"><div class="n">'+esc(a.l)+'</div><div class="p">'+esc(a.p)+'</div></div><span class="btn '+(op==='unfreeze'?'b':'g')+'">'+t+'</span></div>';
+ mset('Geri Alma Merkezi','<div class="nf">Dondurduğun veya kullanıcı 0’dan kaldırdığın paketleri tek dokunuşla geri getir. Tamamen kaldırılmış kullanıcı uygulamaları geri gelmez.</div>'+(adbOk?'':NEEDADB)+
+ '<div><span class="btn b" onclick="recAll()">Dondurulan + kaldırdıklarımı geri getir ('+(fr.length+mine.length)+')</span></div>'+
+ '<div class="sec">Dondurulmuş ('+fr.length+')</div>'+(fr.map(a=>R(a,'unfreeze','Çöz')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Bu launcher ile kaldırılanlar ('+mine.length+')</div>'+(mine.map(a=>R(a,'restore','Geri yükle')).join('')||'<div class="empty">Yok</div>')+
+ '<div class="sec">Diğer kaldırılmış paketler ('+other.length+')</div><div class="nf">Bunlar üretici varsayılanı olarak bu kullanıcıda hiç kurulu olmamış olabilir; yalnızca ne olduğunu biliyorsan geri yükle.</div>'+(other.map(a=>R(a,'restore','Geri yükle')).join('')||'<div class="empty">Yok</div>'),backSG)}
+async function recOne(op,p){toast('⏳','İşleniyor…');const r=await pmRun(op,p);toast(r.ok?'✅':'❌',r.ok?'Geri getirildi: '+baseLab(p):String(r.out||r.error||'başarısız').slice(0,90));await loadApps();keepNext();sgRecover()}
+async function recAll(){if(!(await adbReady())){info('ADB gerekli','Geri getirme için ADB / Shizuku bağlı olmalı.');return}if(!(await conf('Dondurduğun ve bu launcher ile kaldırdığın paketler geri getirilsin mi?')))return;
+ let ok=0,bad=0;const list=ALL.filter(a=>(a.inst&&!a.en)||(!a.inst&&S.rmlog[a.p]));for(let k=0;k<list.length;k++){toast('⏳',(k+1)+' / '+list.length);const a=list[k],r=await pmRun(a.inst?'unfreeze':'restore',a.p,true);if(r.ok)ok++;else bad++}
+ await loadApps();toast(bad?'⚠️':'✅',ok+' geri getirildi, '+bad+' başarısız');sgRecover()}
+/* --- Uygulama Yöneticisi --- */
+let AM={f:'user',q:''},AML=[];
+async function sgApps(){curView='apps';ALL=await N('allPkgs');if(!Array.isArray(ALL))ALL=[];
+ mset('Uygulama Yöneticisi','<div class="chips">'+[['user','Kullanıcı'],['sys','Sistem'],['frozen','Dondurulmuş'],['gone','Kaldırılmış'],['all','Hepsi']].map(c=>'<div class="chip" data-cf="'+c[0]+'" onclick="amF(\''+c[0]+'\')">'+c[1]+'</div>').join('')+'</div><input class="tx" id="amq" placeholder="Ara…" oninput="AM.q=this.value;amRender()" data-submit="amSub"><div id="aml" style="margin-top:12px"></div>',backSG);amRender()}
+function amSub(){const l=$('#aml .r2');if(l)focusEl(l)}
+function amF(f){AM.f=f;amRender()}
+function amRender(){const f=AM.f,qq=(AM.q||'').toLowerCase();$$('[data-cf]').forEach(c=>c.classList.toggle('on',c.dataset.cf===f));
+ AML=ALL.filter(a=>{if(qq&&!(a.l.toLowerCase().includes(qq)||a.p.includes(qq)))return false;if(f==='user')return !a.s&&a.inst;if(f==='sys')return a.s&&a.inst;if(f==='frozen')return a.inst&&!a.en;if(f==='gone')return !a.inst;return true}).sort((a,b)=>a.l.localeCompare(b.l,'tr')).slice(0,200);
+ const e=$('#aml');if(!e)return;e.innerHTML=AML.length?AML.map((a,i)=>{const c=classify(a.p,a.l);return '<div class="r2" onclick="amMenu('+i+')"><div style="min-width:0"><div class="n">'+esc(a.l)+(a.s&&c.risk!=='unknown'?' <span class="bd '+RISK[c.risk].c+'">'+RISK[c.risk].t+'</span>':'')+'</div><div class="p">'+esc(a.p)+'</div></div><span class="bd '+(!a.inst?'u':(!a.en?'f':'a'))+'">'+(!a.inst?'KALDIRILDI':(!a.en?'DONDURULDU':'AKTİF'))+'</span></div>'}).join(''):'<div class="empty">Sonuç yok</div>'}
+function amMenu(i){const a=AML[i];if(!a)return;const it=[];
+ if(!a.inst)it.push(['Geri yükle',()=>pmDo('restore',a.p)]);
+ else{it.push(a.en?['Dondur',()=>pmDo('freeze',a.p)]:['Çöz',()=>pmDo('unfreeze',a.p)]);it.push(['Kaldır',()=>uninstallApp(a.p,a.s)]);it.push(['Zorla durdur',()=>pmDo('stop',a.p)]);it.push(['Verileri temizle',()=>pmDo('clear',a.p)]);it.push(['Arka planı kısıtla',()=>pmDo('bgRestrict',a.p)]);it.push(['İzinler',()=>permsFor(a.p)]);it.push(['Ayrıntılar',()=>appDetail(a.p)])}
+ menu(a.l,it)}
+/* --- ADB --- */
+const PRESETS=[['Kullanıcı paketleri','pm list packages -3'],['Sistem paketleri','pm list packages -s'],['Dondurulmuşlar','pm list packages -d'],['Ekran','wm size; wm density'],['Android sürümü','getprop ro.build.version.release'],['Bellek','head -n 5 /proc/meminfo'],['IP','ip -f inet addr show'],['Açık uygulama','dumpsys activity activities | grep mResumedActivity'],['Isı','dumpsys thermalservice | head -n 30'],['Ping','ping -c 3 1.1.1.1'],['Yeniden başlat','reboot']];
+function term(t,c){const d=$('#term');if(!d)return;const s=document.createElement('div');s.textContent=t;if(c)s.className=c;d.appendChild(s);d.scrollTop=d.scrollHeight}
+async function sgAdb(){curView='adb';const st=await N('adbStatus');
+ mset('ADB Terminal','<div class="nf">Durum: <b style="color:'+(st.ready?'var(--ok)':'var(--bad)')+'">'+(st.ready?'● Bağlı ('+esc(st.mode)+' '+esc(st.info)+')':'● Bağlı değil')+'</b><br>Shizuku: '+(st.shizukuReady?'izinli':(st.shizukuRunning?'çalışıyor, izin gerekli':'çalışmıyor'))+'</div>'+
+ '<div><span class="btn g" onclick="adbConn()">Bağlan ('+esc(st.host)+':'+st.port+')</span><span class="btn" onclick="adbEdit()">Adres/port</span><span class="btn b" onclick="shizukuAsk()">Shizuku izni</span><span class="btn" onclick="runSetup()">Tek tuş kurulum</span><span class="btn" onclick="setHome()">Varsayılan yap</span></div>'+
+ '<div class="nf">TV’de Geliştirici seçenekleri → USB/Ağ hata ayıklama açık olmalı. İlk bağlantıda çıkan izin penceresinde “Her zaman izin ver”i seç.</div><div id="term"></div><input class="tx" id="adbin" placeholder="komut (ör. pm list packages -3)" data-submit="adbRun">'+
+ '<div style="margin-top:12px">'+PRESETS.map((p,k)=>'<span class="btn" onclick="adbPreset('+k+')">'+p[0]+'</span>').join('')+'</div>'+((S.hist||[]).length?'<div class="nf">Geçmiş:</div><div>'+S.hist.slice(0,12).map((h,k)=>'<span class="chip" onclick="adbHist('+k+')">'+esc(h.slice(0,30))+'</span>').join(' ')+'</div>':''),backSG)}
+async function shizukuAsk(){await N('shizukuRequest');toast('🔑','Shizuku izin isteği gönderildi')}
+async function adbConn(){const st=await N('adbStatus');toast('⏳','Bağlanılıyor… TV’de izin penceresi çıkabilir');const r=await N('adbConnect',{host:st.host,port:st.port});toast(r.r==='ok'?'✅':'❌',r.r==='ok'?'ADB bağlandı':String(r.r||r.error).slice(0,90));sgAdb()}
+async function adbEdit(){const st=await N('adbStatus');const v=await ask('ADB adresi (host:port)',st.host+':'+st.port);if(!v)return;const m=v.trim().split(':');const r=await N('adbConnect',{host:m[0],port:parseInt(m[1]||'5555',10)});toast(r.r==='ok'?'✅':'❌',r.r==='ok'?'ADB bağlandı':String(r.r||r.error).slice(0,90));sgAdb()}
+async function adbRun(){const i=$('#adbin');if(!i)return;const c=i.value.trim();if(!c)return;i.value='';term('$ '+c,'tp');S.hist=[c].concat((S.hist||[]).filter(x=>x!==c)).slice(0,30);save();const r=await N('adb',{c});term(r.out||r.error||'(çıktı yok)')}
+async function adbPreset(k){const p=PRESETS[k];if(p[1]==='reboot'&&!(await conf('Cihaz yeniden başlatılsın mı?')))return;$('#adbin').value=p[1];adbRun()}
+function adbHist(k){$('#adbin').value=S.hist[k];focusEl($('#adbin'))}
+/* ===== Tuş Atama (her tuş atanabilir) ===== */
+const KN={'3':'Ana ekran','4':'Geri','19':'Yukarı','20':'Aşağı','21':'Sol','22':'Sağ','23':'Tamam (OK)','66':'Enter','82':'Menü','84':'Ara','24':'Ses +','25':'Ses −','164':'Sessiz','85':'Oynat / Duraklat','86':'Dur','87':'Sonraki','88':'Önceki','89':'Geri sar','90':'İleri sar','126':'Oynat','127':'Duraklat','130':'Kayıt','166':'Kanal +','167':'Kanal −','165':'Bilgi','172':'Rehber','170':'TV','175':'Altyazı','176':'Ayarlar','178':'Giriş','183':'Kırmızı','184':'Yeşil','185':'Sarı','186':'Mavi','187':'Son uygulamalar','219':'Asistan','231':'Sesli asistan','92':'Sayfa yukarı','93':'Sayfa aşağı'};
+for(let i=0;i<=9;i++)KN[String(7+i)]=String(i);
+const KCOL={'183':'#FF453A','184':'#30D158','185':'#FFD60A','186':'#0A84FF'};
+const KCRIT=['3','4','19','20','21','22','23','66','82','160'];
+const KGRP=[['Renkli tuşlar',['183','184','185','186']],['Medya',['85','126','127','86','87','88','89','90','130']],['Ses ve kanal',['24','25','164','166','167']],['Kumanda',['82','165','172','170','176','178','84','175','231','219','187']],['Rakamlar',['7','8','9','10','11','12','13','14','15','16']],['Gezinme (dikkatli ol)',['19','20','21','22','23','4','3']]];
+const GLB={back:'Geri',home:'Ana ekran',recents:'Son uygulamalar',notif:'Bildirim paneli',quick:'Hızlı ayarlar',power:'Güç menüsü'};
+const KTMP={};
+const prettyKey=n=>String(n).replace(/_/g,' ').toLowerCase().replace(/^./,c=>c.toUpperCase());
+const keyName=id=>KN[id]||(S.keyNames&&S.keyNames[id]?prettyKey(S.keyNames[id]):KTMP[id]?prettyKey(KTMP[id]):'Tuş '+id);
+function keyTgt(t){if(t==='none')return{n:'Devre dışı',d:'Tuş hiçbir şey yapmaz'};
+ if(t.indexOf('glb:')===0)return{n:GLB[t.slice(4)]||t,d:'Sistem eylemi'};
+ if(t.indexOf('act:')===0){const a=allActs()[t.slice(4)];return{n:a?a[1]:t,d:/^dock/.test(t.slice(4))?'Panel (dock)':'Launcher özelliği'}}
+ return{n:lab(t),d:'Uygulamayı aç',img:icon(t)}}
+function keyRow(id,t){const x=keyTgt(t),c=KCOL[id];
+ return '<div class="r2 kr" onclick="keyEdit('+q(id)+')"><div class="kc">'+(c?'<i class="kd" style="background:'+c+'"></i>':'')+esc(keyName(id))+'</div><div class="ar">›</div><div class="kt">'+(x.img?'<img src="'+x.img+'" alt="">':'')+'<div><div class="n">'+esc(x.n)+'</div><div class="s2">'+x.d+'</div></div></div>'+(KCRIT.includes(id)?'<span class="kw">Yalnızca diğer uygulamalarda</span>':'')+'</div>'}
+async function keysView(){curView='keys';const acc=(await N('keyAccess')).v,km=S.keymap||{},ids=Object.keys(km);
+ let h='<div class="kh"><div class="kic"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="19" rx="4"/><circle cx="12" cy="8" r="1.2"/><path d="M10 13h4M10 16.5h4"/></svg></div><div class="ktx"><div class="h1">Her tuşa bir görev ver</div><div class="h2">Kumandadaki herhangi bir tuşu bir uygulamaya, launcher eylemine veya sistem eylemine bağla.</div></div><div class="kpill '+(acc?'ok':'bad')+'">'+(acc?'Servis açık':'Servis kapalı')+'</div></div>';
+ if(!acc)h+='<div class="nf">Tuş atamanın çalışması için erişilebilirlik servisi açık olmalı.</div><span class="btn g" onclick="runSetup()">Tek tuş kurulum</span><span class="btn" onclick="N(\'openSettings\',{k:\'a11y\'})">Erişilebilirlik ayarı</span>';
+ h+='<div class="kq"><span class="btn b" onclick="keyAdd()">＋ Tuşa basarak ekle</span><span class="btn" onclick="keyListMenu()">Listeden tuş seç</span><span class="btn" onclick="sgColor()">Ana ekran renkli tuşları</span>'+(ids.length?'<span class="btn r" onclick="keyResetAll()">Tümünü sıfırla</span>':'')+'</div>';
+ h+='<div class="sec">Atanmış tuşlar'+(ids.length?' ('+ids.length+')':'')+'</div>'+(ids.map(id=>keyRow(id,km[id])).join('')||'<div class="empty">Henüz atanmış tuş yok. “Tuşa basarak ekle”yi seç, sonra kumandada atamak istediğin tuşa bas.</div>');
+ h+='<div class="sec">Paneller (dock)'+(S.docks.length?' ('+S.docks.length+')':'')+'</div><div class="nf">Bir tuşa panel ata: tuşa basınca ekranın altında 10 adete kadar uygulama / özellik kısayolu açılır.</div><div><span class="btn b" onclick="dockNew()">＋ Yeni panel</span></div>'+S.docks.map(d=>'<div class="r2" onclick="dockEdit('+q(d.id)+')"><div><div class="n">🚀 '+esc(d.name)+'</div><div class="s2">'+d.items.length+' öğe</div></div><span class="btn">Düzenle</span></div>').join('');
+ h+='<div class="sec">Bilmen gerekenler</div><div class="nf">Yön, Tamam, Geri, Menü ve Ana ekran tuşları da atanabilir; ama ihlauncher açıkken bu tuşlar normal çalışmaya devam eder. Böylece yanlış bir atamadan sonra bile ayarlara dönebilirsin.<br>Bazı cihazlar Ana ekran tuşunu uygulamalara hiç iletmez; bu tuşta atama çalışmayabilir.</div>';
+ mset('Tuş Atama',h,null)}
+let learnT;
+async function keyAdd(){if(!(await N('keyAccess')).v){toast('⚠️','Önce erişilebilirlik servisini aç');return}
+ $('#dlgbox').innerHTML='<div class="dt">Tuşa bas</div><div class="dm">Kumandada atamak istediğin tuşa bas. Yön tuşları, Tamam ve Geri dahil her tuş atanabilir.\n15 sn içinde basmazsan kendiliğinden kapanır.</div><div class="drow"><div class="btn" onclick="keyLearnCancel()">Vazgeç</div></div>';markOpener();$('#dlg').classList.add('show');window.__learnActive=true;N('keyLearn');clearTimeout(learnT);learnT=setTimeout(()=>{closeDlg()},15000)}
+function keyLearnCancel(){closeDlg()}
+window.__key=(id,name)=>{window.__learnActive=false;clearTimeout(learnT);closeDlg();KTMP[String(id)]=String(name).replace('KEYCODE_','');keyStart(String(id))};
+async function keyStart(id){if(KCRIT.includes(id)&&!(await conf(keyName(id)+' tuşu gezinme için kullanılıyor. Atama yalnızca başka uygulamalar açıkken çalışır; ihlauncher içinde bu tuş normal çalışmaya devam eder. Devam edilsin mi?')))return;keyPickTarget(id)}
+function keyPickTarget(id){menu(keyName(id)+' tuşu ne yapsın?',[['Uygulama aç…',()=>keyApp(id)],['Özellik / panel…',()=>keyActMenu(id)],['Sistem eylemi…',()=>keyGlbMenu(id)],['Tuşu devre dışı bırak',()=>keySet(id,'none')]])}
+async function keyApp(id){const p=await pickApp(keyName(id)+' tuşu hangi uygulamayı açsın?');if(!p)return;keySet(id,p)}
+function keyActMenu(id){menu(keyName(id)+' → Özellik / panel',Object.entries(allActs()).filter(([a])=>a!=='none').map(([a,v])=>[v[0]+'  '+v[1],()=>keySet(id,'act:'+a)]))}
+function keyGlbMenu(id){menu(keyName(id)+' → Sistem eylemi',Object.keys(GLB).map(g=>[GLB[g],()=>keySet(id,'glb:'+g)]))}
+function keySave(){save();N('setKeymap',{m:JSON.stringify(S.keymap)})}
+function keySet(id,t){S.keymap[id]=t;S.keyNames[id]=KTMP[id]||S.keyNames[id]||'';keySave();toast('✅',keyName(id)+' → '+keyTgt(t).n);keepNext();keysView()}
+function keyEdit(id){menu(keyName(id)+' tuşu',[['Hedefi değiştir',()=>keyPickTarget(id)],['Sil',()=>keyDel(id)]])}
+function keyDel(c){delete S.keymap[c];delete S.keyNames[c];keySave();keysView()}
+async function keyResetAll(){if(!(await conf('Tüm tuş atamaları silinsin mi?')))return;S.keymap={};S.keyNames={};keySave();keysView()}
+function keyListMenu(){menu('Tuş seç',KGRP.map((g,i)=>[g[0],()=>keyGroup(i)]))}
+function keyGroup(i){menu(KGRP[i][0],KGRP[i][1].map(id=>[keyName(id)+(S.keymap[id]?'  ✓':''),()=>keyStart(id)]))}
+/* --- DNS --- */
+const DNS=[['','AdGuard DNS (reklam + izleyici engeller)','hostname','dns.adguard-dns.com'],['','Cloudflare','hostname','one.one.one.one'],['','Google DNS','hostname','dns.google'],['','Quad9 (zararlı alan adı engeller)','hostname','dns.quad9.net'],['','Otomatik','opportunistic',''],['','Kapalı','off','']];
+async function sgDns(){curView='dns';const cur=await N('getDns');const ls=(cur.out||'').split('\n');
+ mset('Özel DNS (Private DNS)','<div class="nf">Şu an: <b>'+esc(cur.code===0?(ls[0]+(ls[0]==='hostname'?' • '+ls[1]:'')):'ADB bağlı değil')+'</b><br>Android 9+ gerekir; cihazın tamamında geçerli olur.</div>'+DNS.map((d,k)=>'<div class="r2" onclick="dnsSet('+k+').then(sgDns)"><div class="n">'+d[0]+' '+d[1]+(d[3]?'<div class="p">'+d[3]+'</div>':'')+'</div>'+((cur.code===0&&ls[0]===d[2]&&(d[2]!=='hostname'||ls[1]===d[3]))?'<span class="bd a">● AKTİF</span>':'')+'</div>').join(''),backSG)}
+async function dnsSet(k){const d=DNS[k];const r=await N('setDns',{mode:d[2],host:d[3]});toast(r.ok?'✅':'❌',r.ok?'DNS: '+d[1].split(' (')[0]:String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+/* --- VPN / CEC / Boot / Yedek / İzin / Bilgi / Perf / Çözünürlük --- */
+async function sgCec(){curView='cec';await loadInputs();const st=await cecState(),A=st&&st.A==='1',E=!st||st.E!=='0';
+ mset('HDMI-CEC / Girişler','<div class="nf">Geç: girişe geç (CEC cihazı çoğu zaman uyanır) • Adı değiştir: kendi etiketin.</div>'+(INPS.length?INPS.map((i,k)=>'<div class="r2"><div><div class="n">'+esc(S.cecNames[i.id]||i.cec||i.label)+'</div><div class="p">'+esc(i.label)+' • port '+i.port+' • CEC: '+esc(i.cec||'-')+' • '+['bağlı','beklemede','bağlı değil'][i.state]+'</div></div><div><span class="btn g" onclick="goInput('+k+')">Geç</span><span class="btn" onclick="renameInput('+k+').then(sgCec)">Adı değiştir</span></div></div>').join(''):'<div class="empty">Bu cihazda TV girişi bulunamadı</div>')+
+ '<div class="sec">CEC ayarları</div>'+(st?'':NEEDADB)+
+ '<div class="r2" onclick="cecTog(\'en\','+(E?0:1)+')"><div><div class="n">CEC (HDMI kontrol) açık</div><div class="s2">Kapalıyken bağlı cihazlar uyandırılamaz.</div></div>'+tg(E)+'</div>'+
+ '<div class="r2" onclick="cecTog(\'off\','+(A?0:1)+')"><div><div class="n">TV uyurken bağlı cihazları da kapat</div><div class="s2">TV bekleme moduna geçerken CEC ile cihazlara kapanma komutu gönderir. Cihaz bu komutu desteklemiyorsa etkisiz kalır.</div></div>'+tg(A)+'</div>'+
+ '<div class="r2" onclick="cecRestart()"><div><div class="n">CEC’i yeniden başlat</div><div class="s2">Cihaz listede görünmüyor veya tepki vermiyorsa dene.</div></div></div>'+
+ '<div class="nf">Not: Android, tek bir HDMI cihazına doğrudan “aç/kapat” komutu göndermeyi kabuktan sunmuyor. Girişe geçmek (yönlendirme) cihazı uyandırır; kapatma ise TV uyurken toplu gider.</div>',backSG)}
+async function cecTog(k,v){if(!(await adbReady())){toast('⚠️','ADB bağlı değil');return}await cecRun(k==='en'?cecEn(v):cecOff(v),v?'Açıldı':'Kapatıldı');keepNext();sgCec()}
+function sgBoot(){curView='boot';mset('Açılışta Başlat','<div class="nf">Cihaz her yeniden başladığında launcher ilk açılışında bu uygulamalar sırayla başlatılır.</div>'+sortedApps().map((a,k)=>'<div class="r2" onclick="bootTog('+k+')"><div class="n">'+esc(lab(a.p))+'</div>'+tg(S.bootApps.includes(a.p))+'</div>').join(''),backSG)}
+function bootTog(k){const p=sortedApps()[k].p,i=S.bootApps.indexOf(p);if(i>=0)S.bootApps.splice(i,1);else S.bootApps.push(p);save();const e=$$('#mbody .r2')[k];if(e)e.querySelector('.tog').classList.toggle('on',i<0)}
+async function backupNow(manual){saveNow();const r=await N('backupNow');if(r&&r.ok){S.autoBackup.last=Date.now();save();if(manual)toast('💾','Yedeklendi: '+r.name)}else if(manual)toast('❌',String((r&&r.error)||'Yedek yazılamadı').slice(0,90));return !!(r&&r.ok)}
+async function sgBackup(){curView='backup';const bi=await N('backupInfo'),ab=S.autoBackup;if(curView!=='backup')return;
+ mset('Yedekle / Geri Yükle','<div class="nf">Tema, favoriler, gizli uygulamalar, klasörler, sıralama, kartlar, bölüm düzeni, kumanda atamaları ve ayarlar JSON olarak yedeklenir.</div>'+
+ '<div class="sec">Tek tuşla yedek</div>'+
+ '<div class="r2" onclick="N(\'backupTree\')"><div><div class="n">Yedek klasörü</div><div class="s2">'+(bi.set?esc(bi.label||'seçili'):'Seçilmedi — USB belleği tak ve bir klasör seç (ilk seferde bir kez)')+'</div></div><span class="btn">'+(bi.set?'Değiştir':'Seç')+'</span></div>'+
+ '<div><span class="btn b" onclick="backupNow(true)">Şimdi yedekle</span></div>'+
+ '<div class="r2" onclick="abSet(\'on\')"><div><div class="n">Otomatik yedek</div><div class="s2">Seçili klasöre belirli aralıkta yedek alır (USB takılıysa). Son: '+(ab.last?new Date(ab.last).toLocaleString('tr-TR'):'yok')+'</div></div>'+tg(ab.on)+'</div>'+
+ '<div class="chips">'+[3,7,14,30].map(d=>'<div class="chip'+(ab.days===d?' on':'')+'" onclick="abSet(\'days\','+d+')">'+d+' gün</div>').join('')+'</div>'+
+ '<div class="sec">Dosya olarak</div><div class="nf">Sistem dosya seçicisiyle istediğin yere kaydet veya oradan geri yükle (USB; cihazında Google Drive uygulaması varsa Drive da listelenir).</div><span class="btn" onclick="saveNow();N(\'exportBackup\')">Dosya olarak kaydet</span><span class="btn" onclick="N(\'importBackup\')">İçe aktar</span>',backSG)}
+function abSet(k,v){const a=S.autoBackup;if(k==='on'){a.on=!a.on;if(a.on&&!a.last)a.last=0}else a.days=v;save();keepNext();sgBackup()}
+window.__backupTree=()=>{toast('📁','Yedek klasörü seçildi');if(curView==='backup')sgBackup()};
+window.__reload=()=>location.reload();
+let PERMS=[],PERMPKG='';
+async function sgPerms(){const p=await pickApp('Hangi uygulamanın izinleri?');if(p)permsFor(p)}
+async function permsFor(p){const r=await N('perms',{p});if(!Array.isArray(r)){toast('❌',String(r.error||'okunamadı').slice(0,80));return}PERMS=r;PERMPKG=p;curView='perms';
+ mset('İzinler — '+esc(lab(p)),'<div class="nf">Yalnızca çalışma zamanı (tehlikeli) izinler listelenir. Aç/kapat: ADB ile ver/geri al.</div>'+(r.length?r.map((x,k)=>'<div class="r2" onclick="permTog('+k+')"><div><div class="n">'+esc(x.n.replace('android.permission.',''))+'</div><div class="p">'+esc(x.n)+'</div></div>'+tg(x.g)+'</div>').join(''):'<div class="empty">Çalışma zamanı izni yok</div>'),backSG)}
+async function permTog(k){const x=PERMS[k];const r=await N('permSet',{p:PERMPKG,perm:x.n,g:!x.g});if(r.ok){x.g=!x.g;const e=$$('#mbody .r2')[k];if(e)e.querySelector('.tog').classList.toggle('on',x.g)}else toast('❌',String(r.out||r.error||'başarısız').slice(0,90))}
+async function sgInfo(){curView='info';const r=await N('deviceInfo');mset('Cihaz Bilgisi',Array.isArray(r)?r.map(x=>'<div class="kv"><span>'+esc(x.k)+'</span><span>'+esc(x.v)+'</span></div>').join(''):'<div class="empty">Okunamadı</div>',backSG)}
+function sgPerf(){curView='perf';mset('Performans','<div class="nf">Animasyon ölçeği (ADB ile). Düşük değer arayüzü hızlı gösterir.</div><span class="btn" onclick="perf(\'1\')">Animasyon 1x</span><span class="btn g" onclick="perf(\'0.5\')">Animasyon 0.5x</span><span class="btn b" onclick="perf(\'0\')">Animasyon kapalı</span><div style="margin-top:12px"><span class="btn r" onclick="perf(\'kill\')">Arka plan uygulamalarını kapat</span></div>',backSG)}
+async function perf(v){const r=await N('perf',{v});toast(r.ok?'✅':'❌',r.ok?'Uygulandı':String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+async function sgRes(){curView='res';const r=await N('wmGet'),t=S.wmT||30;
+ mset('Çözünürlük / Yoğunluk','<div class="nf">'+esc(r.code===0?r.out:'ADB bağlı değil')+'</div><div class="nf">Bir ayarı uyguladıktan sonra ekranda <b>Koru / Geri al</b> penceresi açılır. Koru’yu seçersen ayar kalıcı olur; seçmezsen süre dolunca önceki ayara dönülür.</div>'+
+  '<div class="sec">Onay süresi</div><div class="chips">'+[15,30,60].map(x=>'<div class="chip'+(t===x?' on':'')+'" onclick="S.wmT='+x+';save();keepNext();sgRes()">'+x+' sn</div>').join('')+'</div>'+
+  '<div class="sec">Boyut</div>'+['1280x720','1920x1080','2560x1440','3840x2160'].map(s=>'<span class="btn" onclick="wmApply(\'wm size '+s+'\')">'+s+'</span>').join('')+
+  '<div class="sec">Yoğunluk (dpi)</div>'+[160,213,240,320,480].map(d=>'<span class="btn" onclick="wmApply(\'wm density '+d+'\')">'+d+'</span>').join('')+
+  '<div style="margin-top:12px"><span class="btn r" onclick="wmReset()">Cihazın varsayılanına sıfırla</span></div>',backSG)}
+/* Onay penceresi yerel (Android) tarafta açılır: ekran boyutu değişince WebView yeniden çizilse bile kaybolmaz */
+async function wmApply(c){const r=await N('wmSet',{c,t:S.wmT||30});if(r.code!==0)toast('❌',String(r.out||r.error||'ADB bağlı değil').slice(0,90))}
+window.__wmDone=()=>{if(curView==='res')sgRes()};
+async function wmReset(){await N('wmReset');toast('↩️','Sıfırlandı');sgRes()}
+/* ===== Kumanda renkli tuşları ===== */
+const ACTS={none:['','Yok'],voice:['','Sesli arama'],search:['','Uygulama ara'],notif:['','Bildirimler'],settings:['','Ayarlar'],center:['','Kontrol Odası'],layout:['','Ana ekran düzeni'],keys:['','Tuş Atama'],look:['','Görünüm'],android:['','Android Ayarları'],top:['','Başa dön'],inputs:['','Giriş kaynağı seç'],clean:['','Önbelleği temizle'],backup:['','Şimdi yedekle'],tv:['📺','Canlı TV'],debloat:['🧹','Akıllı Debloat'],recover:['♻️','Geri Alma Merkezi'],apps:['📦','Uygulama Yöneticisi'],adb:['⌨️','ADB Terminal']};
+function allActs(){const o=Object.assign({},ACTS);(S.docks||[]).forEach(d=>{o[d.id]=['🚀','Panel: '+d.name]});return o}
+function runAct(a){switch(a){
+ case 'voice':voice();break;
+ case 'search':closePanels();$('#content').scrollTo({top:0});actInput($('#q'));break;
+ case 'notif':openPanel('notif');break;case 'settings':openPanel('settings');break;
+ case 'center':surgeonHome();break;case 'layout':layoutView();break;case 'keys':keysView();break;case 'look':lookView();break;case 'android':N('openSettings',{k:'android'});break;
+ case 'top':closePanels();$('#content').scrollTo({top:0});{const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}break;
+ case 'inputs':menu('Giriş kaynağı',[['📺 Canlı TV',()=>{try{closePanels();TVUI.open()}catch(e){}}]].concat(INPS.map((i,k)=>[''+(S.cecNames[i.id]||i.cec||i.label),()=>goInput(k)])));break;
+ case 'clean':autoCleanRun(true);break;case 'backup':backupNow(true);break;
+ case 'tv':try{closePanels();TVUI.open()}catch(e){}break;case 'debloat':sgDebloat();break;case 'recover':sgRecover();break;case 'apps':sgApps();break;case 'adb':sgAdb();break;
+ default:if(/^dock/.test(a))openDock(a)}}
+const CKC={red:['#FF453A','Kırmızı'],green:['#30D158','Yeşil'],yellow:['#FFD60A','Sarı'],blue:['#0A84FF','Mavi']};
+function sgColor(){curView='color';mset('Kumanda Kısayolları','<div class="nf">Kumandanın renkli tuşlarına, ihlauncher açıkken çalışacak bir eylem ata. Renkli tuşu başka uygulamalarda da kullanmak istiyorsan Tuş Atama’dan ekle.</div>'+
+ Object.keys(CKC).map(k=>'<div class="r2" onclick="colorPick(\''+k+'\')"><div class="n"><span class="cd" style="background:'+CKC[k][0]+'"></span>'+CKC[k][1]+' tuş</div><span class="btn">'+(allActs()[S.colorKeys[k]]||ACTS.none)[0]+' '+(allActs()[S.colorKeys[k]]||ACTS.none)[1]+'</span></div>').join(''),keysView)}
+function colorPick(k){menu(CKC[k][1]+' tuş',Object.entries(allActs()).map(([a,v])=>[v[0]+'  '+v[1],()=>{S.colorKeys[k]=a;save();keepNext();sgColor()}]))}
+/* ===== Ses komutu ===== */
+function voice(){N('voice').then(r=>{if(r.error)toast('❌',r.error)})}
+let vActs=[];
+window.__voice=t=>{t=(t||'').toLowerCase().trim();if(!t){toast('🎤','Anlaşılamadı');return}voiceResults(t)};
+function voiceResults(t){const qq=t.replace(/(^|\s)(aç|çalıştır|başlat|git|göster)(?=\s|$)/g,' ').replace(/\s+/g,' ').trim(),words=qq.split(' ').filter(w=>w.length>1),res=[];
+ const apps=APPS.filter(a=>S.showHidden||!S.hidden.includes(a.p)).map(a=>{const l=lab(a.p).toLowerCase(),b=a.l.toLowerCase();let sc=0;if(qq&&(qq===l||qq.indexOf(l)>=0))sc+=10;if(qq&&l.startsWith(qq))sc+=5;words.forEach(w=>{if(l.includes(w)||b.includes(w))sc+=3});return{a,sc}}).filter(x=>x.sc>0).sort((x,y)=>y.sc-x.sc||lab(x.a.p).localeCompare(lab(y.a.p),'tr')).slice(0,8);
+ apps.forEach(x=>res.push({img:icon(x.a.p),t:lab(x.a.p),d:'Uygulamayı aç',f:()=>launch(x.a.p)}));
+ const cmds=[['ayarlar','','Ayarlar',()=>openPanel('settings')],['bildirim','','Bildirimler',()=>openPanel('notif')],['sistem','','Kontrol Odası',surgeonHome],['debloat','','Akıllı Debloat',sgDebloat],['telemetri','','Telemetri & Gizlilik',sgTele],['temizle','','Önbelleği temizle',()=>autoCleanRun(true)],['tema','','Görünüm',openTheme],['tuş','','Tuş Atama',keysView],['duvar','','Duvar Kağıdı',openWall],['kart','','Kart ekle',addWidgetMenu],['widget','','Kart ekle',addWidgetMenu]];
+ cmds.forEach(c=>{if(t.indexOf(c[0])>=0||words.some(w=>w.length>3&&c[0].startsWith(w)))if(!res.some(r=>r.t===c[2]))res.push({e:c[1],t:c[2],d:'Ayar / araç',f:c[3]})});
+ INPS.forEach((i,k)=>{const n=(S.cecNames[i.id]||i.cec||i.label).toLowerCase();if(words.some(w=>n.includes(w)||i.label.toLowerCase().includes(w)))res.push({e:'',t:'Giriş: '+(S.cecNames[i.id]||i.cec||i.label),d:'Bu girişe geç',f:()=>goInput(k)})});
+ res.push({e:'',t:'Tüm uygulamalarda ara: “'+qq+'”',d:'Ana ekrandaki aramaya yaz',f:()=>{$('#q').value=qq;renderGrid();$('#content').scrollTo({top:0})}});
+ vActs=res.map(r=>r.f);
+ $('#dlgbox').style.maxWidth='620px';
+ $('#dlgbox').innerHTML='<div class="dt">“'+esc(t)+'”</div><div class="dm" style="text-align:center">'+(apps.length?apps.length+' uygulama bulundu':'Eşleşen uygulama yok')+'</div>'+res.map((r,k)=>'<div class="ditem vr" onclick="voicePick('+k+')">'+(r.img?'<img src="'+r.img+'" alt="">':'<div class="vi">'+r.e+'</div>')+'<div><div>'+esc(r.t)+'</div><div style="font-size:12px;opacity:.7;font-weight:400">'+esc(r.d)+'</div></div></div>').join('');showDlg()}
+function voicePick(k){closeDlg();vActs[k]()}
+/* ===== Başlat ===== */
+let rsT;
+window.__resume=()=>{setTimeout(()=>updAuto(),4000);clearTimeout(rsT);rsT=setTimeout(()=>{loadApps().then(()=>{loadInputs()});pollN();autoCheck()},300)};
+window.__pkgChanged=()=>{clearTimeout(rsT);rsT=setTimeout(loadApps,1500)};
+function init(){safe('fx',fx);safe('load',load);safe('uzak liste',()=>{if(S.dbRemote&&S.dbRemote.data)applyRemote(S.dbRemote.data)});safe('tema',applyTheme);safe('duvar kağıdı',applyWall);safe('bölümler',applyRows);safe('kartlar',renderWidgets);safe('saat',tick);setInterval(()=>safe('saat',tick),1000);
+ N('setKeymap',{m:JSON.stringify(S.keymap||{})});
+ loadApps().then(()=>{loadInputs();setTimeout(()=>{if(document.activeElement===document.body||!document.activeElement){const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}},250)});
+ if(!S.hintLp&&navigator.maxTouchPoints===0){S.hintLp=1;save();setTimeout(()=>toast('','Seçenekler için OK tuşunu basılı tut'),2500)}
+ setInterval(poll,3000);rotTick();setInterval(()=>{rotTick();if(S.wall==='auto')applyWall()},60000);setTimeout(unusedHint,20000);setTimeout(()=>updAuto(),25000);setInterval(()=>updAuto(),36e5);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
+/* ===== Odak kilidi: panel/pencere/TV açıkken yalnızca o katman seçilebilir ===== */
+let _trap=null;function syncTrap(){const L=layer(),d=$('#dlg'),m=$('#modal'),key=(L&&L.id)||'';if(key===_trap)return;_trap=key;
+ document.body.classList.toggle('trap',!!L);
+ const lock=(el,on)=>{if(!el)return;if(on){el.setAttribute('inert','');el.setAttribute('aria-hidden','true')}else{el.removeAttribute('inert');el.removeAttribute('aria-hidden')}};
+ lock($('#content'),!!L);lock(document.querySelector('.topbar'),!!L);
+ lock(m,L===d);$$('.side').forEach(x=>lock(x,!!L&&x!==L&&!(x.contains&&L.contains&&x.contains(L))))}
+new MutationObserver(syncTrap).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:false});
+document.addEventListener('focusin',e=>{if(document.body.classList.contains('tvon'))return;const L=layer();if(L&&!L.contains(e.target)&&!(e.target.closest&&e.target.closest('#dlg')))setTimeout(()=>{const l=layer();if(l&&!l.contains(document.activeElement))focusFirst()},0)},true);
+
+/* ===== Taşı modu: öğe büyür, yön tuşlarıyla götürülür, OK bırakır, Geri iptal eder ===== */
+let MV=null;
+const mvId=(k,x)=>k==='w'?x.id:x;
+function mvArr(){const k=MV.k;if(k==='fav')return S.fav;if(k==='w')return S.widgets;
+ if(k==='app'){if(!MV.full){S.order=sortedApps().map(a=>a.p);MV.full=1}return S.order}
+ if(!MV.full){S.inOrder=INPS.map(i=>i.id);MV.full=1}return S.inOrder}
+function mvVis(){const k=MV.k;if(k==='fav')return S.fav.filter(p=>APPS.some(a=>a.p===p));if(k==='w')return S.widgets.map(w=>w.id);
+ if(k==='app')return [...document.querySelectorAll('#grid [data-p]')].map(e=>e.dataset.p);return INPS.map(i=>i.id)}
+function mvEl(){const k=MV.k;
+ if(k==='fav')return document.querySelector('#favRow [data-p="'+MV.id+'"]');
+ if(k==='app')return document.querySelector('#grid [data-p="'+MV.id+'"]');
+ if(k==='w')return document.querySelector('#wgRow [data-w="'+MV.id+'"]');
+ const i=INPS.findIndex(x=>x.id===MV.id);return document.querySelector('#inRow [data-in="'+i+'"]')}
+function mvCols(){const t=[...document.querySelectorAll('#grid [data-p]')];if(!t.length)return 1;const y=t[0].offsetTop;let n=0;for(const e of t){if(Math.abs(e.offsetTop-y)<4)n++;else break}return Math.max(1,n)}
+function mvMark(){const e=mvEl();document.querySelectorAll('.moving').forEach(x=>x.classList.remove('moving'));if(e){e.classList.add('moving');focusEl(e)}}
+function mvRender(){const k=MV.k;if(k==='fav')renderFavs();else if(k==='app')renderGrid();else if(k==='w')renderWidgets();else{loadInputs().then(mvMark);return}mvMark()}
+function startMove(k,id){if(MV)return;MV={k,id,full:0,snap:null};const a=mvArr();MV.snap=JSON.stringify(a);
+ document.body.classList.add('mv-on');let b=$('#mvbar');if(!b){b=document.createElement('div');b.id='mvbar';document.body.appendChild(b)}
+ b.innerHTML='<span><b>◀ ▶ ▲ ▼</b> Götür</span><span><b>OK</b> Bırak</span><span><b>Geri</b> İptal</span>';b.classList.add('show');mvMark()}
+function mvStep(d){const vis=mvVis(),i=vis.indexOf(MV.id);if(i<0)return;let j=i+d;j=Math.max(0,Math.min(vis.length-1,j));if(j===i)return;
+ const arr=mvArr(),a=arr.findIndex(x=>mvId(MV.k,x)===MV.id),b=arr.findIndex(x=>mvId(MV.k,x)===vis[j]);if(a<0||b<0)return;
+ arr.splice(b,0,arr.splice(a,1)[0]);mvRender()}
+function mvEnd(ok){if(!MV)return;const k=MV.k,id=MV.id;
+ if(!ok){const o=JSON.parse(MV.snap);if(k==='fav')S.fav=o;else if(k==='w')S.widgets=o;else if(k==='app')S.order=o;else S.inOrder=o}
+ else save();
+ document.body.classList.remove('mv-on');const b=$('#mvbar');if(b)b.classList.remove('show');MV=null;
+ document.querySelectorAll('.moving').forEach(x=>x.classList.remove('moving'));
+ if(k==='fav')renderFavs();else if(k==='app')renderGrid();else if(k==='w')renderWidgets();else loadInputs();
+ MV=null;setTimeout(()=>{const e=k==='fav'?document.querySelector('#favRow [data-p="'+id+'"]'):k==='app'?document.querySelector('#grid [data-p="'+id+'"]'):k==='w'?document.querySelector('#wgRow [data-w="'+id+'"]'):document.querySelector('#inRow [data-in="'+Math.max(0,INPS.findIndex(x=>x.id===id))+'"]');if(e)focusEl(e)},80);
+ toast(ok?'✅':'↩️',ok?'Yeni sıra kaydedildi':'Taşıma iptal edildi')}
+window.addEventListener('keydown',e=>{if(!MV)return;const k=e.key;
+ const D={ArrowLeft:-1,ArrowRight:1,ArrowUp:'u',ArrowDown:'d'}[k];
+ if(D!==undefined){e.preventDefault();e.stopImmediatePropagation();if(MV.k==='app'){const c=mvCols();mvStep(D==='u'?-c:D==='d'?c:D)}else{if(D===-1||D===1)mvStep(D);else if(MV.k==='fav'||MV.k==='w'||MV.k==='in'){}}return}
+ if(k==='Enter'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)mvEnd(true);return}
+ if(k==='Escape'||k==='Backspace'){e.preventDefault();e.stopImmediatePropagation();mvEnd(false)}},true);
+window.addEventListener('keyup',e=>{if(MV&&e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation()}},true);
+
+/* ===== Gruplu, ikonlu seçenek menüsü ===== */
+let gActs=[];
+function gmenu(o){gActs=[];
+ let h='<div class="gm-h">'+(o.icon?'<div class="gm-ic ico"><img src="'+o.icon+'" alt=""></div>':'')+'<div class="gm-t"><div class="gm-n">'+esc(o.title)+'</div>'+(o.sub?'<div class="gm-s">'+esc(o.sub)+'</div>':'')+(o.chips&&o.chips.length?'<div class="gm-c">'+o.chips.map(c=>'<span class="gm-b '+(c[1]||'')+'">'+esc(c[0])+'</span>').join('')+'</div>':'')+'</div></div>';
+ for(const g of o.groups){if(!g.items.length)continue;
+  h+='<div class="gm-g">'+esc(g.t)+'</div><div class="gm-grid">'+g.items.map(i=>{gActs.push(i[2]);return '<div class="gm-i'+(i[3]?' '+i[3]:'')+'" onclick="gPick('+(gActs.length-1)+')"><span class="gm-e">'+i[0]+'</span><span class="gm-l">'+esc(i[1])+'</span></div>'}).join('')+'</div>'}
+ $('#dlgbox').innerHTML=h;$('#dlg').classList.add('rside');showDlg();$('#dlgbox').style.maxWidth='none'}
+function gPick(k){closeDlg();gActs[k]()}
+
+/* ===== Panel (dock) ===== */
+let dockPrev=null;
+function dsave(){save();docksSync()}
+function docksSync(){try{N('setDocks',{d:JSON.stringify((S.docks||[]).map(d=>({id:d.id,name:d.name,items:dockOk(d).map(t=>{const x=dockItem(t);return{t,n:x.n,e:x.e||''}})})))})}catch(e){}}
+function dockOk(d){return d.items.filter(i=>i.indexOf('act:')===0?!!ACTS[i.slice(4)]:APPS.some(a=>a.p===i))}
+function dockItem(i){if(i.indexOf('act:')===0){const a=ACTS[i.slice(4)];return{n:a[1],e:a[0]}}return{n:lab(i),img:icon(i)}}
+function openDock(id){const d=(S.docks||[]).find(x=>x.id===id);if(!d){toast('ℹ️','Panel bulunamadı');return}
+ const it=dockOk(d);if(!it.length){toast('ℹ️','Panel boş: Tuş Atama → '+d.name);return}
+ dockPrev=document.activeElement;
+ $('#dkbar').innerHTML=it.map((i,k)=>{const x=dockItem(i);return '<div class="dki" tabindex="0" data-dn="'+esc(x.n)+'" onclick="dockGo('+q(id)+','+k+')">'+(x.img?'<img src="'+x.img+'" alt="">':'<div class="dke">'+x.e+'</div>')+'</div>'}).join('');
+ $('#dkt').textContent='';$('#dock').classList.add('show');
+ setTimeout(()=>{const f=$('#dkbar .dki');if(f)focusEl(f)},30)}
+function closeDock(){$('#dock').classList.remove('show');const o=dockPrev;dockPrev=null;if(o&&o.isConnected)try{o.focus({preventScroll:true})}catch(e){}}
+function dockGo(id,k){const d=S.docks.find(x=>x.id===id);if(!d)return;const i=dockOk(d)[k];closeDock();if(!i)return;if(i.indexOf('act:')===0)runAct(i.slice(4));else launch(i)}
+document.addEventListener('focusin',e=>{const t=e.target.closest&&e.target.closest('.dki');if(t)$('#dkt').textContent=t.dataset.dn||''});
+$('#dock').addEventListener('click',e=>{if(e.target===$('#dock'))closeDock()});
+async function dockNew(){const n=await ask('Panel adı','Panel '+((S.docks||[]).length+1));if(!n||!n.trim())return;const d={id:'dock'+Date.now().toString(36),name:n.trim().slice(0,24),items:[]};S.docks.push(d);dsave();dockEdit(d.id)}
+function dockEdit(id){const d=S.docks.find(x=>x.id===id);if(!d){keysView();return}curView='dockedit';
+ mset('Panel: '+d.name,'<div class="nf">'+d.items.length+' / 10 öğe. Bu paneli Tuş Atama’dan bir tuşa bağla: Özellik / panel… → Panel: '+esc(d.name)+'</div>'+
+ '<div><span class="btn b" onclick="dockAddApp('+q(id)+')">＋ Uygulama</span><span class="btn b" onclick="dockAddFeat('+q(id)+')">＋ Özellik</span><span class="btn g" onclick="openDock('+q(id)+')">▶ Önizle</span></div>'+
+ (d.items.length?d.items.map((i,k)=>{const x=dockItem(i.indexOf('act:')===0&&!ACTS[i.slice(4)]?'act:none':i);return '<div class="r2"><div class="n">'+(x.img?'<img src="'+x.img+'" style="width:30px;height:30px;border-radius:8px;vertical-align:middle;margin-right:10px">':(x.e||'')+'  ')+esc(x.n)+'</div><div><span class="btn" onclick="dockMv('+q(id)+','+k+',-1)">▲</span><span class="btn" onclick="dockMv('+q(id)+','+k+',1)">▼</span><span class="btn r" onclick="dockRm('+q(id)+','+k+')">Çıkar</span></div></div>'}).join(''):'<div class="empty">Panel boş. Uygulama veya özellik ekle.</div>')+
+ '<div class="sec">Panel</div><div><span class="btn" onclick="dockRename('+q(id)+')">Adı değiştir</span><span class="btn r" onclick="dockDel('+q(id)+')">Paneli sil</span></div>',keysView)}
+async function dockAddApp(id){const d=S.docks.find(x=>x.id===id);if(d.items.length>=10){toast('⚠️','En fazla 10 öğe');return}const p=await pickApp('Panele eklenecek uygulama');if(!p)return;if(d.items.includes(p)){toast('ℹ️','Zaten panelde');return}d.items.push(p);dsave();dockEdit(id)}
+function dockAddFeat(id){const d=S.docks.find(x=>x.id===id);if(d.items.length>=10){toast('⚠️','En fazla 10 öğe');return}
+ menu('Panele eklenecek özellik',Object.entries(ACTS).filter(([a])=>a!=='none'&&a!=='top').map(([a,v])=>[v[0]+'  '+v[1],()=>{if(!d.items.includes('act:'+a)){d.items.push('act:'+a);save()}dockEdit(id)}]))}
+function dockMv(id,k,dr){const d=S.docks.find(x=>x.id===id),n=k+dr;if(n<0||n>=d.items.length)return;[d.items[k],d.items[n]]=[d.items[n],d.items[k]];dsave();dockEdit(id)}
+function dockRm(id,k){const d=S.docks.find(x=>x.id===id);d.items.splice(k,1);dsave();dockEdit(id)}
+async function dockRename(id){const d=S.docks.find(x=>x.id===id);const n=await ask('Panel adı',d.name);if(!n||!n.trim())return;d.name=n.trim().slice(0,24);dsave();dockEdit(id)}
+async function dockDel(id){if(!(await conf('Panel silinsin mi? Bu panele bağlı tuş atamaları da kaldırılır.')))return;S.docks=S.docks.filter(x=>x.id!==id);let ch=false;for(const k of Object.keys(S.keymap))if(S.keymap[k]==='act:'+id){delete S.keymap[k];delete S.keyNames[k];ch=true}for(const k of Object.keys(S.colorKeys))if(S.colorKeys[k]===id)S.colorKeys[k]='none';if(ch)keySave();dsave();keysView()}
+
+init();syncTrap();setTimeout(docksSync,1500);
+</script><script src="tv.js"></script></body></html>
