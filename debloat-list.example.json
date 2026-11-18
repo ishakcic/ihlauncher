@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "_doc": "Bu dosyayı kendi GitHub reponuza koyup Sistem Merkezi > Akıllı Debloat > Adres gir ile ham (raw) adresini verin. entries: [paket, ad, kategori, risk, not]. kategori: tele|google|vendor|promo|demo|unused. risk: safe|caution|risky. Korumalı/kritik paketler ve yerleşik kayıtlar yok sayılır. family: [önek. , ad, risk(caution|risky), not].",
+  "entries": [
+    ["com.example.analytics.agent", "Örnek analitik ajanı", "tele", "safe", "Örnek kayıt — kendi cihazınıza göre düzenleyin."],
+    ["com.example.promo.hub", "Örnek tanıtım uygulaması", "promo", "caution", ""]
+  ],
+  "family": [
+    ["com.example.vendor.", "Örnek üretici paketi", "caution", ""]
+  ]
+}
