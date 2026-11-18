@@ -345,7 +345,101 @@ body[data-theme=cosmic] .btn.b,body[data-theme=cosmic] .chip.on{background:linea
 body[data-theme=cosmic] .tog.on{background:#1FB6E6}
 body[data-theme=cosmic] .toast,body[data-theme=cosmic] .dlgbox,body[data-theme=cosmic] #hdBar{border:1px solid rgba(255,255,255,.3);box-shadow:0 0 22px rgba(92,230,255,.22)}
 </style>
-<link rel="stylesheet" href="tv.css"></head>
+<link rel="stylesheet" href="tv.css">
+<style id="studio-style">
+/* Launcher artwork and layout are self-contained for Android WebView. */
+body[data-theme=studio]{--bg:#0d0d19;--panel:#1a192b;--panel-a:#1a192bf2;--t1:#f7f4ff;--t2:#c3bdd7;--t3:#a49bbd;--glass:#ffffff0d;--glass2:#ffffff18;--stroke:#d5c7ff26;--studio-edge:clamp(24px,4vw,80px)}
+.pv.studio{background:linear-gradient(125deg,#201a38 24%,#544a8b 64%,#be94cc)}
+#studio-home{display:none}
+body[data-theme=studio] #studio-home{display:block;margin:0 0 24px}
+body[data-theme=studio] .bg.def{background:radial-gradient(ellipse at 80% 0%,#201934 0%,transparent 53%),var(--bg)}
+body[data-theme=studio] .bg.def:after{display:none}
+body[data-theme=studio] .bg.wp:after{background:linear-gradient(#0d0d1960,#0d0d19dc 65%,#0d0d19)}
+body[data-theme=studio][data-top=wide] .topbar{padding:16px var(--studio-edge) 15px;background:linear-gradient(#11101efc 63%,#11101e00)}
+body[data-theme=studio][data-top=pill] .topbar{background:#211e37f5;border:1px solid var(--stroke)}
+body[data-theme=studio] #clock{font-weight:580;letter-spacing:-.06em;line-height:1.02}
+body[data-theme=studio] #date{font-size:15px}
+body[data-theme=studio] .topbar [data-tvbtn]{display:none}
+body[data-theme=studio][data-top=wide] .tr{background:#211e32;border:1px solid #d9c9ff25;box-shadow:none}
+body[data-theme=studio] .tr :is(.ib,.wifi){background:#2e2944;color:#f0e7ff}
+body[data-theme=studio] .tr :is(.ib,.wifi):focus{outline:2px solid #e8dfff;outline-offset:1px}
+body[data-theme=studio] .search{width:clamp(155px,17vw,268px);border:1px solid var(--stroke)}
+body[data-theme=studio][data-top=pill] .search:not(:focus-within):not(.has){width:44px}
+body[data-theme=studio] .search input::placeholder{color:var(--t2)}
+body[data-theme=studio] #content{padding:93px var(--studio-edge) 70px}
+body[data-theme=studio][data-top=pill] #content{padding-top:98px}
+.st-hero{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;min-height:clamp(238px,34vh,385px);padding:24px clamp(28px,4.2vw,74px);background:linear-gradient(105deg,#1c1832,#252043 52%,#352851);border:1px solid #c3adfb35;border-radius:26px;box-shadow:0 16px 50px #05030a4d}
+.st-art{position:absolute;inset:0 0 0 auto;height:100%;width:70%;z-index:-2;color:#cab6ff;pointer-events:none}
+.st-hero:after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#1d1833 6%,#1d1833ef 31%,#201a3900 75%)}
+.st-copy{max-width:540px}
+.st-kicker{display:flex;align-items:center;gap:10px;color:#d6c6f9;font-size:12px;font-weight:700;letter-spacing:.2em}
+.st-kicker:before{content:'';width:8px;height:8px;border-radius:50%;background:#d3bcff;box-shadow:0 0 14px #ae86ff}
+.st-title{font-size:clamp(42px,5.35vw,88px);font-weight:710;line-height:1;letter-spacing:-.065em;margin:13px 0 10px;color:#f8f4ff}
+.st-desc{color:#ded5ef;font-size:clamp(15px,1.37vw,21px);line-height:1.45;margin-bottom:24px}
+.st-actions{display:flex;flex-wrap:wrap;gap:9px}
+.st-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 15px;border-radius:12px;border:1px solid #dbccff42;background:#211b36e8;color:#f6efff;font:650 15px var(--font);white-space:nowrap}
+.st-btn .i{width:20px;height:20px}
+.st-btn.st-main{background:var(--accent);color:var(--onacc);border-color:transparent}
+.st-btn:hover{border-color:#e4d9ff;background:#423557;color:#fff}
+.st-btn:focus{outline:2px solid #fff;outline-offset:3px}
+body[data-theme=studio] .row{margin-bottom:19px}
+body[data-theme=studio] .rt{margin-left:1px;font-size:clamp(19px,1.7vw,25px);font-weight:690;letter-spacing:-.025em}
+body[data-theme=studio] .rt:before{display:block;flex:none;width:3px;height:16px;opacity:.85}
+body[data-theme=studio] .rs{gap:12px;padding:11px 6px 15px}
+body[data-theme=studio] #inRow .hd{height:101px;width:clamp(165px,18vw,245px);border-radius:16px;padding:15px 17px;background:linear-gradient(135deg,#28223def,#1d1a30f5);border:1px solid #d4c3ff42;box-shadow:none}
+body[data-theme=studio] .hd.off{opacity:.73}
+body[data-theme=studio] .hd .l{font-size:11px;font-weight:730;letter-spacing:.065em}
+body[data-theme=studio] .hd:not(.on):not(.off) .l:before{background:#e3b76d}
+body[data-theme=studio] .hd .d{font-size:clamp(16px,1.8vw,24px);font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body[data-theme=studio] .card:not(.tvc),body[data-theme=studio] .tile{border-radius:16px}
+body[data-theme=studio] .wg:not(.addw){border:1px solid var(--stroke)}
+body[data-theme=studio] .wg:not(.addw),body[data-theme=studio][data-dock=on] #grid{background:#201d33;box-shadow:inset 0 0 0 1px #d8c9ff26}
+body[data-theme=studio] .card.addw{flex-direction:row;justify-content:flex-start;align-items:flex-start;gap:10px;padding:14px 15px;border:1px dashed #a18cc778;background:#19172a;box-shadow:none;color:#e1d4f7;font-size:14px;line-height:25px}
+body[data-theme=studio] .card.addw b{font-size:25px}
+.studio-rail-controls{display:none}
+body[data-theme=studio] .studio-rail-head{display:flex;align-items:center;justify-content:space-between;gap:6px}
+body[data-theme=studio] .studio-rail-controls:not([hidden]){display:flex;gap:5px;margin-right:5px}
+.studio-rail-controls button{display:grid;place-items:center;width:34px;height:32px;border:1px solid #c3adfb40;border-radius:8px;background:#252039;color:#efe5ff}
+.studio-rail-controls button[aria-disabled=true]{color:#a39ab5;background:#171626}
+.studio-rail-controls button .i{width:17px;height:17px}
+.studio-rail-controls button:focus{outline:2px solid #ece2ff;outline-offset:2px}
+body[data-theme=studio] :is(.btn.b,.chip.on){background:var(--accent);color:var(--onacc)}
+body[data-theme=studio] .tog.on{background:var(--accent)}
+body[data-theme=studio] #inRow .hd:focus,body[data-theme=studio] .card:not(.tvc):focus,body[data-theme=studio] .tile:focus{outline:2px solid #e8dfff;outline-offset:1px}
+body[data-theme=studio] .side,body[data-theme=studio] #modal .modal{background:linear-gradient(150deg,#28213e,#19182a 72%);border-left:1px solid #d8c9ff30}
+body[data-theme=studio] .dlgbox{background:#211d34;border:1px solid var(--stroke)}
+body.tvon,body.hdmion{background:transparent!important}
+body.tvon :is(#bg,.topbar,#content,#dock){visibility:hidden}
+body.tvon :is(.topbar,#content,#dock){pointer-events:none}
+@media(max-height:570px) and (orientation:landscape){
+ body[data-theme=studio] #content,body[data-theme=studio][data-top=pill] #content{padding-top:73px}
+ .st-hero{min-height:210px;padding-top:22px;padding-bottom:22px}
+ .st-title{font-size:clamp(32px,5vw,58px)}
+}
+@media(max-width:680px) and (orientation:portrait){
+ body[data-theme=studio][data-top] .topbar{top:0;right:0;left:0;padding:12px 18px;justify-content:space-between;gap:7px;flex-wrap:nowrap;background:#151324;border:0;border-radius:0;box-shadow:none}
+ body[data-theme=studio] .tl{width:auto;min-width:max-content}
+ body[data-theme=studio] #clock{font-size:29px}
+ body[data-theme=studio] .tr{gap:3px}
+ body[data-theme=studio][data-top] .search{width:36px;height:36px;padding:0 7px;margin:0;position:relative}
+ body[data-theme=studio][data-top] .search input{opacity:0}
+ body[data-theme=studio][data-top] .search:focus-within,body[data-theme=studio][data-top] .search.has{position:absolute;z-index:2;top:59px;right:18px;width:min(245px,90vw);background:var(--panel)}
+ body[data-theme=studio][data-top] :is(.search:focus-within,.search.has) input{opacity:1}
+ body[data-theme=studio] :is(.ib,.wifi){width:34px;height:36px;padding:6px}
+ body[data-theme=studio] #content,body[data-theme=studio][data-top=pill] #content{padding:76px 16px 55px}
+ .st-hero{padding:24px 19px;min-height:285px;align-items:flex-end;border-radius:21px}
+ .st-hero:after{background:linear-gradient(0deg,#1d1833 19%,#1d1833f5 44%,#201a391a 100%)}
+ .st-art{width:100%;height:76%}
+ .st-title{font-size:clamp(38px,11.8vw,61px)}
+ .st-desc{margin-bottom:17px}
+ .st-actions{gap:5px}
+ .st-btn{min-height:43px;font-size:12px;padding:0 7px;gap:4px}
+ .st-btn .i{width:14px;height:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ body[data-theme=studio] :is(.card,.tile,.side,.modal,.st-btn){transition:none;animation:none}
+}
+</style></head>
 <body data-theme="oneui">
 <div id="splash"><div class="sp-in"><svg viewBox="0 0 108 108" width="132" height="132"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><rect x="6" y="6" width="96" height="96" rx="28" fill="url(#spg)"/><path d="M44,36L44,72L75,54z" fill="#fff"/></svg><div class="sp-n">ihlauncher</div><div class="sp-l"><i></i></div></div></div>
 <script>
@@ -386,8 +480,44 @@ window.addEventListener('unhandledrejection',function(e){window.__rep('Promise: 
 <div class="side" id="notifPanel"></div>
 <div class="side" id="settingsPanel"></div>
 <div id="content">
+ <section id="studio-home" aria-labelledby="studio-title">
+  <div class="st-hero">
+   <svg class="st-art" viewBox="0 0 880 385" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+     <radialGradient id="stGlow"><stop stop-color="#594583"/><stop offset="1" stop-color="#32274c" stop-opacity="0"/></radialGradient>
+     <linearGradient id="stOrb" x1="22%" y1="3%" x2="76%" y2="100%"><stop stop-color="#f1cff6"/><stop offset=".34" stop-color="#af98e1"/><stop offset=".69" stop-color="#675caa"/><stop offset="1" stop-color="#2b254e"/></linearGradient>
+     <linearGradient id="stOrbit"><stop stop-color="#665cb2" stop-opacity="0"/><stop offset=".57" stop-color="#bca7ee"/><stop offset="1" stop-color="#f4c3db" stop-opacity=".13"/></linearGradient>
+     <pattern id="stBands" width="4" height="5" patternUnits="userSpaceOnUse"><path d="M0 0h4" stroke="#f6dbff" stroke-opacity=".22" stroke-width="1"/></pattern>
+     <pattern id="stStars" width="186" height="128" patternUnits="userSpaceOnUse"><circle cx="13" cy="22" r="1" fill="#c4b1f5"/><circle cx="90" cy="58" r=".6" fill="#ffcfec"/><circle cx="151" cy="109" r="1" fill="#a79ade"/><circle cx="56" cy="99" r=".7" fill="#c4b1f5"/></pattern>
+    </defs>
+    <ellipse cx="610" cy="185" rx="365" ry="235" fill="url(#stGlow)"/>
+    <path fill="url(#stStars)" opacity=".53" d="M0 0h880v385H0z"/>
+    <g stroke="#c5b2ff" stroke-opacity=".16" stroke-width="1" fill="none"><circle cx="602" cy="184" r="164"/><circle cx="602" cy="184" r="187" stroke-dasharray="2 7"/><path d="M602 0v385M324 184h555"/></g>
+    <circle cx="602" cy="184" r="122" stroke="#eedaff" stroke-opacity=".35" fill="url(#stOrb)"/>
+    <circle cx="602" cy="184" r="121" fill="url(#stBands)"/>
+    <g fill="none" stroke="url(#stOrbit)" transform="rotate(-20 602 184)">
+     <ellipse cx="602" cy="184" rx="268" ry="57" stroke-width="1.75"/><ellipse cx="602" cy="184" rx="288" ry="73" stroke-width=".9" opacity=".56"/>
+     <ellipse cx="602" cy="184" rx="311" ry="88" stroke-width=".8" opacity=".34"/><ellipse cx="602" cy="184" rx="236" ry="38" stroke-width=".7" opacity=".44"/>
+    </g>
+    <g fill="#e3cffb"><circle cx="810" cy="73" r="3"/><circle cx="448" cy="267" r="3"/><circle cx="735" cy="318" r="2"/><path d="M767 147v12m-6-6h12M405 94v8m-4-4h8" stroke="#e3cffb" opacity=".7"/></g>
+   </svg>
+   <div class="st-copy">
+    <div class="st-kicker">İHLAUNCHER / STÜDYO</div>
+    <h1 class="st-title" id="studio-title">Ana ekran</h1>
+    <p class="st-desc">Canlı yayın, HDMI girişleri ve uygulamalar.</p>
+    <nav class="st-actions" aria-label="Ana ekran kısayolları">
+     <button type="button" class="st-btn st-main" id="studio-tv" onclick="runAct('tv')"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="13" rx="3"/><path d="m10 9 5 2.5-5 2.5zM8 21h8"/></svg>Canlı TV</button>
+     <button type="button" class="st-btn" onclick="studioSources()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v5m8-5v5M6 9h12v3a6 6 0 0 1-6 6v3M6 12a6 6 0 0 0 6 6"/></svg>Kaynaklar</button>
+     <button type="button" class="st-btn" onclick="studioApps()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Uygulamalar</button>
+    </nav>
+   </div>
+  </div>
+ </section>
  <div class="row" id="row-in"><div class="rt" data-row="in">Giriş Kaynakları</div><div class="rs" id="inRow"></div></div>
- <div class="row" id="row-tv"><div class="rt" data-row="tv" id="tvHead" onclick="TVUI.strip()"></div><div class="rs" id="tvRow"></div></div>
+ <div class="row" id="row-tv"><div class="studio-rail-head"><div class="rt" data-row="tv" id="tvHead" onclick="TVUI.strip()"></div><div class="studio-rail-controls" id="tvRailControls" hidden role="group" aria-label="Kanal kartlarını kaydır">
+  <button type="button" aria-controls="tvRow" aria-label="Önceki kanal kartları" aria-disabled="true" onclick="studioTvRail(-1)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+  <button type="button" aria-controls="tvRow" aria-label="Sonraki kanal kartları" aria-disabled="true" onclick="studioTvRail(1)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+ </div></div><div class="rs" id="tvRow"></div></div>
  <div class="row" id="row-wg"><div class="rt" data-row="wg">Kartlar</div><div class="rs" id="wgRow"></div></div>
  <div class="row" id="row-fav"><div class="rt" data-row="fav">Favoriler</div><div class="rs" id="favRow"></div></div>
  <div class="row" id="row-apps"><div class="rt" data-row="apps">Tüm Uygulamalar</div><div class="grid" id="grid"></div></div>
@@ -403,12 +533,13 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const q=s=>esc(JSON.stringify(String(s)));   /* HTML attribute içine güvenli JS string */
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'};
-const THEMES={cosmic:'Kozmik Cam',oneui:'One UI',ocean:'Okyanus',wine:'Şarap'};
-const ACC={blue:['#3B82F6','Mavi'],cyan:['#4DD8FF','Buz mavisi'],teal:['#27BDAE','Turkuaz'],green:['#4DB862','Yeşil'],orange:['#FF9A3D','Turuncu'],pink:['#EE6A9B','Pembe'],purple:['#9A7DFF','Mor']};
+const THEMES={studio:'Stüdyo',cosmic:'Kozmik Cam',oneui:'One UI',ocean:'Okyanus',wine:'Şarap'};
+const ACC={blue:['#3B82F6','Mavi'],cyan:['#4DD8FF','Buz mavisi'],teal:['#27BDAE','Turkuaz'],green:['#4DB862','Yeşil'],orange:['#FF9A3D','Turuncu'],pink:['#EE6A9B','Pembe'],purple:['#9A7DFF','Mor'],lavender:['#D0B9FF','Lavanta']};
 const SIZES={s:['Küçük',72],m:['Orta',86],l:['Büyük',100],xl:['Çok büyük',116]};
 const ISH={sq:'Squircle (One UI)',ci:'Daire',rd:'Yuvarlak kare',sh:'Köşeli kare',or:'Orijinal'},ILB={always:'Hep görünsün',focus:'Sadece seçilince',off:'Gizli'};
 const BLR={0:['Kapalı',0],1:['Hafif',12],2:['Orta',22],3:['Güçlü',34]},TOPS={pill:'Yüzen hap',wide:'Geniş'},FXS={scale:'Büyüt',glow:'Parlama',ring:'Halka',lift:'Yüksel'},TLS={icon:'Simge',banner:'Banner'},IDL={0:'Kapalı',20:'20 sn',45:'45 sn',90:'90 sn'};
 const LOOKS={
+ studio:{n:'Stüdyo',d:'Lavanta vurgulu koyu ana ekran, yörünge çizimi ve Canlı TV, kaynak ve uygulama kısayolları',v:{theme:'studio',accent:'lavender',tileStyle:'icon',topStyle:'wide',blur:1,focusFx:'ring',dock:true,wall:'',icLabel:'always',icShape:'sq',iconSize:'m'}},
  cosmic:{n:'Kozmik Cam',d:'Kutup ışıklı yıldızlı gece, buzlu cam paneller, buz mavisi neon parlama ve dijital saat',v:{theme:'cosmic',accent:'cyan',tileStyle:'icon',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:aurora',icLabel:'focus',icShape:'sq',iconSize:'l'}},
  calm:{n:'Sakin',d:'Gün doğumu manzarası, cam panel içinde simgeler, adlar sadece odakta',v:{theme:'oneui',accent:'blue',tileStyle:'icon',topStyle:'pill',blur:2,focusFx:'ring',dock:true,wall:'scene:dawn',icLabel:'focus',icShape:'sq',iconSize:'l'}},
  aurora:{n:'Aurora',d:'Kuzey ışıkları ve buzlu göl, okyanus tonlu derin cam, turkuaz parlama, büyük net simgeler',v:{theme:'ocean',accent:'teal',tileStyle:'icon',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:nordic',icLabel:'focus',icShape:'sq',iconSize:'l'}},
@@ -435,7 +566,8 @@ function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Objec
  if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
  for(const r of DEF.rows)if(!S.rows.some(x=>x.id===r.id))S.rows.push({id:r.id,on:true});
  if(!S.v5){const i=S.rows.findIndex(r=>r.id==='tv'),t=i>=0?S.rows.splice(i,1)[0]:{id:'tv',on:true},j=S.rows.findIndex(r=>r.id==='in');S.rows.splice(j>=0?j+1:0,0,t);S.v5=1}
- if(!S.wseq)S.wseq=S.widgets.length+3}
+ if(!S.wseq)S.wseq=S.widgets.length+3;
+ if(FRESH&&s&&typeof s==='object'&&!Object.keys(s).length)Object.assign(S,LOOKS.studio.v)}
 const TI={'\u2705':['\u2713','ok'],'\u274C':['\u2715','bad'],'\u26D4':['\u2715','bad'],'\u26A0':['!','warn'],'\u23F3':['\u2026','']};
 let tt;function toast(i,m){const t=TI[String(i).replace(/\uFE0F/g,'')]||['',''],ti=$('#ti');ti.textContent=t[0];ti.className=t[1];$('#tm').textContent=m;$('#toast').classList.add('show');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('show'),3300)}
 window.__toast=toast;
@@ -568,7 +700,8 @@ window.__back=function(){if(MV){mvEnd(false);return true}if($('#dock').classList
  const c=$('#content');if($('#q').value){$('#q').value='';renderGrid();return true}
  if(c.scrollTop>10){c.scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}
  return true};
-window.__home=function(){hdExit();closeDlg();closeModal();closePanels();$('#content').scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)};
+function homeFocus(){return (S.theme==='studio'&&$('#studio-tv'))||$('#favRow .card,#grid .tile')}
+window.__home=function(){hdExit();closeDlg();closeModal();closePanels();$('#content').scrollTo({top:0});const f=homeFocus();if(f)focusEl(f)};
 function openPanel(n){closePanels();opener=document.activeElement;panel=n;$('#'+n+'Panel').classList.add('open');if(n==='notif')loadNotifs();else renderSettings();setTimeout(focusFirst,80)}
 function closePanels(){const had=panel;$$('.side').forEach(s=>s.classList.remove('open'));panel=null;if(had&&opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}}
 /* ===== Uygulamalar ===== */
@@ -648,6 +781,44 @@ function layoutView(){curView='layout';mset('Ana Ekran Düzeni','<div class="nf"
  '<div style="margin-top:8px"><span class="btn b" onclick="addWidgetMenu()">Kart ekle</span><span class="btn" onclick="resetWidgets()">Varsayılan kartlar</span></div>',null)}
 /* ===== Giriş kaynakları (HDMI/CEC) ===== */
 let INPS=[];
+const INPUT_STATUS=['Bağlı','Beklemede','Bağlı değil'];
+const inputName=i=>S.cecNames[i.id]||i.cec||i.label||('HDMI'+(i.port>0?' '+i.port:''));
+window.__ihHdmiInputs=async()=>{
+ const res=await N('inputs');
+ if(!Array.isArray(res))throw new Error('Giriş listesi alınamadı.');
+ const order=S.inOrder;
+ const rank=id=>{const n=order.indexOf(id);return n<0?999:n};
+ return res.filter(i=>i&&Number(i.type)===1007).sort((a,b)=>rank(a.id)-rank(b.id))
+   .map(i=>Object.assign({},i,{label:inputName(i),portLabel:'HDMI'+(i.port>0?' '+i.port:''),status:INPUT_STATUS[i.state]||''}));
+};
+window.__ihTuneHdmi=async id=>{
+ const res=await N('switchInput',{id});
+ if(res&&(res.error||res.ok===false))return {ok:false,mode:'hdmi',error:res.error||'Bu HDMI girişi açılamadı.'};
+ // Bazı sürümler yalnızca __tvEv ile video/sinyal durumunu bildirir.
+ return {ok:true,mode:'hdmi'};
+};
+function studioSources(){
+ if(window.TVUI&&typeof TVUI.sources==='function'){closePanels();TVUI.sources()}
+ else runAct('inputs')
+}
+function studioApps(){
+ const row=$('#row-apps'),tile=row&&row.querySelector('.tile');
+ if(tile&&getComputedStyle(row).display!=='none'){focusEl(tile);return}
+ runAct('search')
+}
+function studioTvRail(dir){
+ const r=$('#tvRow');r.scrollLeft+=dir*Math.max(165,Math.floor(r.clientWidth*.7));syncStudioRail()
+}
+function syncStudioRail(){
+ const r=$('#tvRow'),c=$('#tvRailControls'),end=r.scrollWidth-r.clientWidth;
+ c.hidden=!r.clientWidth||end<=2;
+ c.children[0].setAttribute('aria-disabled',r.scrollLeft<=2);
+ c.children[1].setAttribute('aria-disabled',r.scrollLeft>=end-2);
+}
+$('#tvRow').addEventListener('scroll',syncStudioRail);
+window.addEventListener('resize',syncStudioRail);
+new MutationObserver(syncStudioRail).observe($('#tvRow'),{childList:true});
+if(window.ResizeObserver)new ResizeObserver(syncStudioRail).observe($('#tvRow'));
 async function loadInputs(){const r=await N('inputs');INP=Array.isArray(r)?r:[];const o=S.inOrder;INPS=[...INP].sort((a,b)=>{const x=o.indexOf(a.id),y=o.indexOf(b.id);return(x<0?999:x)-(y<0?999:y)});updateRowVis();
  const st=['BAĞLI','BEKLEMEDE','BAĞLI DEĞİL'];
  $('#inRow').innerHTML=INPS.map((i,k)=>'<div class="card hd '+(i.state===2?'off':(i.state===0?'on':''))+'" data-in="'+k+'" onclick="goInput('+k+')"><div class="l">'+esc(i.type===1007?'HDMI'+(i.port>0?' '+i.port:''):'GİRİŞ')+' • '+(st[i.state]||'')+'</div><div class="d">'+esc(S.cecNames[i.id]||i.cec||i.label)+'</div></div>').join('')}
@@ -656,7 +827,9 @@ function hdBar(){let b=$('#hdBar');if(!b){b=document.createElement('div');b.id='
  const i=INPS[HD.k]||{};b.innerHTML='<b>'+esc(S.cecNames[i.id]||i.cec||i.label||'HDMI')+'</b><span>'+(HD.vid?'':'Sinyal bekleniyor… • ')+'Geri: çık • Kaynak: girişler</span>';
  b.classList.add('show');clearTimeout(HD.tm);HD.tm=setTimeout(()=>b.classList.remove('show'),4000)}
 function goInput(k){const i=INPS[k];if(!i)return;try{closeDlg();closeModal();closePanels()}catch(e){}
- HD.on=true;HD.k=k;HD.vid=false;document.body.classList.add('hdmion');N('switchInput',{id:i.id});hdBar()}
+ HD.on=true;HD.k=k;HD.vid=false;document.body.classList.add('hdmion');const req=HD.seq=(HD.seq||0)+1;
+ window.__ihTuneHdmi(i.id).then(r=>{if(HD.on&&HD.seq===req&&!r.ok){hdExit();toast('❌',r.error)}});
+ hdBar()}
 function hdExit(){if(!HD.on)return false;HD.on=false;clearTimeout(HD.tm);document.body.classList.remove('hdmion');const b=$('#hdBar');if(b)b.classList.remove('show');N('tvStop');N('tvMode',{on:false});return true}
 window.__hdmiExit=hdExit;
 window.__hdmiOn=()=>HD.on;
@@ -1223,7 +1396,7 @@ function runAct(a){switch(a){
  case 'search':closePanels();$('#content').scrollTo({top:0});actInput($('#q'));break;
  case 'notif':openPanel('notif');break;case 'settings':openPanel('settings');break;
  case 'center':surgeonHome();break;case 'layout':layoutView();break;case 'keys':keysView();break;case 'look':lookView();break;case 'android':N('openSettings',{k:'android'});break;
- case 'top':closePanels();$('#content').scrollTo({top:0});{const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}break;
+ case 'top':closePanels();$('#content').scrollTo({top:0});{const f=homeFocus();if(f)focusEl(f)}break;
  case 'inputs':menu('Giriş kaynağı',[['📺 Canlı TV',()=>{try{closePanels();TVUI.open()}catch(e){}}]].concat(INPS.map((i,k)=>[''+(S.cecNames[i.id]||i.cec||i.label),()=>goInput(k)])));break;
  case 'clean':autoCleanRun(true);break;case 'backup':backupNow(true);break;
  case 'tv':try{closePanels();TVUI.open()}catch(e){}break;case 'debloat':sgDebloat();break;case 'recover':sgRecover();break;case 'apps':sgApps();break;case 'adb':sgAdb();break;
@@ -1253,7 +1426,7 @@ window.__resume=()=>{if(HD.on&&INPS[HD.k])setTimeout(()=>{if(HD.on&&INPS[HD.k])N
 window.__pkgChanged=()=>{clearTimeout(rsT);rsT=setTimeout(loadApps,1500)};
 function init(){safe('fx',fx);safe('load',load);safe('uzak liste',()=>{if(S.dbRemote&&S.dbRemote.data)applyRemote(S.dbRemote.data)});safe('tema',applyTheme);safe('duvar kağıdı',applyWall);safe('bölümler',applyRows);safe('kartlar',renderWidgets);safe('saat',tick);setInterval(()=>safe('saat',tick),1000);
  N('setKeymap',{m:JSON.stringify(S.keymap||{})});
- loadApps().then(()=>{loadInputs();setTimeout(()=>{if(document.activeElement===document.body||!document.activeElement){const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}},250)});
+ loadApps().then(()=>{loadInputs();setTimeout(()=>{if(document.activeElement===document.body||!document.activeElement){const f=homeFocus();if(f)focusEl(f)}},250)});
  if(!S.hintLp&&navigator.maxTouchPoints===0){S.hintLp=1;save();setTimeout(()=>toast('','Seçenekler için OK tuşunu basılı tut'),2500)}
  setInterval(poll,3000);rotTick();setInterval(()=>{rotTick();if(S.wall==='auto')applyWall()},60000);setTimeout(unusedHint,20000);setTimeout(()=>updAuto(),25000);setInterval(()=>updAuto(),36e5);setTimeout(()=>{if(S.dbUrl&&Date.now()-((S.dbRemote||{}).t||0)>6048e5)dbUpdate(false)},30000);setInterval(pollN,8000);setInterval(autoCheck,600000);setInterval(()=>S.widgets.filter(w=>w.t==='weather').forEach(loadWx),900000);poll();pollN()}
 /* ===== Odak kilidi: panel/pencere/TV açıkken yalnızca o katman seçilebilir ===== */
