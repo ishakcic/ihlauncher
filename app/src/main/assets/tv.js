@@ -1,4 +1,4 @@
-/* ihlauncher • Canlı TV v4.2 — tam ekran video, HDMI kaynak seçimi ve kumanda öncelikli arayüz.
+/* ihlauncher • Canlı TV v4.3 — tam ekran video, HDMI kaynak seçimi ve kumanda öncelikli arayüz.
  * Video (TvView) hiç yeniden boyutlanmaz; liste/rehber/seçenekler videonun ÜSTÜNE çizilir.
  * Tuşlar tamamen burada yönetilir (launcher'ın odak tahmini kullanılmaz); seçim JS durumundadır (.sel).
  * Kanal düzenleme (gizle/sil, taşı, adlandır, favori) S.tvx içinde kalıcıdır; sistem kanal veritabanı değiştirilmez. */
@@ -13,145 +13,146 @@ const TV_DESIGN=`
   --body:clamp(15px,1.22vw,24px);--title:clamp(24px,2.3vw,46px);
   position:fixed;inset:0;display:none;background:transparent;color:var(--ink);
   font:500 var(--body)/1.25 system-ui,Roboto,sans-serif;pointer-events:none;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
 }
-:where(#tv[data-tv-design]){z-index:60}
+#tv[data-tv-design]{z-index:110}
 body.tvon #tv[data-tv-design]{display:block}
 #tv[data-tv-design] *{box-sizing:border-box}
-#tv[data-tv-design] :is(.t-lp,.t-gd,.t-op,.t-su,.t-src,.t-ctx,.t-cnf,.t-ban,.t-ck2,.t-numbox,.t-stat,.t-tip){display:none}
-#tv[data-tv-design] :is(.t-lp,.t-gd,.t-op,.t-su,.t-src,.t-ctx,.t-cb,.t-ban,.t-ck2,.t-stat,.t-numbox,.t-tip){
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-gd,.ihtv-op,.ihtv-su,.ihtv-src,.ihtv-ctx,.ihtv-cnf,.ihtv-ban,.ihtv-ck2,.ihtv-numbox,.ihtv-stat,.ihtv-tip){display:none}
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-gd,.ihtv-op,.ihtv-su,.ihtv-src,.ihtv-ctx,.ihtv-cb,.ihtv-ban,.ihtv-ck2,.ihtv-stat,.ihtv-numbox,.ihtv-tip){
   color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;
   box-shadow:0 20px 55px #07110f73;
 }
-#tv[data-tv-design] :is(.t-lp,.t-gd,.t-op,.t-su,.t-src,.t-ctx){position:absolute;padding:var(--pad);pointer-events:auto;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-#tv[data-tv-design] :is(.t-lp,.t-op){top:var(--edge);right:var(--edge);bottom:var(--edge);left:auto;width:min(100% - 2 * var(--edge),clamp(365px,37vw,720px));}
-#tv[data-tv-design] .t-lp{background:linear-gradient(155deg,#142826fa,#0f201efa 65%)}
-#tv[data-tv-design].v-list .t-lp,#tv[data-tv-design].v-guide .t-gd,#tv[data-tv-design].v-opts .t-op{display:flex;flex-direction:column}
-#tv[data-tv-design] :is(.t-lp,.t-gd,.t-op)>*{flex:none}
-#tv[data-tv-design].v-setup .t-su,#tv[data-tv-design].v-ctx .t-ctx{display:block}
-#tv[data-tv-design] :is(.t-head,.t-listmeta,.t-guidegroup){display:flex;align-items:center;justify-content:space-between;gap:10px}
-#tv[data-tv-design] .t-head{padding:0 0 clamp(11px,1.3vh,20px);margin:0 0 clamp(9px,1.15vh,16px);border-bottom:1px solid var(--line)}
-#tv[data-tv-design] .t-headcopy{min-width:0}
-#tv[data-tv-design] .t-kicker{color:var(--mint);font-size:var(--micro);font-weight:750;letter-spacing:.13em}
-#tv[data-tv-design] .t-lt{margin:3px 0 0;color:var(--ink);font-size:var(--title);font-weight:720;letter-spacing:-.045em;line-height:1.05}
-#tv[data-tv-design] .t-headmeta{display:flex;align-items:center;gap:clamp(6px,1vw,16px);flex:none}
-#tv[data-tv-design] :is(.t-clk,.t-lc,.t-rn,.t-bn,.t-bm,.t-dm,.t-up b,.t-ckt,.t-guidegroup){font-variant-numeric:tabular-nums}
-#tv[data-tv-design] :is(.t-clk,.t-lc,.t-rn,.t-listlabel){color:var(--sub);font-size:var(--small);font-weight:650}
-#tv[data-tv-design] .t-clk{color:var(--ink);font-weight:750}
-#tv[data-tv-design] :is(.t-navbtn,.t-chip){white-space:nowrap;font:inherit;font-size:var(--micro);font-weight:700;padding:.53em .77em;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#1c3631;cursor:pointer}
-#tv[data-tv-design] :is(.t-navbtn,.t-chip):is(:hover,:focus-visible){outline:2px solid var(--mint);outline-offset:1px}
-#tv[data-tv-design] .t-chip:disabled{opacity:.65;cursor:default}
-#tv[data-tv-design] .t-listmeta{margin-bottom:8px}
-#tv[data-tv-design] .t-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:clamp(8px,1.2vh,18px)}
-#tv[data-tv-design] .t-chip.on{color:#12332b;background:var(--mint);border-color:var(--mint)}
-#tv[data-tv-design] .t-rowsw{position:relative;padding-right:10px}
-#tv[data-tv-design] .t-rows{display:grid;gap:clamp(3px,.48vh,8px)}
-#tv[data-tv-design] .t-sb{position:absolute;inset:0 0 0 auto;width:3px;background:#2a463f;border-radius:5px}
-#tv[data-tv-design] .t-sb i{position:absolute;left:0;width:100%;border-radius:5px;background:#78ac9e}
-#tv[data-tv-design] :is(.t-r,.t-gr,.t-ci,.t-oi,.t-sbn,.t-cbn){border:1px solid transparent;border-radius:7px;cursor:pointer}
-#tv[data-tv-design] :is(.t-r,.t-gr,.t-ci,.t-oi,.t-sbn,.t-cbn):hover{border-color:#668f84}
-#tv[data-tv-design] :is(.t-r,.t-gr,.t-ci,.t-oi,.t-sbn,.t-cbn).sel{
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-gd,.ihtv-op,.ihtv-su,.ihtv-src,.ihtv-ctx){position:absolute;padding:var(--pad);pointer-events:auto;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-op){top:var(--edge);right:var(--edge);bottom:var(--edge);left:auto;width:min(100% - 2 * var(--edge),clamp(365px,37vw,720px));}
+#tv[data-tv-design] .ihtv-lp{background:linear-gradient(155deg,#142826fa,#0f201efa 65%)}
+#tv[data-tv-design].v-list .ihtv-lp,#tv[data-tv-design].v-guide .ihtv-gd,#tv[data-tv-design].v-opts .ihtv-op{display:flex;flex-direction:column}
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-gd,.ihtv-op)>*{flex:none}
+#tv[data-tv-design].v-setup .ihtv-su,#tv[data-tv-design].v-ctx .ihtv-ctx{display:block}
+#tv[data-tv-design] :is(.ihtv-head,.ihtv-listmeta,.ihtv-guidegroup){display:flex;align-items:center;justify-content:space-between;gap:10px}
+#tv[data-tv-design] .ihtv-head{padding:0 0 clamp(11px,1.3vh,20px);margin:0 0 clamp(9px,1.15vh,16px);border-bottom:1px solid var(--line)}
+#tv[data-tv-design] .ihtv-headcopy{min-width:0}
+#tv[data-tv-design] .ihtv-kicker{color:var(--mint);font-size:var(--micro);font-weight:750;letter-spacing:.13em}
+#tv[data-tv-design] .ihtv-lt{margin:3px 0 0;color:var(--ink);font-size:var(--title);font-weight:720;letter-spacing:-.045em;line-height:1.05}
+#tv[data-tv-design] .ihtv-headmeta{display:flex;align-items:center;gap:clamp(6px,1vw,16px);flex:none}
+#tv[data-tv-design] :is(.ihtv-clk,.ihtv-lc,.ihtv-rn,.ihtv-bn,.ihtv-bm,.ihtv-dm,.ihtv-up b,.ihtv-ckt,.ihtv-guidegroup){font-variant-numeric:tabular-nums}
+#tv[data-tv-design] :is(.ihtv-clk,.ihtv-lc,.ihtv-rn,.ihtv-listlabel){color:var(--sub);font-size:var(--small);font-weight:650}
+#tv[data-tv-design] .ihtv-clk{color:var(--ink);font-weight:750}
+#tv[data-tv-design] :is(.ihtv-navbtn,.ihtv-chip){white-space:nowrap;font:inherit;font-size:var(--micro);font-weight:700;padding:.53em .77em;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#1c3631;cursor:pointer}
+#tv[data-tv-design] :is(.ihtv-navbtn,.ihtv-chip):is(:hover,:focus-visible){outline:2px solid var(--mint);outline-offset:1px}
+#tv[data-tv-design] .ihtv-chip:disabled{opacity:.65;cursor:default}
+#tv[data-tv-design] .ihtv-listmeta{margin-bottom:8px}
+#tv[data-tv-design] .ihtv-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:clamp(8px,1.2vh,18px)}
+#tv[data-tv-design] .ihtv-chip.on{color:#12332b;background:var(--mint);border-color:var(--mint)}
+#tv[data-tv-design] .ihtv-rowsw{position:relative;padding-right:10px}
+#tv[data-tv-design] .ihtv-rows{display:grid;gap:clamp(3px,.48vh,8px)}
+#tv[data-tv-design] .ihtv-sb{position:absolute;inset:0 0 0 auto;width:3px;background:#2a463f;border-radius:5px}
+#tv[data-tv-design] .ihtv-sb i{position:absolute;left:0;width:100%;border-radius:5px;background:#78ac9e}
+#tv[data-tv-design] :is(.ihtv-r,.ihtv-gr,.ihtv-ci,.ihtv-oi,.ihtv-sbn,.ihtv-cbn){border:1px solid transparent;border-radius:7px;cursor:pointer}
+#tv[data-tv-design] :is(.ihtv-r,.ihtv-gr,.ihtv-ci,.ihtv-oi,.ihtv-sbn,.ihtv-cbn):hover{border-color:#668f84}
+#tv[data-tv-design] :is(.ihtv-r,.ihtv-gr,.ihtv-ci,.ihtv-oi,.ihtv-sbn,.ihtv-cbn).sel{
   background:var(--focus);border-color:var(--mint);box-shadow:inset 3px 0 var(--mint);color:var(--ink)
 }
-#tv[data-tv-design] .t-r{display:flex;align-items:center;gap:clamp(7px,.72vw,15px);min-height:clamp(45px,6.55vh,104px);padding:4px clamp(7px,.65vw,15px);background:#19302c}
-#tv[data-tv-design] .t-rn{min-width:2.1em;text-align:right;flex:none}
-#tv[data-tv-design] .t-rl,#row-tv[data-tv-design] .tvc-lg{
+#tv[data-tv-design] .ihtv-r{display:flex;align-items:center;gap:clamp(7px,.72vw,15px);min-height:clamp(45px,6.55vh,104px);padding:4px clamp(7px,.65vw,15px);background:#19302c}
+#tv[data-tv-design] .ihtv-rn{min-width:2.1em;text-align:right;flex:none}
+#tv[data-tv-design] .ihtv-rl,#row-tv[data-tv-design] .tvc-lg{
   display:grid;place-items:center;flex:none;width:clamp(31px,3vw,63px);aspect-ratio:1.12;
   color:white;border:1px solid #ffffff2c;border-radius:6px;
   background:linear-gradient(140deg,var(--cc2,#284b42),#101d1eea),var(--cc,#2d534b);
   font-size:var(--micro,12px);font-weight:800;letter-spacing:.05em;overflow:hidden
 }
-#tv[data-tv-design] .t-rl img,#row-tv[data-tv-design] .tvc-lg img{width:100%;height:100%;object-fit:contain;padding:3px}
-#tv[data-tv-design] .t-rt{flex:1;min-width:0}
-#tv[data-tv-design] :is(.t-rc,.t-rg,.t-bname,.t-bt,.t-gc,.t-gp .x,.t-up span,.t-dn){overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-#tv[data-tv-design] .t-rc{font-weight:750}
-#tv[data-tv-design] .t-rg{color:var(--sub);font-size:var(--small)}
-#tv[data-tv-design] :is(.t-hd,.t-tag,.t-mu){display:inline-block;margin-left:.45em;padding:.12em .32em;border:1px solid #709e91;border-radius:4px;color:var(--ink);font-size:var(--micro);font-weight:700;vertical-align:.11em}
-#tv[data-tv-design] .t-fv{margin-left:.4em;color:#ffe297}
-#tv[data-tv-design] :is(.t-rp,.t-bp,.t-gp .z){height:3px;margin-top:4px;overflow:hidden;border-radius:3px;background:#53746a}
-#tv[data-tv-design] :is(.t-rp,.t-bp,.t-gp .z) i{display:block;height:100%;background:var(--mint);border-radius:inherit}
-#tv[data-tv-design] .t-eq{display:flex;align-items:end;gap:2px;height:12px}
-#tv[data-tv-design] .t-eq i{display:block;width:3px;height:60%;background:var(--mint);border-radius:2px}
-#tv[data-tv-design] .t-eq i:nth-child(2){height:100%}
-#tv[data-tv-design] .t-eq i:nth-child(3){height:42%}
-#tv[data-tv-design] :is(.t-grip,.t-mvi,.t-ck.on,.t-dn b){color:var(--mint)}
-#tv[data-tv-design] .t-ck{flex:none;width:1.05em;height:1.05em;line-height:1;border-radius:3px;border:1px solid #91b3a9;text-align:center}
-#tv[data-tv-design] .t-det{margin-top:clamp(8px,1vh,16px);padding:clamp(8px,1vh,15px) clamp(9px,1vw,18px);border-left:2px solid #7ab0a1;background:#172f2a;border-radius:0 7px 7px 0}
-#tv[data-tv-design] .t-det:empty{display:none}
-#tv[data-tv-design] :is(.t-dt,.t-gdt){font-weight:750;color:var(--ink);overflow-wrap:anywhere}
-#tv[data-tv-design] :is(.t-dm,.t-dd,.t-dn,.t-gdm,.t-gdd,.t-gp .y,.t-empty){font-size:var(--small);color:var(--sub)}
-#tv[data-tv-design] .t-dn{margin-top:4px}
-#tv[data-tv-design] .t-hints{display:flex;flex-wrap:wrap;gap:.38em 1em;border-top:1px solid var(--line);padding-top:.7em;margin-top:.75em;color:var(--sub);font-size:var(--micro)}
-#tv[data-tv-design] :is(.t-lp,.t-gd,.t-op)>.t-hints{margin-top:auto;position:relative;top:.5em}
-#tv[data-tv-design] .t-h{display:inline-flex;align-items:center;gap:.35em;white-space:nowrap}
-#tv[data-tv-design] .t-h b{color:var(--ink)}
-#tv[data-tv-design] .t-h i{width:.64em;height:.64em;border-radius:50%;display:inline-block}
-#tv[data-tv-design] .t-h .r{background:#ff8583}#tv[data-tv-design] .t-h .g{background:#8ce19a}
-#tv[data-tv-design] .t-h .y{background:#ffe285}#tv[data-tv-design] .t-h .b{background:#92c5ff}
-#tv[data-tv-design] .t-empty{padding:1em .55em}
-#tv[data-tv-design] .t-gd{inset:var(--edge);background:#10211ff7}
-#tv[data-tv-design] .t-guidegroup{margin-bottom:.65em;color:var(--sub);font-size:var(--small);font-weight:650}
-#tv[data-tv-design] .t-gb{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr);gap:clamp(10px,1.65vw,34px)}
-#tv[data-tv-design] :is(.t-gcols,.t-gr){display:grid;grid-template-columns:2.4em minmax(0,1.04fr) minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:.65em;padding:0 .6em}
-#tv[data-tv-design] .t-gcols{height:1.35em;align-items:start;color:var(--muted);letter-spacing:.11em;font-weight:750}
-#tv[data-tv-design] .t-gcols span{font-size:var(--micro)}
-#tv[data-tv-design] .t-gr{min-height:clamp(38px,6.35vh,90px);margin-bottom:clamp(3px,.45vh,8px);background:#19302b}
-#tv[data-tv-design] .t-gr.on .t-rn{color:var(--mint)}
-#tv[data-tv-design] .t-gcols span:first-child{text-align:right}
-#tv[data-tv-design] .t-gc{font-weight:700}
-#tv[data-tv-design] .t-gp .x{font-size:var(--small)}
-#tv[data-tv-design] .t-gp.nx{color:var(--sub)}
-#tv[data-tv-design] .t-gdet{min-width:0;padding:clamp(11px,1.25vw,24px);background:#172e29;border:1px solid var(--line);border-radius:9px}
-#tv[data-tv-design] :is(.t-gdn,.t-gul){color:var(--mint);font-size:var(--micro);font-weight:750;letter-spacing:.08em;overflow-wrap:anywhere}
-#tv[data-tv-design] .t-gdt{font-size:clamp(20px,1.8vw,38px);line-height:1.1;margin:.35em 0}
-#tv[data-tv-design] .t-gdd{margin-top:.55em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
-#tv[data-tv-design] .t-gul{margin-top:1.2em;padding-bottom:.55em}
-#tv[data-tv-design] .t-up{display:flex;gap:.7em;border-top:1px solid var(--line);padding:.52em 0;font-size:var(--small)}
-#tv[data-tv-design] .t-up b{color:var(--sub);flex:none}
-#tv[data-tv-design] .t-oi,#tv[data-tv-design] .t-sbn,#tv[data-tv-design] .t-ci{padding:.45em .7em;margin-bottom:4px;background:#19302b}
-#tv[data-tv-design] .t-oi .a{font-weight:750}
-#tv[data-tv-design] .t-oi .b{font-size:var(--small);color:var(--sub)}
-#tv[data-tv-design] .t-more{min-height:.9em;color:var(--mint);text-align:center;font-size:var(--micro)}
-#tv[data-tv-design] .t-su{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(620px,100% - 2 * var(--edge));max-height:calc(100% - 2 * var(--edge))}
-#tv[data-tv-design] .t-sbx p{color:var(--sub);margin:.7em 0 1em;line-height:1.5}
-#tv[data-tv-design] .t-ctx{top:50%;left:calc(var(--edge) + 5vw);transform:translateY(-50%);width:min(395px,100% - 2 * var(--edge));max-height:calc(100% - 2 * var(--edge));z-index:2}
-#tv[data-tv-design] .t-ct{font-weight:750;font-size:1.2em;margin-bottom:.7em;overflow-wrap:anywhere}
-#tv[data-tv-design] .t-ci span{display:inline-block;width:1.8em;color:var(--mint)}
-#tv[data-tv-design].v-cnf .t-cnf{position:absolute;inset:0;display:grid;place-items:center;z-index:3;background:#081413b5;pointer-events:auto}
-#tv[data-tv-design] .t-cb{max-width:min(535px,100% - 2 * var(--edge));padding:var(--pad)}
-#tv[data-tv-design] .t-cq{font-size:clamp(20px,2vw,33px);font-weight:750;overflow-wrap:anywhere}
-#tv[data-tv-design] .t-cs{margin:.65em 0 1em;color:var(--sub)}
-#tv[data-tv-design] .t-cbs{display:flex;flex-wrap:wrap;gap:8px}
-#tv[data-tv-design] .t-cbn{padding:.55em .7em;background:#19302b}
-#tv[data-tv-design].v-ctx .t-lp,#tv[data-tv-design].v-cnf .t-lp{pointer-events:none}
-#tv[data-tv-design].ban .t-ban{
+#tv[data-tv-design] .ihtv-rl img,#row-tv[data-tv-design] .tvc-lg img{width:100%;height:100%;object-fit:contain;padding:3px}
+#tv[data-tv-design] .ihtv-rt{flex:1;min-width:0}
+#tv[data-tv-design] :is(.ihtv-rc,.ihtv-rg,.ihtv-bname,.ihtv-bt,.ihtv-gc,.ihtv-gp .x,.ihtv-up span,.ihtv-dn){overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#tv[data-tv-design] .ihtv-rc{font-weight:750}
+#tv[data-tv-design] .ihtv-rg{color:var(--sub);font-size:var(--small)}
+#tv[data-tv-design] :is(.ihtv-hd,.ihtv-tag,.ihtv-mu){display:inline-block;margin-left:.45em;padding:.12em .32em;border:1px solid #709e91;border-radius:4px;color:var(--ink);font-size:var(--micro);font-weight:700;vertical-align:.11em}
+#tv[data-tv-design] .ihtv-fv{margin-left:.4em;color:#ffe297}
+#tv[data-tv-design] :is(.ihtv-rp,.ihtv-bp,.ihtv-gp .z){height:3px;margin-top:4px;overflow:hidden;border-radius:3px;background:#53746a}
+#tv[data-tv-design] :is(.ihtv-rp,.ihtv-bp,.ihtv-gp .z) i{display:block;height:100%;background:var(--mint);border-radius:inherit}
+#tv[data-tv-design] .ihtv-eq{display:flex;align-items:end;gap:2px;height:12px}
+#tv[data-tv-design] .ihtv-eq i{display:block;width:3px;height:60%;background:var(--mint);border-radius:2px}
+#tv[data-tv-design] .ihtv-eq i:nth-child(2){height:100%}
+#tv[data-tv-design] .ihtv-eq i:nth-child(3){height:42%}
+#tv[data-tv-design] :is(.ihtv-grip,.ihtv-mvi,.ihtv-ck.on,.ihtv-dn b){color:var(--mint)}
+#tv[data-tv-design] .ihtv-ck{flex:none;width:1.05em;height:1.05em;line-height:1;border-radius:3px;border:1px solid #91b3a9;text-align:center}
+#tv[data-tv-design] .ihtv-det{margin-top:clamp(8px,1vh,16px);padding:clamp(8px,1vh,15px) clamp(9px,1vw,18px);border-left:2px solid #7ab0a1;background:#172f2a;border-radius:0 7px 7px 0}
+#tv[data-tv-design] .ihtv-det:empty{display:none}
+#tv[data-tv-design] :is(.ihtv-dt,.ihtv-gdt){font-weight:750;color:var(--ink);overflow-wrap:anywhere}
+#tv[data-tv-design] :is(.ihtv-dm,.ihtv-dd,.ihtv-dn,.ihtv-gdm,.ihtv-gdd,.ihtv-gp .y,.ihtv-empty){font-size:var(--small);color:var(--sub)}
+#tv[data-tv-design] .ihtv-dn{margin-top:4px}
+#tv[data-tv-design] .ihtv-hints{display:flex;flex-wrap:wrap;gap:.38em 1em;border-top:1px solid var(--line);padding-top:.7em;margin-top:.75em;color:var(--sub);font-size:var(--micro)}
+#tv[data-tv-design] :is(.ihtv-lp,.ihtv-gd,.ihtv-op)>.ihtv-hints{margin-top:auto;position:relative;top:.5em}
+#tv[data-tv-design] .ihtv-h{display:inline-flex;align-items:center;gap:.35em;white-space:nowrap}
+#tv[data-tv-design] .ihtv-h b{color:var(--ink)}
+#tv[data-tv-design] .ihtv-h i{width:.64em;height:.64em;border-radius:50%;display:inline-block}
+#tv[data-tv-design] .ihtv-h .r{background:#ff8583}#tv[data-tv-design] .ihtv-h .g{background:#8ce19a}
+#tv[data-tv-design] .ihtv-h .y{background:#ffe285}#tv[data-tv-design] .ihtv-h .b{background:#92c5ff}
+#tv[data-tv-design] .ihtv-empty{padding:1em .55em}
+#tv[data-tv-design] .ihtv-gd{inset:var(--edge);background:#10211ff7}
+#tv[data-tv-design] .ihtv-guidegroup{margin-bottom:.65em;color:var(--sub);font-size:var(--small);font-weight:650}
+#tv[data-tv-design] .ihtv-gb{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr);gap:clamp(10px,1.65vw,34px)}
+#tv[data-tv-design] :is(.ihtv-gcols,.ihtv-gr){display:grid;grid-template-columns:2.4em minmax(0,1.04fr) minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:.65em;padding:0 .6em}
+#tv[data-tv-design] .ihtv-gcols{height:1.35em;align-items:start;color:var(--muted);letter-spacing:.11em;font-weight:750}
+#tv[data-tv-design] .ihtv-gcols span{font-size:var(--micro)}
+#tv[data-tv-design] .ihtv-gr{min-height:clamp(38px,6.35vh,90px);margin-bottom:clamp(3px,.45vh,8px);background:#19302b}
+#tv[data-tv-design] .ihtv-gr.on .ihtv-rn{color:var(--mint)}
+#tv[data-tv-design] .ihtv-gcols span:first-child{text-align:right}
+#tv[data-tv-design] .ihtv-gc{font-weight:700}
+#tv[data-tv-design] .ihtv-gp .x{font-size:var(--small)}
+#tv[data-tv-design] .ihtv-gp.nx{color:var(--sub)}
+#tv[data-tv-design] .ihtv-gdet{min-width:0;padding:clamp(11px,1.25vw,24px);background:#172e29;border:1px solid var(--line);border-radius:9px}
+#tv[data-tv-design] :is(.ihtv-gdn,.ihtv-gul){color:var(--mint);font-size:var(--micro);font-weight:750;letter-spacing:.08em;overflow-wrap:anywhere}
+#tv[data-tv-design] .ihtv-gdt{font-size:clamp(20px,1.8vw,38px);line-height:1.1;margin:.35em 0}
+#tv[data-tv-design] .ihtv-gdd{margin-top:.55em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+#tv[data-tv-design] .ihtv-gul{margin-top:1.2em;padding-bottom:.55em}
+#tv[data-tv-design] .ihtv-up{display:flex;gap:.7em;border-top:1px solid var(--line);padding:.52em 0;font-size:var(--small)}
+#tv[data-tv-design] .ihtv-up b{color:var(--sub);flex:none}
+#tv[data-tv-design] .ihtv-oi,#tv[data-tv-design] .ihtv-sbn,#tv[data-tv-design] .ihtv-ci{padding:.45em .7em;margin-bottom:4px;background:#19302b}
+#tv[data-tv-design] .ihtv-oi .a{font-weight:750}
+#tv[data-tv-design] .ihtv-oi .b{font-size:var(--small);color:var(--sub)}
+#tv[data-tv-design] .ihtv-more{min-height:.9em;color:var(--mint);text-align:center;font-size:var(--micro)}
+#tv[data-tv-design] .ihtv-su{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(620px,100% - 2 * var(--edge));max-height:calc(100% - 2 * var(--edge))}
+#tv[data-tv-design] .ihtv-sbx p{color:var(--sub);margin:.7em 0 1em;line-height:1.5}
+#tv[data-tv-design] .ihtv-ctx{top:50%;left:calc(var(--edge) + 5vw);transform:translateY(-50%);width:min(395px,100% - 2 * var(--edge));max-height:calc(100% - 2 * var(--edge));z-index:2}
+#tv[data-tv-design] .ihtv-ct{font-weight:750;font-size:1.2em;margin-bottom:.7em;overflow-wrap:anywhere}
+#tv[data-tv-design] .ihtv-ci span{display:inline-block;width:1.8em;color:var(--mint)}
+#tv[data-tv-design].v-cnf .ihtv-cnf{position:absolute;inset:0;display:grid;place-items:center;z-index:3;background:#081413b5;pointer-events:auto}
+#tv[data-tv-design] .ihtv-cb{max-width:min(535px,100% - 2 * var(--edge));padding:var(--pad)}
+#tv[data-tv-design] .ihtv-cq{font-size:clamp(20px,2vw,33px);font-weight:750;overflow-wrap:anywhere}
+#tv[data-tv-design] .ihtv-cs{margin:.65em 0 1em;color:var(--sub)}
+#tv[data-tv-design] .ihtv-cbs{display:flex;flex-wrap:wrap;gap:8px}
+#tv[data-tv-design] .ihtv-cbn{padding:.55em .7em;background:#19302b}
+#tv[data-tv-design].v-ctx .ihtv-lp,#tv[data-tv-design].v-cnf .ihtv-lp{pointer-events:none}
+#tv[data-tv-design].ban .ihtv-ban{
   position:absolute;inset:auto var(--edge) var(--edge);display:grid;grid-template-columns:auto minmax(0,1.45fr) minmax(0,.68fr);
   gap:clamp(12px,2vw,36px);align-items:center;padding:var(--pad);background:#102421f5;
   border-top:2px solid var(--mint);pointer-events:auto
 }
-#tv[data-tv-design] .t-channel{background:#203b34;border-radius:8px;padding:.65em .85em;min-width:4.1em;text-align:center}
-#tv[data-tv-design] .t-bn{font-size:clamp(29px,4.1vw,80px);line-height:.98;font-weight:750;letter-spacing:-.06em}
-#tv[data-tv-design] .t-bc{display:flex;align-items:center;gap:.45em}
-#tv[data-tv-design] .t-bc .t-hd,#tv[data-tv-design] .t-bc .t-fv,#tv[data-tv-design] .t-bc .t-mu{margin-left:0}
-#tv[data-tv-design] .t-live{display:inline-flex;align-items:center;gap:.4em;color:#0d3329;background:var(--mint);padding:.25em .46em;border-radius:4px;font-size:var(--micro);font-weight:800;letter-spacing:.08em}
-#tv[data-tv-design] .t-live::before{content:'';width:.5em;height:.5em;background:currentColor;border-radius:50%}
-#tv[data-tv-design] .t-bname{color:var(--sub);font-weight:700}
-#tv[data-tv-design] .t-bt{margin:.17em 0 .2em;font-size:var(--title);font-weight:740;line-height:1.12;letter-spacing:-.035em}
-#tv[data-tv-design] .t-bp{height:4px}
-#tv[data-tv-design] .t-bm{display:flex;justify-content:space-between;margin-top:5px;color:var(--sub);font-size:var(--micro)}
-#tv[data-tv-design] .t-bside{min-width:0;border-left:1px solid var(--line);padding-left:clamp(9px,1.3vw,22px)}
-#tv[data-tv-design] .t-bx div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;margin:.25em 0 .62em}
-#tv[data-tv-design] .t-bk{display:flex;flex-wrap:wrap;gap:5px}
-#tv[data-tv-design].clk .t-ck2{position:absolute;top:var(--edge);right:var(--edge);display:block;text-align:right;padding:.65em .9em;background:#102421ec}
-#tv[data-tv-design] .t-ckt{font-size:var(--title);font-weight:740;line-height:1}
-#tv[data-tv-design] :is(.t-ckd,.t-ckm){font-size:var(--micro);color:var(--sub);margin-top:.25em}
-#tv[data-tv-design] .t-stat.show{position:absolute;top:47%;left:50%;transform:translate(-50%,-50%);display:block;text-align:center;background:#102421f5;padding:1em;max-width:90%;width:max-content}
-#tv[data-tv-design] .t-sx{font-weight:750}
-#tv[data-tv-design] .t-ss{font-size:var(--small);color:var(--sub);margin-top:.45em;max-width:38em}
-#tv[data-tv-design] .t-sp{width:1em;height:1em;border-radius:50%;border:2px solid var(--line);border-top-color:var(--mint);margin:0 auto .6em;animation:tvDesignSpin 1s linear infinite}
-#tv[data-tv-design] .t-numbox.show,#tv[data-tv-design] .t-tip.show{position:absolute;display:block;z-index:4;padding:.44em .65em;background:#173832}
-#tv[data-tv-design] .t-numbox{top:var(--edge);left:var(--edge);font-size:var(--title);font-weight:740}
-#tv[data-tv-design] .t-tip{bottom:var(--edge);left:var(--edge);max-width:calc(100% - 2 * var(--edge))}
-#tv[data-tv-design].ban .t-tip{bottom:auto;top:var(--edge)}
+#tv[data-tv-design] .ihtv-channel{background:#203b34;border-radius:8px;padding:.65em .85em;min-width:4.1em;text-align:center}
+#tv[data-tv-design] .ihtv-bn{font-size:clamp(29px,4.1vw,80px);line-height:.98;font-weight:750;letter-spacing:-.06em}
+#tv[data-tv-design] .ihtv-bc{display:flex;align-items:center;gap:.45em}
+#tv[data-tv-design] .ihtv-bc .ihtv-hd,#tv[data-tv-design] .ihtv-bc .ihtv-fv,#tv[data-tv-design] .ihtv-bc .ihtv-mu{margin-left:0}
+#tv[data-tv-design] .ihtv-live{display:inline-flex;align-items:center;gap:.4em;color:#0d3329;background:var(--mint);padding:.25em .46em;border-radius:4px;font-size:var(--micro);font-weight:800;letter-spacing:.08em}
+#tv[data-tv-design] .ihtv-live::before{content:'';width:.5em;height:.5em;background:currentColor;border-radius:50%}
+#tv[data-tv-design] .ihtv-bname{color:var(--sub);font-weight:700}
+#tv[data-tv-design] .ihtv-bt{margin:.17em 0 .2em;font-size:var(--title);font-weight:740;line-height:1.12;letter-spacing:-.035em}
+#tv[data-tv-design] .ihtv-bp{height:4px}
+#tv[data-tv-design] .ihtv-bm{display:flex;justify-content:space-between;margin-top:5px;color:var(--sub);font-size:var(--micro)}
+#tv[data-tv-design] .ihtv-bside{min-width:0;border-left:1px solid var(--line);padding-left:clamp(9px,1.3vw,22px)}
+#tv[data-tv-design] .ihtv-bx div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;margin:.25em 0 .62em}
+#tv[data-tv-design] .ihtv-bk{display:flex;flex-wrap:wrap;gap:5px}
+#tv[data-tv-design].clk .ihtv-ck2{position:absolute;top:var(--edge);right:var(--edge);display:block;text-align:right;padding:.65em .9em;background:#102421ec}
+#tv[data-tv-design] .ihtv-ckt{font-size:var(--title);font-weight:740;line-height:1}
+#tv[data-tv-design] :is(.ihtv-ckd,.ihtv-ckm){font-size:var(--micro);color:var(--sub);margin-top:.25em}
+#tv[data-tv-design] .ihtv-stat.show{position:absolute;top:47%;left:50%;transform:translate(-50%,-50%);display:block;text-align:center;background:#102421f5;padding:1em;max-width:90%;width:max-content}
+#tv[data-tv-design] .ihtv-sx{font-weight:750}
+#tv[data-tv-design] .ihtv-ss{font-size:var(--small);color:var(--sub);margin-top:.45em;max-width:38em}
+#tv[data-tv-design] .ihtv-sp{width:1em;height:1em;border-radius:50%;border:2px solid var(--line);border-top-color:var(--mint);margin:0 auto .6em;animation:tvDesignSpin 1s linear infinite}
+#tv[data-tv-design] .ihtv-numbox.show,#tv[data-tv-design] .ihtv-tip.show{position:absolute;display:block;z-index:4;padding:.44em .65em;background:#173832}
+#tv[data-tv-design] .ihtv-numbox{top:var(--edge);left:var(--edge);font-size:var(--title);font-weight:740}
+#tv[data-tv-design] .ihtv-tip{bottom:var(--edge);left:var(--edge);max-width:calc(100% - 2 * var(--edge))}
+#tv[data-tv-design].ban .ihtv-tip{bottom:auto;top:var(--edge)}
 #row-tv[data-tv-design] #tvHead{display:flex;gap:.65em;align-items:center}
 #row-tv[data-tv-design] .tvh-c{color:#b9ccc6;font-size:.78em}
 #row-tv[data-tv-design] .tvh-t{color:#9af0d5;font-size:.78em}
@@ -175,123 +176,148 @@ body[data-theme=studio] #row-tv[data-tv-design] .tvc-bar{background:#554967}
 body[data-theme=studio] #row-tv[data-tv-design] .tvc-bar i{background:var(--accent)}
 body[data-theme=studio] #row-tv[data-tv-design] .tvo-i .i{stroke:var(--accent)}
 @keyframes tvDesignSpin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){#tv[data-tv-design] .t-sp{animation:none}}
+@media(prefers-reduced-motion:reduce){#tv[data-tv-design] .ihtv-sp{animation:none}}
 @media(max-width:720px){
-  #tv[data-tv-design] .t-gb{grid-template-columns:minmax(0,1fr)}
-  #tv[data-tv-design] .t-gd{top:max(var(--edge),34px)}
-  #tv[data-tv-design] :is(.t-lp,.t-op){top:max(var(--edge),34px)}
-  #tv[data-tv-design] .t-ctx{left:var(--edge)}
+  #tv[data-tv-design] .ihtv-gb{grid-template-columns:minmax(0,1fr)}
+  #tv[data-tv-design] .ihtv-gd{top:max(var(--edge),34px)}
+  #tv[data-tv-design] :is(.ihtv-lp,.ihtv-op){top:max(var(--edge),34px)}
+  #tv[data-tv-design] .ihtv-ctx{left:var(--edge)}
 }
 @media(max-width:520px){
-  #tv[data-tv-design].ban .t-ban{grid-template-columns:auto minmax(0,1fr);gap:10px}
-  #tv[data-tv-design] .t-bside{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding:.52em 0 0}
-  #tv[data-tv-design] .t-bx div{margin:.1em 0 .44em}
-  #tv[data-tv-design] .t-bn{font-size:34px}
-  #tv[data-tv-design] .t-bname{font-size:var(--small)}
-  #tv[data-tv-design] :is(.t-gcols,.t-gr){grid-template-columns:2em minmax(0,1fr) minmax(0,1.3fr)}
-  #tv[data-tv-design] :is(.t-gcols,.t-gr) .nx{display:none}
+  #tv[data-tv-design].ban .ihtv-ban{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  #tv[data-tv-design] .ihtv-bside{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding:.52em 0 0}
+  #tv[data-tv-design] .ihtv-bx div{margin:.1em 0 .44em}
+  #tv[data-tv-design] .ihtv-bn{font-size:34px}
+  #tv[data-tv-design] .ihtv-bname{font-size:var(--small)}
+  #tv[data-tv-design] :is(.ihtv-gcols,.ihtv-gr){grid-template-columns:2em minmax(0,1fr) minmax(0,1.3fr)}
+  #tv[data-tv-design] :is(.ihtv-gcols,.ihtv-gr) .nx{display:none}
 }
 
 /* Kanal seçimi: koyu yayın paneli, mor odak ve ayrı yeşil canlı işareti. */
-#tv[data-tv-design] #tList{
+#tv[data-tv-design] #ihtv-tList{
   --ink:#f5f5fc;--sub:#c3c5d6;--muted:#aeb2c9;--mint:#c4c4ff;
   --line:#34354a;--surface:#141522;--focus:#393961;
   top:50%;bottom:auto;transform:translateY(-50%);
   width:min(calc(100% - 2 * var(--edge)),clamp(392px,37.5vw,790px));
   max-height:calc(100% - 2 * var(--edge));padding:clamp(17px,1.95vw,36px);
+  overflow:hidden;
   border-radius:22px;border-color:#464760;
   background:radial-gradient(ellipse at 100% -15%,#343454 0%,transparent 49%),#151624;
   box-shadow:0 32px 90px #090a13b8,0 0 0 1px #0b0c13a0;
 }
-#tv[data-tv-design] #tList .t-head{padding:0;margin:0 0 clamp(12px,2vh,25px);border-bottom:0;align-items:flex-start}
-#tv[data-tv-design] #tList .t-headcopy{min-width:0}
-#tv[data-tv-design] #tList .t-headcopy .t-kicker{display:flex;align-items:center;gap:7px;margin-bottom:.5em;color:#d2d2f8}
-#tv[data-tv-design] #tList .t-headcopy .t-kicker::before{content:'';width:15px;height:9px;border-left:2px solid #c4c4ff;border-right:2px solid #c4c4ff;background:linear-gradient(#c4c4ff,#c4c4ff) center/2px 100% no-repeat;transform:skewX(-16deg)}
-#tv[data-tv-design] #tList .t-lt{font-size:clamp(32px,3.8vw,68px);letter-spacing:-.054em;line-height:1.01;font-weight:760}
-#tv[data-tv-design] #tList .t-headmeta{gap:8px}
-#tv[data-tv-design] #tList .t-clk{color:var(--sub);font-variant-numeric:tabular-nums}
-#tv[data-tv-design] #tList .t-navbtn{background:#1e2031;border-color:#51526d;padding:.55em .8em;border-radius:8px}
-#tv[data-tv-design] #tList .t-chips{margin:0 0 clamp(12px,1.55vh,20px);gap:5px}
-#tv[data-tv-design] #tList .t-chip{border-radius:7px;padding:.56em .85em;background:#222337;border-color:#373850;font-size:var(--small);line-height:1}
-#tv[data-tv-design] #tList .t-chip.on{background:#c4c4ff;color:#181830;border-color:#c4c4ff}
-#tv[data-tv-design] #tList .t-listmeta{margin-bottom:7px;gap:8px}
-#tv[data-tv-design] #tList :is(.t-listlabel,.t-lc){font-size:var(--micro);line-height:1.3;color:var(--muted);font-weight:690;letter-spacing:.05em}
-#tv[data-tv-design] #tList .t-listlabel{text-transform:uppercase}
-#tv[data-tv-design] #tList .t-lc{white-space:nowrap}
-#tv[data-tv-design] #tList .t-rowsw{padding-right:0}
-#tv[data-tv-design] #tList .t-rows{gap:3px}
-#tv[data-tv-design] #tList .t-sb{right:-8px;width:2px;background:#292a40}
-#tv[data-tv-design] #tList .t-sb i{background:#7778a0}
-#tv[data-tv-design] #tList .t-sb[hidden]{display:none}
-#tv[data-tv-design] #tList .t-r{min-height:clamp(34px,5vh,65px);padding:2px 8px;gap:clamp(6px,.78vw,14px);border-radius:7px;background:#1d1e2e;border-color:transparent}
-#tv[data-tv-design] #tList .t-r:hover{border-color:#76779d}
-#tv[data-tv-design] #tList .t-r.sel{border-color:#c4c4ff;background:linear-gradient(96deg,#3b3b65,#2f304e);box-shadow:inset 3px 0 0 #c4c4ff}
-#tv[data-tv-design] #tList .t-r.on:not(.sel){background:#242639}
-#tv[data-tv-design] #tList .t-rn{color:#b9bad2;min-width:1.65em;font-variant-numeric:tabular-nums}
-#tv[data-tv-design] #tList .t-r.sel .t-rn{color:#efeeff}
-#tv[data-tv-design] #tList .t-rl{width:clamp(25px,3.65vh,50px);aspect-ratio:1;border-radius:6px;border-color:#ffffff2b;background:linear-gradient(150deg,var(--cc2,#3d405d),#24263abf)}
-#tv[data-tv-design] #tList .t-rc{font-weight:725;letter-spacing:-.018em;line-height:1.16}
-#tv[data-tv-design] #tList .t-rg{color:#c3c5da;line-height:1.15;margin-top:2px}
-#tv[data-tv-design] #tList .t-hd{color:#e3e3f5;border-color:#72738c;vertical-align:1px;font-size:.62em}
-#tv[data-tv-design] #tList .t-rp{display:none}
-#tv[data-tv-design] #tList .t-rowstate{display:flex;flex:none;align-items:center;gap:5px;color:#c0f2d2;font-size:var(--micro);font-weight:760;letter-spacing:.045em}
-#tv[data-tv-design] #tList .t-eq{height:9px}
-#tv[data-tv-design] #tList .t-eq i{width:2px;background:#a3edbc}
-#tv[data-tv-design] #tList .t-det{background:#202139;border:1px solid #383a56;border-radius:10px;margin:clamp(9px,1.2vh,17px) 0 0;padding:clamp(9px,1.05vw,16px)}
-#tv[data-tv-design] #tList .t-det:empty{display:none}
-#tv[data-tv-design] #tList .t-nowgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
-#tv[data-tv-design] #tList .t-nowgrid>div{min-width:0}
-#tv[data-tv-design] #tList .t-nowgrid>div:only-child{grid-column:1/-1}
-#tv[data-tv-design] #tList .t-detnext{padding-left:12px;margin-left:12px;border-left:1px solid #484965}
-#tv[data-tv-design] #tList .t-nowgrid .t-kicker{font-weight:720;letter-spacing:.09em;margin-bottom:4px}
-#tv[data-tv-design] #tList .t-nowgrid .t-dt{font-size:var(--small);line-height:1.23;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-#tv[data-tv-design] #tList .t-detmeta{display:flex;gap:5px;justify-content:space-between;margin-top:4px;color:var(--sub);font-size:var(--micro);font-variant-numeric:tabular-nums}
-#tv[data-tv-design] #tList .t-detmeter{height:3px;margin-top:5px;border-radius:4px;background:#505270;overflow:hidden}
-#tv[data-tv-design] #tList .t-detmeter i{display:block;height:100%;background:#bbbbfa}
-#tv[data-tv-design] #tList>.t-hints{top:auto;margin-top:clamp(10px,1.6vh,18px);padding-top:.65em;border-color:#35364d}
-#tv[data-tv-design] #tList .t-quick{display:flex;width:100%;gap:4px;align-items:center;flex-wrap:wrap}
-#tv[data-tv-design] #tList .t-quick button{display:flex;align-items:center;gap:5px;padding:.46em .55em;cursor:pointer;border-radius:6px;border:1px solid #454660;background:#22233a;color:var(--ink);font:inherit;line-height:1}
-#tv[data-tv-design] #tList .t-quick button:is(:hover,:focus-visible){outline:2px solid #c4c4ff;outline-offset:1px}
-#tv[data-tv-design] #tList .t-quick button:disabled{opacity:.45;cursor:default}
-#tv[data-tv-design] #tList .t-quick .t-watchkey{background:#c4c4ff;color:#181830;border-color:#c4c4ff;font-weight:750;padding-inline:.72em}
-#tv[data-tv-design] #tList .t-watchkey b{padding:.16em .26em;color:#eaeaff;background:#353558;border-radius:3px;font-size:.86em}
-#tv[data-tv-design] #tList .t-groupkey{margin-left:auto;color:var(--muted);white-space:nowrap}
-#tv[data-tv-design] #tList .t-groupkey b{margin-right:2px;color:var(--ink)}
-#tv[data-tv-design].v-source .t-src{
+#tv[data-tv-design] #ihtv-tList .ihtv-head{padding:0;margin:0 0 clamp(12px,2vh,25px);border-bottom:0;align-items:flex-start}
+#tv[data-tv-design] #ihtv-tList .ihtv-headcopy{min-width:0}
+#tv[data-tv-design] #ihtv-tList .ihtv-headcopy .ihtv-kicker{display:flex;align-items:center;gap:7px;margin-bottom:.5em;color:#d2d2f8}
+#tv[data-tv-design] #ihtv-tList .ihtv-headcopy .ihtv-kicker::before{content:'';width:15px;height:9px;border-left:2px solid #c4c4ff;border-right:2px solid #c4c4ff;background:linear-gradient(#c4c4ff,#c4c4ff) center/2px 100% no-repeat;transform:skewX(-16deg)}
+#tv[data-tv-design] #ihtv-tList .ihtv-lt{font-size:clamp(32px,3.8vw,68px);letter-spacing:-.054em;line-height:1.01;font-weight:760}
+#tv[data-tv-design] #ihtv-tList .ihtv-headmeta{gap:8px}
+#tv[data-tv-design] #ihtv-tList .ihtv-clk{color:var(--sub);font-variant-numeric:tabular-nums}
+#tv[data-tv-design] #ihtv-tList .ihtv-navbtn{background:#1e2031;border-color:#51526d;padding:.55em .8em;border-radius:8px}
+#tv[data-tv-design] #ihtv-tList .ihtv-navbtn[data-action=source]{background:#373655;border-color:#74749c}
+#tv[data-tv-design] #ihtv-tList .ihtv-navbtn.is-remote-focus{background:#c4c4ff;border-color:#eeeeff;color:#181830;outline:2px solid #e0dfff;outline-offset:2px}
+#tv[data-tv-design] #ihtv-tList .ihtv-chips{margin:0 0 clamp(12px,1.55vh,20px);gap:5px}
+#tv[data-tv-design] #ihtv-tList .ihtv-chip{border-radius:7px;padding:.56em .85em;background:#222337;border-color:#373850;font-size:var(--small);line-height:1}
+#tv[data-tv-design] #ihtv-tList .ihtv-chip.on{background:#c4c4ff;color:#181830;border-color:#c4c4ff}
+#tv[data-tv-design] #ihtv-tList .ihtv-listmeta{margin-bottom:7px;gap:8px}
+#tv[data-tv-design] #ihtv-tList :is(.ihtv-listlabel,.ihtv-lc){font-size:var(--micro);line-height:1.3;color:var(--muted);font-weight:690;letter-spacing:.05em}
+#tv[data-tv-design] #ihtv-tList .ihtv-listlabel{text-transform:uppercase}
+#tv[data-tv-design] #ihtv-tList .ihtv-lc{white-space:nowrap}
+#tv[data-tv-design] #ihtv-tList .ihtv-rowsw{padding-right:6px;flex:1 1 auto;min-height:0;overflow:auto}
+#tv[data-tv-design] #ihtv-tList .ihtv-rows{gap:3px}
+#tv[data-tv-design] #ihtv-tList .ihtv-sb{right:0;width:2px;background:#292a40;pointer-events:none}
+#tv[data-tv-design] #ihtv-tList .ihtv-sb i{background:#7778a0}
+#tv[data-tv-design] #ihtv-tList .ihtv-sb[hidden]{display:none}
+#tv[data-tv-design] #ihtv-tList .ihtv-r{min-height:clamp(34px,5vh,65px);padding:2px 8px;gap:clamp(6px,.78vw,14px);border-radius:7px;background:#1d1e2e;border-color:transparent}
+#tv[data-tv-design] #ihtv-tList .ihtv-r:hover{border-color:#76779d}
+#tv[data-tv-design] #ihtv-tList .ihtv-r.sel{border-color:#c4c4ff;background:linear-gradient(96deg,#3b3b65,#2f304e);box-shadow:inset 3px 0 0 #c4c4ff}
+#tv[data-tv-design] #ihtv-tList.head-focus .ihtv-r.sel{border-color:transparent;background:#1d1e2e;box-shadow:none}
+#tv[data-tv-design] #ihtv-tList .ihtv-r.on:not(.sel){background:#242639}
+#tv[data-tv-design] #ihtv-tList .ihtv-rn{color:#b9bad2;min-width:1.65em;font-variant-numeric:tabular-nums}
+#tv[data-tv-design] #ihtv-tList .ihtv-r.sel .ihtv-rn{color:#efeeff}
+#tv[data-tv-design] #ihtv-tList .ihtv-rl{width:clamp(25px,3.65vh,50px);aspect-ratio:1;border-radius:6px;border-color:#ffffff2b;background:linear-gradient(150deg,var(--cc2,#3d405d),#24263abf)}
+#tv[data-tv-design] #ihtv-tList .ihtv-rc{font-weight:725;letter-spacing:-.018em;line-height:1.16}
+#tv[data-tv-design] #ihtv-tList .ihtv-rg{color:#c3c5da;line-height:1.15;margin-top:2px}
+#tv[data-tv-design] #ihtv-tList .ihtv-hd{color:#e3e3f5;border-color:#72738c;vertical-align:1px;font-size:.62em}
+#tv[data-tv-design] #ihtv-tList .ihtv-rp{display:none}
+#tv[data-tv-design] #ihtv-tList .ihtv-rowstate{display:flex;flex:none;align-items:center;gap:5px;color:#c0f2d2;font-size:var(--micro);font-weight:760;letter-spacing:.045em}
+#tv[data-tv-design] #ihtv-tList .ihtv-eq{height:9px}
+#tv[data-tv-design] #ihtv-tList .ihtv-eq i{width:2px;background:#a3edbc}
+#tv[data-tv-design] #ihtv-tList .ihtv-det{background:#202139;border:1px solid #383a56;border-radius:10px;margin:clamp(9px,1.2vh,17px) 0 0;padding:clamp(9px,1.05vw,16px)}
+#tv[data-tv-design] #ihtv-tList .ihtv-det:empty{display:none}
+#tv[data-tv-design] #ihtv-tList .ihtv-nowgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+#tv[data-tv-design] #ihtv-tList .ihtv-nowgrid>div{min-width:0}
+#tv[data-tv-design] #ihtv-tList .ihtv-nowgrid>div:only-child{grid-column:1/-1}
+#tv[data-tv-design] #ihtv-tList .ihtv-detnext{padding-left:12px;margin-left:12px;border-left:1px solid #484965}
+#tv[data-tv-design] #ihtv-tList .ihtv-nowgrid .ihtv-kicker{font-weight:720;letter-spacing:.09em;margin-bottom:4px}
+#tv[data-tv-design] #ihtv-tList .ihtv-nowgrid .ihtv-dt{font-size:var(--small);line-height:1.23;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#tv[data-tv-design] #ihtv-tList .ihtv-detmeta{display:flex;gap:5px;justify-content:space-between;margin-top:4px;color:var(--sub);font-size:var(--micro);font-variant-numeric:tabular-nums}
+#tv[data-tv-design] #ihtv-tList .ihtv-detmeter{height:3px;margin-top:5px;border-radius:4px;background:#505270;overflow:hidden}
+#tv[data-tv-design] #ihtv-tList .ihtv-detmeter i{display:block;height:100%;background:#bbbbfa}
+#tv[data-tv-design] #ihtv-tList>.ihtv-hints{position:static;top:auto;bottom:auto;margin-top:clamp(10px,1.6vh,18px);padding-top:.65em;border-color:#35364d}
+#tv[data-tv-design] #ihtv-tList .ihtv-quick{display:flex;width:100%;gap:4px;align-items:center;flex-wrap:wrap}
+#tv[data-tv-design] #ihtv-tList .ihtv-quick button{display:flex;align-items:center;gap:5px;padding:.46em .55em;cursor:pointer;border-radius:6px;border:1px solid #454660;background:#22233a;color:var(--ink);font:inherit;line-height:1}
+#tv[data-tv-design] #ihtv-tList .ihtv-quick button:is(:hover,:focus-visible){outline:2px solid #c4c4ff;outline-offset:1px}
+#tv[data-tv-design] #ihtv-tList .ihtv-quick button:disabled{opacity:.45;cursor:default}
+#tv[data-tv-design] #ihtv-tList .ihtv-quick .ihtv-watchkey{background:#c4c4ff;color:#181830;border-color:#c4c4ff;font-weight:750;padding-inline:.72em}
+#tv[data-tv-design] #ihtv-tList .ihtv-watchkey b{padding:.16em .26em;color:#eaeaff;background:#353558;border-radius:3px;font-size:.86em}
+#tv[data-tv-design] #ihtv-tList .ihtv-groupkey{margin-left:auto;color:var(--muted);white-space:nowrap}
+#tv[data-tv-design] #ihtv-tList .ihtv-groupkey b{margin-right:2px;color:var(--ink)}
+#tv[data-tv-design].v-source .ihtv-src{
   --ink:#f5f5fc;--sub:#c3c5d6;--mint:#c4c4ff;--line:#464760;--focus:#393961;
   display:block;top:50%;right:var(--edge);transform:translateY(-50%);
   width:min(calc(100% - 2 * var(--edge)),clamp(355px,34vw,640px));max-height:calc(100% - 2 * var(--edge));
   background:radial-gradient(ellipse at 100% -15%,#343454 0%,transparent 56%),#151624;border-radius:19px;
 }
-#tv[data-tv-design] .t-src .t-navbtn{background:#222337}
-#tv[data-tv-design] .t-srcintro{margin:.55em 0 .82em;color:var(--sub);font-size:var(--small)}
-#tv[data-tv-design] .t-src .t-oi{display:flex;align-items:center;gap:.7em;background:#222338;width:100%;color:inherit;text-align:left;font:inherit}
-#tv[data-tv-design] .t-src .t-oi.sel{background:var(--focus)}
-#tv[data-tv-design] .t-srcicon{display:grid;place-items:center;flex:none;font-size:var(--micro);font-weight:800;width:3.65em;height:2.6em;border-radius:6px;background:#30324c;color:#dedfff}
-#tv[data-tv-design] .t-srccopy{flex:1;min-width:0;overflow-wrap:anywhere}
-#tv[data-tv-design] .t-srcactive{color:#b9f0cf;font-size:var(--micro);font-weight:750}
-#tv[data-tv-design] .t-srcmsg{color:#ffdaa3;margin:.75em 0;font-size:var(--small);overflow-wrap:anywhere}
-#tv[data-tv-design].v-hdmi.ban .t-ban{grid-template-columns:auto minmax(0,1fr) auto}
+#tv[data-tv-design] .ihtv-src .ihtv-navbtn{background:#222337}
+#tv[data-tv-design] .ihtv-srcintro{margin:.55em 0 .82em;color:var(--sub);font-size:var(--small)}
+#tv[data-tv-design] .ihtv-src .ihtv-oi{display:flex;align-items:center;gap:.7em;background:#222338;width:100%;color:inherit;text-align:left;font:inherit}
+#tv[data-tv-design] .ihtv-src .ihtv-oi.sel{background:var(--focus)}
+#tv[data-tv-design] .ihtv-srcicon{display:grid;place-items:center;flex:none;font-size:var(--micro);font-weight:800;width:3.65em;height:2.6em;border-radius:6px;background:#30324c;color:#dedfff}
+#tv[data-tv-design] .ihtv-srccopy{flex:1;min-width:0;overflow-wrap:anywhere}
+#tv[data-tv-design] .ihtv-srcactive{color:#b9f0cf;font-size:var(--micro);font-weight:750}
+#tv[data-tv-design] .ihtv-srcmsg{color:#ffdaa3;margin:.75em 0;font-size:var(--small);overflow-wrap:anywhere}
+#tv[data-tv-design].v-hdmi.ban .ihtv-ban{grid-template-columns:auto minmax(0,1fr) auto}
 @media(max-height:800px) and (min-width:721px){
-  #tv[data-tv-design] #tList{padding:clamp(12px,2.4vh,19px);max-height:calc(100% - 32px)}
-  #tv[data-tv-design] #tList .t-head{margin-bottom:9px}
-  #tv[data-tv-design] #tList .t-lt{font-size:clamp(31px,5.25vh,43px)}
-  #tv[data-tv-design] #tList .t-chips{margin-bottom:8px}
-  #tv[data-tv-design] #tList .t-rows{gap:2px}
-  #tv[data-tv-design] #tList .t-r{padding-block:1px;font-size:clamp(14px,2.05vh,17px)}
-  #tv[data-tv-design] #tList .t-rg{font-size:clamp(11px,1.65vh,14px)}
-  #tv[data-tv-design] #tList .t-det{padding:7px 10px}
-  #tv[data-tv-design] #tList>.t-hints{margin-top:8px;padding-top:6px}
+  #tv[data-tv-design] #ihtv-tList{padding:clamp(12px,2.4vh,19px);max-height:calc(100% - 32px)}
+  #tv[data-tv-design] #ihtv-tList .ihtv-head{margin-bottom:9px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-lt{font-size:clamp(31px,5.25vh,43px)}
+  #tv[data-tv-design] #ihtv-tList .ihtv-chips{margin-bottom:8px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rows{gap:2px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-r{padding-block:1px;font-size:clamp(14px,2.05vh,17px)}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rg{font-size:clamp(11px,1.65vh,14px)}
+  #tv[data-tv-design] #ihtv-tList .ihtv-det{padding:7px 10px}
+  #tv[data-tv-design] #ihtv-tList>.ihtv-hints{margin-top:8px;padding-top:6px}
 }
 @media(max-width:720px){
-  #tv[data-tv-design] #tList{top:max(var(--edge),36px);transform:none;max-height:calc(100% - max(var(--edge),36px) - var(--edge))}
+  #tv[data-tv-design] #ihtv-tList{top:max(var(--edge),36px);transform:none;max-height:calc(100% - max(var(--edge),36px) - var(--edge))}
+}
+@media(max-height:590px) and (orientation:landscape){
+  #tv[data-tv-design] #ihtv-tList{padding:10px 12px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-head{margin-bottom:7px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-lt{font-size:25px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-kicker{font-size:10px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-chips{margin-bottom:5px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-chip{font-size:11px;padding:.43em .64em}
+  #tv[data-tv-design] #ihtv-tList .ihtv-listmeta{margin-bottom:4px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rows{gap:2px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-r{min-height:27px;font-size:13px;padding:0 6px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rl{width:22px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rg{font-size:10px;margin-top:0}
+  #tv[data-tv-design]:not(.ed) #ihtv-tList .ihtv-det{display:none}
+  #tv[data-tv-design] #ihtv-tList .ihtv-groupkey{display:none}
+  #tv[data-tv-design] #ihtv-tList>.ihtv-hints{margin-top:5px;padding-top:5px}
+}
+@media(max-height:500px) and (orientation:landscape){
+  #tv[data-tv-design] #ihtv-tList .ihtv-head{margin-bottom:4px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-r{font-size:12px}
 }
 @media(max-width:425px){
-  #tv[data-tv-design] #tList{padding:14px;border-radius:15px}
-  #tv[data-tv-design] #tList .t-chip{padding:.48em .68em}
-  #tv[data-tv-design] #tList .t-rowstate span{font-size:9px}
-  #tv[data-tv-design] #tList .t-groupkey{display:none}
-  #tv[data-tv-design].v-hdmi.ban .t-ban{grid-template-columns:auto minmax(0,1fr)}
+  #tv[data-tv-design] #ihtv-tList{padding:14px;border-radius:15px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-clk{display:none}
+  #tv[data-tv-design] #ihtv-tList .ihtv-chip{padding:.48em .68em}
+  #tv[data-tv-design] #ihtv-tList .ihtv-rowstate span{font-size:9px}
+  #tv[data-tv-design] #ihtv-tList .ihtv-groupkey{display:none}
+  #tv[data-tv-design].v-hdmi.ban .ihtv-ban{grid-template-columns:auto minmax(0,1fr)}
 }
 `;
 const $t=id=>document.getElementById(id);
@@ -362,29 +388,30 @@ function installDesign(){
   const style=document.createElement('style');style.id='tvDesign';
   style.textContent=TV_DESIGN;document.head.appendChild(style)}
 function navBtn(action,label){
-  return '<button class="t-navbtn" type="button" onclick="TVUI.nav(\''+action+'\')">'+label+'</button>'}
+  return '<button class="ihtv-navbtn" type="button" data-action="'+action+'" onclick="TVUI.nav(\''+action+'\')">'+label+'</button>'}
 function panelHead(kicker,title,meta,actions){
-  return '<header class="t-head"><div class="t-headcopy"><div class="t-kicker">'+kicker+'</div><h2 class="t-lt">'+title+'</h2></div>'+
-    '<div class="t-headmeta">'+(meta||'')+(actions||'')+'</div></header>'}
+  return '<header class="ihtv-head"><div class="ihtv-headcopy"><div class="ihtv-kicker">'+kicker+'</div><h2 class="ihtv-lt">'+title+'</h2></div>'+
+    '<div class="ihtv-headmeta">'+(meta||'')+(actions||'')+'</div></header>'}
 function build(){
   if($t('tv'))return;
   installDesign();
   const d=document.createElement('div');d.id='tv';d.dataset.m='watch';d.dataset.tvDesign='4';
   d.innerHTML=
-  '<div class="t-ban" id="tBan"></div><div class="t-ck2" id="tClk"></div>'+
-  '<section class="t-lp" id="tList" aria-labelledby="lTitle">'+
-   panelHead('CANLI TV','<span id="lTitle">Kanallar</span>','<span class="t-clk" id="lClk"></span>',navBtn('source','Kaynaklar')+navBtn('back','Geri'))+
-   '<div class="t-chips" id="lChips"></div><div class="t-listmeta"><span class="t-listlabel" id="lMode">Kanal listesi</span><span class="t-lc" id="lCnt"></span></div>'+
-   '<div class="t-rowsw"><div class="t-rows" id="lRows"></div><div class="t-sb" aria-hidden="true"><i id="lBar"></i></div></div>'+
-   '<div class="t-det" id="lDet"></div><div class="t-hints" id="lHints"></div></section>'+
-  '<div class="t-gd" id="tGuide"></div>'+
-  '<div class="t-op" id="tOpts"></div>'+
-  '<div class="t-su" id="tSetup"></div>'+
-  '<section class="t-src" id="tSrc" aria-label="Kaynaklar"></section>'+
-  '<div class="t-ctx" id="tCtx"></div><div class="t-cnf" id="tCnf"></div>'+
-  '<div class="t-numbox" id="tNum" role="status"></div><div class="t-stat" id="tStat"></div><div class="t-tip" id="tTip" role="status"></div>';
+  '<div class="ihtv-ban" id="ihtv-tBan"></div><div class="ihtv-ck2" id="ihtv-tClk"></div>'+
+  '<section class="ihtv-lp" id="ihtv-tList" aria-labelledby="ihtv-lTitle">'+
+   panelHead('CANLI TV','<span id="ihtv-lTitle">Kanallar</span>','<span class="ihtv-clk" id="ihtv-lClk"></span>',navBtn('source','Kaynaklar')+navBtn('back','Geri'))+
+   '<div class="ihtv-chips" id="ihtv-lChips"></div><div class="ihtv-listmeta"><span class="ihtv-listlabel" id="ihtv-lMode">Kanal listesi</span><span class="ihtv-lc" id="ihtv-lCnt"></span></div>'+
+   '<div class="ihtv-rowsw"><div class="ihtv-rows" id="ihtv-lRows"></div><div class="ihtv-sb" aria-hidden="true"><i id="ihtv-lBar"></i></div></div>'+
+   '<div class="ihtv-det" id="ihtv-lDet"></div><div class="ihtv-hints" id="ihtv-lHints"></div></section>'+
+  '<div class="ihtv-gd" id="ihtv-tGuide"></div>'+
+  '<div class="ihtv-op" id="ihtv-tOpts"></div>'+
+  '<div class="ihtv-su" id="ihtv-tSetup"></div>'+
+  '<section class="ihtv-src" id="ihtv-tSrc" aria-label="Kaynaklar"></section>'+
+  '<div class="ihtv-ctx" id="ihtv-tCtx"></div><div class="ihtv-cnf" id="ihtv-tCnf"></div>'+
+  '<div class="ihtv-numbox" id="ihtv-tNum" role="status"></div><div class="ihtv-stat" id="ihtv-tStat"></div><div class="ihtv-tip" id="ihtv-tTip" role="status"></div>';
   document.body.appendChild(d)}
 function setMode(m){
+  if(m!=='source'&&TV.mode!=='source')TV.listHead=false;
   TV.mode=m;if(EDITM.indexOf(m)<0){TV.multi=false;TV.msel={}}const T=$t('tv');T.dataset.m=m;
   T.classList.toggle('v-list',inList());T.classList.toggle('ed',EDITM.indexOf(m)>=0);
   T.classList.toggle('v-guide',m==='guide');T.classList.toggle('v-opts',m==='opts');T.classList.toggle('v-setup',m==='setup');
@@ -396,53 +423,56 @@ function render(){
   if(inList())renderList();else if(TV.mode==='guide')renderGuide();else if(TV.mode==='opts')renderOpts();else if(TV.mode==='setup')renderSetup();else if(TV.mode==='source')renderSources();
   if(TV.mode==='ctx')renderCtx();if(TV.mode==='cnf')renderCnf()}
 function refresh(){if(!TV.on)return;render();if(TV.mode==='watch'&&$t('tv').classList.contains('ban'))banner()}
-function tip(t){const e=$t('tTip');e.textContent=t;e.classList.add('show');clearTimeout(TV.tpt);TV.tpt=setTimeout(()=>e.classList.remove('show'),2400)}
+function tip(t){const e=$t('ihtv-tTip');e.textContent=t;e.classList.add('show');clearTimeout(TV.tpt);TV.tpt=setTimeout(()=>e.classList.remove('show'),2400)}
 
 /* ---------- Kanal listesi ---------- */
 function rowHtml(c,i){
   const k=col(c),n=nowNext(c).now,x=X(),on=c.key===TV.curKey,mv=TV.move&&(TV.move.key===c.key||(TV.move.keys&&TV.move.keys.indexOf(c.key)>=0));
   const lg=logoHtml(c),ed=EDITM.indexOf(TV.mode)>=0;
-  return '<div class="t-r'+(i===TV.sel?' sel':'')+(on?' on':'')+(mv?' mv':'')+(TV.multi&&TV.msel[c.key]?' msel':'')+'" style="--cc:'+k.c1+';--cc2:'+k.c2+'" onclick="TVUI.row('+i+')">'+(ed?(TV.multi?'<div class="t-ck'+(TV.msel[c.key]?' on':'')+'">'+(TV.msel[c.key]?'✓':'')+'</div>':'<div class="t-grip">⠿</div>'):'')+'<div class="t-rn">'+c.n+'</div><div class="t-rl" data-lg="'+esc(c.id)+'">'+lg+'</div>'+
-   '<div class="t-rt"><div class="t-rc">'+esc(c.dn)+(isHd(c)?'<span class="t-hd">HD</span>':'')+(x.fav[c.key]?'<span class="t-fv">★</span>':'')+(ed&&x.name[c.key]?'<span class="t-tag">✎ özel ad</span>':'')+(ed&&c.radio?'<span class="t-tag">RADYO</span>':'')+'</div><div class="t-rg">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div></div>'+
-   (mv?'<div class="t-mvi" aria-label="Taşınıyor">↕</div>':(on?'<div class="t-rowstate"><div class="t-eq" aria-hidden="true"><i></i><i></i><i></i></div><span>YAYINDA</span></div>':''))+'</div>'}
-function hint(c,txt){return '<span class="t-h">'+(c?'<i class="'+c+'"></i>':'')+txt+'</span>'}
+  return '<div class="ihtv-r'+(i===TV.sel?' sel':'')+(on?' on':'')+(mv?' mv':'')+(TV.multi&&TV.msel[c.key]?' msel':'')+'" style="--cc:'+k.c1+';--cc2:'+k.c2+'" onclick="TVUI.row('+i+')">'+(ed?(TV.multi?'<div class="ihtv-ck'+(TV.msel[c.key]?' on':'')+'">'+(TV.msel[c.key]?'✓':'')+'</div>':'<div class="ihtv-grip">⠿</div>'):'')+'<div class="ihtv-rn">'+c.n+'</div><div class="ihtv-rl" data-lg="'+esc(c.id)+'">'+lg+'</div>'+
+   '<div class="ihtv-rt"><div class="ihtv-rc">'+esc(c.dn)+(isHd(c)?'<span class="ihtv-hd">HD</span>':'')+(x.fav[c.key]?'<span class="ihtv-fv">★</span>':'')+(ed&&x.name[c.key]?'<span class="ihtv-tag">✎ özel ad</span>':'')+(ed&&c.radio?'<span class="ihtv-tag">RADYO</span>':'')+'</div><div class="ihtv-rg">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div></div>'+
+   (mv?'<div class="ihtv-mvi" aria-label="Taşınıyor">↕</div>':(on?'<div class="ihtv-rowstate"><div class="ihtv-eq" aria-hidden="true"><i></i><i></i><i></i></div><span>YAYINDA</span></div>':''))+'</div>'}
+function hint(c,txt){return '<span class="ihtv-h">'+(c?'<i class="'+c+'"></i>':'')+txt+'</span>'}
 function listProgram(c,nn){
   if(!c)return '';
   const n=nn.now,x=nn.next;
-  return '<div class="t-nowgrid"><div><div class="t-kicker">ŞİMDİ</div><div class="t-dt">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div>'+
-    (n?'<div class="t-detmeta"><span>'+fmt(n.s)+' – '+fmt(n.e)+'</span><span>%'+Math.round(pct(n))+'</span></div><div class="t-detmeter" aria-hidden="true"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div>'+
-    (x?'<div class="t-detnext"><div class="t-kicker">SONRA</div><div class="t-dt">'+esc(x.t)+'</div><div class="t-detmeta">'+fmt(x.s)+'</div></div>':'')+'</div>'}
+  return '<div class="ihtv-nowgrid"><div><div class="ihtv-kicker">ŞİMDİ</div><div class="ihtv-dt">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div>'+
+    (n?'<div class="ihtv-detmeta"><span>'+fmt(n.s)+' – '+fmt(n.e)+'</span><span>%'+Math.round(pct(n))+'</span></div><div class="ihtv-detmeter" aria-hidden="true"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div>'+
+    (x?'<div class="ihtv-detnext"><div class="ihtv-kicker">SONRA</div><div class="ihtv-dt">'+esc(x.t)+'</div><div class="ihtv-detmeta">'+fmt(x.s)+'</div></div>':'')+'</div>'}
 function listQuick(c){
   const actions=[['red','r','Favori'],['green','g','Düzenle'],['yellow','y','Rehber'],['blue','b','Seçenekler']];
-  return '<div class="t-quick"><button type="button" class="t-watchkey"'+(c?'':' disabled')+' onclick="TVUI.nav(\'ok\')"><b>OK</b> İzle</button>'+
+  return '<div class="ihtv-quick"><button type="button" class="ihtv-watchkey"'+(c?'':' disabled')+' onclick="TVUI.nav(\'ok\')"><b>OK</b> İzle</button>'+
     actions.map(([key,color,label])=>'<button type="button"'+(!c&&key==='red'?' disabled':'')+' onclick="TVUI.nav(\''+key+'\')">'+hint(color,label)+'</button>').join('')+
-    '<span class="t-groupkey"><b>◀ ▶</b> Grup</span></div>'}
+    '<span class="ihtv-groupkey"><b>Menü</b> Kaynaklar</span></div>'}
 function renderList(){
   const L=TV.list;
   if(TV.sel>=L.length)TV.sel=Math.max(0,L.length-1);if(TV.sel<0)TV.sel=0;
   if(TV.sel<TV.top)TV.top=TV.sel;else if(TV.sel>=TV.top+VIS)TV.top=TV.sel-VIS+1;
   TV.top=Math.max(0,Math.min(TV.top,Math.max(0,L.length-VIS)));
   const sl=L.slice(TV.top,TV.top+VIS);
-  $t('lRows').innerHTML=L.length?sl.map((c,j)=>rowHtml(c,TV.top+j)).join(''):'<div class="t-empty">'+(TV.filter==='fav'?'Favori kanal yok. Kırmızı tuşla ekle.':'Bu grupta kanal yok')+'</div>';
+  $t('ihtv-lRows').innerHTML=L.length?sl.map((c,j)=>rowHtml(c,TV.top+j)).join(''):'<div class="ihtv-empty">'+(TV.filter==='fav'?'Favori kanal yok. Kırmızı tuşla ekle.':'Bu grupta kanal yok')+'</div>';
   const locked=TV.mode==='move'||TV.mode==='ctx'||TV.mode==='cnf';
-  $t('lChips').innerHTML=FILT.map(f=>'<button type="button" class="t-chip'+(TV.filter===f[0]?' on':'')+'" aria-pressed="'+(TV.filter===f[0])+'"'+(locked?' disabled':'')+' onclick="TVUI.chip(\''+f[0]+'\')">'+f[1]+'</button>').join('');
-  $t('lCnt').textContent=L.length?(TV.sel+1)+' / '+L.length:'0';
-  const bar=$t('lBar');bar.parentElement.hidden=L.length<=VIS;bar.style.height=Math.max(8,Math.min(100,VIS/Math.max(VIS,L.length)*100))+'%';bar.style.top=(L.length>VIS?TV.top/(L.length-VIS)*(100-parseFloat(bar.style.height)):0)+'%';
+  $t('ihtv-lChips').innerHTML=FILT.map(f=>'<button type="button" class="ihtv-chip'+(TV.filter===f[0]?' on':'')+'" aria-pressed="'+(TV.filter===f[0])+'"'+(locked?' disabled':'')+' onclick="TVUI.chip(\''+f[0]+'\')">'+f[1]+'</button>').join('');
+  $t('ihtv-lCnt').textContent=L.length?(TV.sel+1)+' / '+L.length:'0';
+  const bar=$t('ihtv-lBar');bar.parentElement.hidden=L.length<=VIS;bar.style.height=Math.max(8,Math.min(100,VIS/Math.max(VIS,L.length)*100))+'%';bar.style.top=(L.length>VIS?TV.top/(L.length-VIS)*(100-parseFloat(bar.style.height)):0)+'%';
   const c=selCh(),nn=c?nowNext(c):{now:null,next:null};
   const hidn=Object.keys(X().hide).length,edm=EDITM.indexOf(TV.mode)>=0;
-  $t('lTitle').textContent=edm?'Kanal düzenleme':'Kanallar';
-  $t('lMode').textContent=TV.mode==='move'?'Sıralama':TV.multi?'Çoklu seçim':'Kanal listesi';
+  $t('ihtv-lTitle').textContent=edm?'Kanal düzenleme':'Kanallar';
+  $t('ihtv-lMode').textContent=TV.mode==='move'?'Sıralama':TV.multi?'Çoklu seçim':'Kanal listesi';
   if(edm&&TV.multi&&TV.mode!=='move'){const n=mKeys().length;
-    $t('lDet').innerHTML='<div class="t-dt">'+n+' kanal seçili</div><div class="t-dm">Toplam '+TV.vis.length+' kanal'+(hidn?'  ·  Kaldırılan: '+hidn:'')+'</div><div class="t-dd">OK: işaretle ve ilerle  ·  Kırmızı: seçilenleri sil  ·  Yeşil: seçilenleri taşı  ·  Sarı: tümünü seç / temizle  ·  Mavi: favori  ·  Menü: daha fazla</div>'}
+    $t('ihtv-lDet').innerHTML='<div class="ihtv-dt">'+n+' kanal seçili</div><div class="ihtv-dm">Toplam '+TV.vis.length+' kanal'+(hidn?'  ·  Kaldırılan: '+hidn:'')+'</div><div class="ihtv-dd">OK: işaretle ve ilerle  ·  Kırmızı: seçilenleri sil  ·  Yeşil: seçilenleri taşı  ·  Sarı: tümünü seç / temizle  ·  Mavi: favori  ·  Menü: daha fazla</div>'}
   else if(edm&&c){const inp=((TV.st&&TV.st.inputs)||[]).find(i=>i.id===c.in);
-    $t('lDet').innerHTML='<div class="t-dt">'+(TV.move&&TV.move.keys?TV.move.keys.length+' kanal (blok)':esc(c.dn))+'</div><div class="t-dm">Kanal '+c.n+'  ·  '+(c.radio?'Radyo':'TV')+(isHd(c)?'  ·  HD':'')+(c.dn!==c.name?'  ·  özgün: '+esc(c.name):'')+'</div><div class="t-dd">Kaynak: '+esc(inp?inp.label:(c.in||'—'))+(hidn?'  ·  Kaldırılan kanal: '+hidn:'')+'</div><div class="t-dn">'+(TV.mode==='move'?'▲▼ ile yeni yerine taşı, OK ile bırak, Geri ile iptal':'OK: işlem menüsü  ·  Kırmızı: sil  ·  Yeşil: taşı  ·  Menü: çoklu seçim')+'</div>'}
-  else $t('lDet').innerHTML=listProgram(c,nn);
+    $t('ihtv-lDet').innerHTML='<div class="ihtv-dt">'+(TV.move&&TV.move.keys?TV.move.keys.length+' kanal (blok)':esc(c.dn))+'</div><div class="ihtv-dm">Kanal '+c.n+'  ·  '+(c.radio?'Radyo':'TV')+(isHd(c)?'  ·  HD':'')+(c.dn!==c.name?'  ·  özgün: '+esc(c.name):'')+'</div><div class="ihtv-dd">Kaynak: '+esc(inp?inp.label:(c.in||'—'))+(hidn?'  ·  Kaldırılan kanal: '+hidn:'')+'</div><div class="ihtv-dn">'+(TV.mode==='move'?'▲▼ ile yeni yerine taşı, OK ile bırak, Geri ile iptal':'OK: işlem menüsü  ·  Kırmızı: sil  ·  Yeşil: taşı  ·  Menü: çoklu seçim')+'</div>'}
+  else $t('ihtv-lDet').innerHTML=listProgram(c,nn);
   const m=TV.mode;
-  $t('lHints').innerHTML=m==='move'?hint('', '<b>▲▼</b> Taşı')+hint('','<b>OK</b> Bırak')+hint('','<b>Geri</b> İptal')
+  $t('ihtv-lHints').innerHTML=m==='move'?hint('', '<b>▲▼</b> Taşı')+hint('','<b>OK</b> Bırak')+hint('','<b>Geri</b> İptal')
    :(m==='list'?listQuick(c)
    :(TV.multi?hint('','<b>OK</b> İşaretle')+hint('r','Sil')+hint('g','Taşı')+hint('y','Tümü')+hint('b','Favori')+hint('','<b>Menü</b> Daha fazla')+hint('','<b>Geri</b> Çık')
     :hint('','<b>OK</b> İşlemler')+hint('r','Sil')+hint('g','Taşı')+hint('y','Adlandır')+hint('b','Favori')+hint('','<b>Menü</b> Çoklu seçim')+hint('','<b>Geri</b> Bitir')));
-  ensureVisible($t('tList'));loadProgs(sl.map(q=>q.id));loadLogos(sl);clock()}
+  const list=$t('ihtv-tList'),head=m==='list'&&!!TV.listHead;
+  list.classList.toggle('head-focus',head);
+  list.querySelector('[data-action=source]').classList.toggle('is-remote-focus',head);
+  ensureVisible($t('ihtv-lRows').parentElement);loadProgs(sl.map(q=>q.id));loadLogos(sl);clock()}
 function ensureVisible(panel){
   const el=panel.querySelector('.sel');if(!el||panel.scrollHeight<=panel.clientHeight)return;
   const a=el.getBoundingClientRect(),b=panel.getBoundingClientRect();
@@ -500,32 +530,33 @@ const CTX=()=>{if(TV.multi){const n=mKeys().length;return [[n+' seçili kanalı 
   const it=[['Taşı','↕',()=>startMove(c)],['Çoklu seçim','☑',()=>mStart(c)],['En üste al','⤒',()=>toTop(c)],['Numara ver…','#',()=>{setMode('edit');toPos(c)}],['Adını değiştir','✎',()=>{setMode('edit');rename(c)}]];
   if(rn)it.push(['Özgün ada dön','↺',()=>{setMode('edit');origName(c)}]);
   it.push([f?'Favoriden çıkar':'Favorilere ekle','★',()=>{setMode('edit');editFav(c)}],['Listeden kaldır','🗑',()=>askDelete(c)]);return it};
-function renderCtx(){const c=selCh(),it=CTX();$t('tCtx').innerHTML='<div class="t-ct">'+esc(TV.multi?'Çoklu seçim · '+mKeys().length+' kanal':(c?c.dn:''))+'</div>'+it.map((a,i)=>'<div class="t-ci'+(i===TV.csel?' sel':'')+'" onclick="TVUI.ctx('+i+')"><span>'+a[1]+'</span>'+a[0]+'</div>').join('')}
-function renderCnf(){const k=TV.cnf||{t:'',s:''};$t('tCnf').innerHTML='<div class="t-cb"><div class="t-cq">'+esc(k.t)+'</div><div class="t-cs">'+esc(k.s||'')+'</div><div class="t-cbs"><div class="t-cbn'+(TV.cbtn===0?' sel':'')+'" onclick="TVUI.cnfPick(0)">Evet, kaldır</div><div class="t-cbn'+(TV.cbtn===1?' sel':'')+'" onclick="TVUI.cnfPick(1)">Vazgeç</div></div></div>'}
+function renderCtx(){const c=selCh(),it=CTX();$t('ihtv-tCtx').innerHTML='<div class="ihtv-ct">'+esc(TV.multi?'Çoklu seçim · '+mKeys().length+' kanal':(c?c.dn:''))+'</div>'+it.map((a,i)=>'<div class="ihtv-ci'+(i===TV.csel?' sel':'')+'" onclick="TVUI.ctx('+i+')"><span>'+a[1]+'</span>'+a[0]+'</div>').join('')}
+function renderCnf(){const k=TV.cnf||{t:'',s:''};$t('ihtv-tCnf').innerHTML='<div class="ihtv-cb"><div class="ihtv-cq">'+esc(k.t)+'</div><div class="ihtv-cs">'+esc(k.s||'')+'</div><div class="ihtv-cbs"><div class="ihtv-cbn'+(TV.cbtn===0?' sel':'')+'" onclick="TVUI.cnfPick(0)">Evet, kaldır</div><div class="ihtv-cbn'+(TV.cbtn===1?' sel':'')+'" onclick="TVUI.cnfPick(1)">Vazgeç</div></div></div>'}
 
 /* ---------- Rehber (EPG) ---------- */
 function openGuide(){const i=TV.list.findIndex(c=>c.key===TV.curKey);TV.gsel=i>=0?i:0;TV.gtop=0;setMode('guide')}
 function renderGuide(){
   const L=TV.list,group=FILT.find(f=>f[0]===TV.filter)[1];
-  const header=panelHead('YAYIN AKIŞI','Program Rehberi','<span class="t-clk" id="gClk"></span>',navBtn('back','Geri'));
-  const footer='<div class="t-hints">'+hint('','<b>▲▼</b> Kanal')+hint('','<b>◀▶</b> Grup')+hint('','<b>OK</b> İzle')+hint('g','Düzenle')+hint('b','Seçenekler')+hint('','<b>Geri</b> Kapat')+'</div>';
-  if(!L.length){$t('tGuide').innerHTML=header+'<div class="t-guidegroup">'+esc(group)+'</div><div class="t-empty">Bu grupta kanal yok.</div>'+footer;clock();return}
+  const header=panelHead('YAYIN AKIŞI','Program Rehberi','<span class="ihtv-clk" id="ihtv-gClk"></span>',navBtn('back','Geri'));
+  const footer='<div class="ihtv-hints">'+hint('','<b>▲▼</b> Kanal')+hint('','<b>◀▶</b> Grup')+hint('','<b>OK</b> İzle')+hint('g','Düzenle')+hint('b','Seçenekler')+hint('','<b>Geri</b> Kapat')+'</div>';
+  if(!L.length){$t('ihtv-tGuide').innerHTML=header+'<div class="ihtv-guidegroup">'+esc(group)+'</div><div class="ihtv-empty">Bu grupta kanal yok.</div>'+footer;clock();return}
   if(TV.gsel>=L.length)TV.gsel=L.length-1;if(TV.gsel<TV.gtop)TV.gtop=TV.gsel;else if(TV.gsel>=TV.gtop+GVIS)TV.gtop=TV.gsel-GVIS+1;
   TV.gtop=Math.max(0,Math.min(TV.gtop,Math.max(0,L.length-GVIS)));
   const sl=L.slice(TV.gtop,TV.gtop+GVIS),c=L[TV.gsel],nn=nowNext(c);
   const rows=sl.map((q,j)=>{const i=TV.gtop+j,a=nowNext(q),n=a.now,x=a.next;
-    return '<div class="t-gr'+(i===TV.gsel?' sel':'')+(q.key===TV.curKey?' on':'')+'" onclick="TVUI.grow('+i+')"><div class="t-rn">'+q.n+'</div><div class="t-gc">'+esc(q.dn)+'</div><div class="t-gp"><div class="x">'+esc(n?n.t:'Program bilgisi yok')+'</div>'+(n?'<div class="y">'+fmt(n.s)+' – '+fmt(n.e)+'</div><div class="z"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div><div class="t-gp nx"><div class="x">'+esc(x?x.t:'')+'</div>'+(x?'<div class="y">'+fmt(x.s)+'</div>':'')+'</div></div>'}).join('');
-  const up=nn.all.filter(p=>p.s>Date.now()).slice(0,8).map(p=>'<div class="t-up"><b>'+fmt(p.s)+'</b><span>'+esc(p.t)+'</span></div>').join('')||'<div class="t-empty">Bu kanal için sonraki program bilgisi yok.</div>';
-  $t('tGuide').innerHTML=header+'<div class="t-guidegroup"><span>'+esc(group)+'</span><span>'+(TV.gsel+1)+' / '+L.length+'</span></div>'+
-    '<div class="t-gb"><div class="t-gl"><div class="t-gcols"><span>NO</span><span>KANAL</span><span>ŞİMDİ</span><span class="nx">SONRA</span></div>'+rows+'</div><div class="t-gdet"><div class="t-gdn">'+c.n+' · '+esc(c.dn)+'</div>'+
-    (nn.now?'<div class="t-gdt">'+esc(nn.now.t)+'</div><div class="t-gdm">'+fmt(nn.now.s)+' – '+fmt(nn.now.e)+'</div><div class="t-gdd">'+esc(nn.now.d||'')+'</div>':'<div class="t-gdt">Program bilgisi yok</div>')+'<div class="t-gul">Sıradaki programlar</div>'+up+'</div></div>'+
+    return '<div class="ihtv-gr'+(i===TV.gsel?' sel':'')+(q.key===TV.curKey?' on':'')+'" onclick="TVUI.grow('+i+')"><div class="ihtv-rn">'+q.n+'</div><div class="ihtv-gc">'+esc(q.dn)+'</div><div class="ihtv-gp"><div class="x">'+esc(n?n.t:'Program bilgisi yok')+'</div>'+(n?'<div class="y">'+fmt(n.s)+' – '+fmt(n.e)+'</div><div class="z"><i style="width:'+pct(n)+'%"></i></div>':'')+'</div><div class="ihtv-gp nx"><div class="x">'+esc(x?x.t:'')+'</div>'+(x?'<div class="y">'+fmt(x.s)+'</div>':'')+'</div></div>'}).join('');
+  const up=nn.all.filter(p=>p.s>Date.now()).slice(0,8).map(p=>'<div class="ihtv-up"><b>'+fmt(p.s)+'</b><span>'+esc(p.t)+'</span></div>').join('')||'<div class="ihtv-empty">Bu kanal için sonraki program bilgisi yok.</div>';
+  $t('ihtv-tGuide').innerHTML=header+'<div class="ihtv-guidegroup"><span>'+esc(group)+'</span><span>'+(TV.gsel+1)+' / '+L.length+'</span></div>'+
+    '<div class="ihtv-gb"><div class="ihtv-gl"><div class="ihtv-gcols"><span>NO</span><span>KANAL</span><span>ŞİMDİ</span><span class="nx">SONRA</span></div>'+rows+'</div><div class="ihtv-gdet"><div class="ihtv-gdn">'+c.n+' · '+esc(c.dn)+'</div>'+
+    (nn.now?'<div class="ihtv-gdt">'+esc(nn.now.t)+'</div><div class="ihtv-gdm">'+fmt(nn.now.s)+' – '+fmt(nn.now.e)+'</div><div class="ihtv-gdd">'+esc(nn.now.d||'')+'</div>':'<div class="ihtv-gdt">Program bilgisi yok</div>')+'<div class="ihtv-gul">Sıradaki programlar</div>'+up+'</div></div>'+
     footer;
-  ensureVisible($t('tGuide'));loadProgs(sl.map(q=>q.id).concat([c.id]));clock()}
+  ensureVisible($t('ihtv-tGuide'));loadProgs(sl.map(q=>q.id).concat([c.id]));clock()}
 
 /* ---------- Seçenekler ---------- */
 function optItems(){
   const hid=Object.keys(X().hide).length;
   return[
+   {t:'Kaynaklar',s:'Canlı TV ve HDMI girişleri',fn:openSources},
    {t:TV.muted?'Sesi aç':'Sessiz',s:'Yayın sesini kapat / aç',fn:muteT},
    {t:'Kanal listesi',s:'Kanalları gez ve seç',fn:()=>setMode('list')},
    {t:'Program rehberi',s:'Şimdi / sonraki programlar',fn:openGuide},
@@ -540,14 +571,13 @@ function optItems(){
    {t:'Sırayı ve adları sıfırla',s:'Sistem sırasına dön',fn:resetOrder},
    {t:'Sistem TV uygulamasında aç',s:'Bu kanalı cihazın kendi TV ekranında göster',fn:()=>{const c=curCh();if(c)N('tvExternal',{id:c.id})}},
    {t:'Tanı',s:'İzin, giriş ve sinyal bilgisi',fn:diag},
-   {t:'Kaynaklar',s:'Canlı TV ve HDMI girişleri',fn:openSources},
    {t:'Canlı TV’den çık',s:'Ana ekrana dön',fn:close}]}
 function renderOpts(){
   const it=optItems(),OV=8;if(TV.osel>=it.length)TV.osel=it.length-1;
   let top=TV.otop||0;if(TV.osel<top)top=TV.osel;else if(TV.osel>=top+OV)top=TV.osel-OV+1;top=Math.max(0,Math.min(top,Math.max(0,it.length-OV)));TV.otop=top;
   const sl=it.slice(top,top+OV);
-  $t('tOpts').innerHTML=panelHead('CANLI TV','Seçenekler','<span class="t-lc">'+(TV.osel+1)+' / '+it.length+'</span>',navBtn('back','Geri'))+(top>0?'<div class="t-more">▲</div>':'<div class="t-more"></div>')+sl.map((o,j)=>{const i=top+j;return '<div class="t-oi'+(i===TV.osel?' sel':'')+'" onclick="TVUI.opt('+i+')"><div class="a">'+esc(o.t)+'</div><div class="b">'+esc(o.s)+'</div></div>'}).join('')+(top+OV<it.length?'<div class="t-more">▼</div>':'<div class="t-more"></div>')+'<div class="t-hints">'+hint('','<b>▲▼</b> Seç')+hint('','<b>OK</b> Uygula')+hint('','<b>Geri</b> Kapat')+'</div>';
-  ensureVisible($t('tOpts'))}
+  $t('ihtv-tOpts').innerHTML=panelHead('CANLI TV','Seçenekler','<span class="ihtv-lc">'+(TV.osel+1)+' / '+it.length+'</span>',navBtn('back','Geri'))+(top>0?'<div class="ihtv-more">▲</div>':'<div class="ihtv-more"></div>')+sl.map((o,j)=>{const i=top+j;return '<div class="ihtv-oi'+(i===TV.osel?' sel':'')+'" onclick="TVUI.opt('+i+')"><div class="a">'+esc(o.t)+'</div><div class="b">'+esc(o.s)+'</div></div>'}).join('')+(top+OV<it.length?'<div class="ihtv-more">▼</div>':'<div class="ihtv-more"></div>')+'<div class="ihtv-hints">'+hint('','<b>▲▼</b> Seç')+hint('','<b>OK</b> Uygula')+hint('','<b>Geri</b> Kapat')+'</div>';
+  ensureVisible($t('ihtv-tOpts'))}
 function muteT(){TV.muted=!TV.muted;N('tvMute',{m:TV.muted});tip(TV.muted?'🔇 Ses kapalı':'🔊 Ses açık');if(TV.mode==='opts')render()}
 function scan(){
   const tu=((TV.st&&TV.st.inputs)||[]).filter(i=>i.tuner&&i.setup);
@@ -577,7 +607,7 @@ function openSources(){
   if(!TV.on){open(true);return}
   if(TV.mode==='move'||TV.mode==='ctx'||TV.mode==='cnf')return;
   if(TV.mode==='source'){leaveSources();return}
-  clearTimeout(TV.nt);TV.num='';$t('tNum').classList.remove('show');
+  clearTimeout(TV.nt);TV.num='';$t('ihtv-tNum').classList.remove('show');
   TV.srcBack=TV.mode;TV.srcMsg='';TV.srcHasError=false;TV.srcLoading=true;
   TV.srcSel=Math.max(0,srcItems().findIndex(i=>TV.hdmi?(i.hdmi&&i.key===TV.hdmi.key):i.key==='live'));
   setMode('source');readSources()}
@@ -595,17 +625,18 @@ async function readSources(){
   }catch(e){if(req===TV.srcReq&&TV.on&&TV.mode==='source')TV.srcHasError=true}
   if(req===TV.srcReq&&TV.on&&TV.mode==='source'){TV.srcLoading=false;renderSources()}}
 function renderSources(){
-  const items=srcItems(), panel=$t('tSrc'), ports=items.length-2;
+  const items=srcItems(), panel=$t('ihtv-tSrc'), ports=items.length-2;
   TV.srcSel=Math.max(0,Math.min(TV.srcSel,items.length-1));
   const intro=TV.srcLoading?'HDMI girişleri aranıyor…':TV.srcHasError?'Cihazdan kaynak bilgisi alınamadı.':ports?ports+' HDMI girişi':'Cihaz uygulamaya bir HDMI girişi bildirmedi.';
-  panel.innerHTML=panelHead('CANLI TV','Kaynaklar','',navBtn('back','Geri'))+'<p class="t-srcintro">'+intro+'</p>'+
+  panel.innerHTML=panelHead('CANLI TV','Kaynaklar','',navBtn('back','Geri'))+'<p class="ihtv-srcintro">'+intro+'</p>'+
     items.map((i,j)=>{
       const live=i.hdmi?TV.hdmi&&TV.hdmi.key===i.key:(!TV.hdmi&&TV.tuned&&i.key==='live');
-      return '<button type="button" class="t-oi'+(j===TV.srcSel?' sel':'')+'" onclick="TVUI.sourcePick('+j+')">'+
-        '<span class="t-srcicon">'+i.icon+'</span><span class="t-srccopy"><span class="a">'+esc(i.label)+'</span><br><span class="b">'+esc(i.sub)+'</span></span>'+
-        (live?'<span class="t-srcactive">AÇIK</span>':'')+'</button>'
-    }).join('')+(TV.srcMsg?'<p class="t-srcmsg" role="status">'+esc(TV.srcMsg)+'</p>':'')+
-    '<div class="t-hints">'+hint('','<b>▲▼</b> Seç')+hint('','<b>OK</b> Aç')+hint('','<b>Geri</b> Kapat')+'</div>';
+      return '<button type="button" class="ihtv-oi'+(j===TV.srcSel?' sel':'')+'" tabindex="'+(j===TV.srcSel?'0':'-1')+'" onclick="TVUI.sourcePick('+j+')">'+
+        '<span class="ihtv-srcicon">'+i.icon+'</span><span class="ihtv-srccopy"><span class="a">'+esc(i.label)+'</span><br><span class="b">'+esc(i.sub)+'</span></span>'+
+        (live?'<span class="ihtv-srcactive">AÇIK</span>':'')+'</button>'
+    }).join('')+(TV.srcMsg?'<p class="ihtv-srcmsg" role="status">'+esc(TV.srcMsg)+'</p>':'')+
+    '<div class="ihtv-hints">'+hint('','<b>▲▼</b> Seç')+hint('','<b>OK</b> Aç')+hint('','<b>Geri</b> Kapat')+'</div>';
+  const sel=panel.querySelector('.sel');if(sel)try{sel.focus({preventScroll:true})}catch(e){}
   ensureVisible(panel)}
 function leaveSources(){
   if(TV.hdmi){setMode('hdmi');hdmiBanner();return}
@@ -645,9 +676,9 @@ async function playHdmi(item){
   if(!TV.vid&&!TV.fail)TV.tt=setTimeout(()=>{if(seq===TV.hdmiSeq&&TV.on&&!TV.vid){TV.fail='timeout';sig()}},8000)}
 function hdmiBanner(){
   const item=TV.hdmi,T=$t('tv');if(!item||!T||TV.mode!=='hdmi')return;
-  $t('tBan').innerHTML='<div class="t-channel"><span class="t-kicker">KAYNAK</span><div>HDMI</div></div>'+
-    '<div class="t-bi"><div class="t-bt">'+esc(item.label)+'</div></div>'+
-    '<div class="t-bside"><div class="t-bk">'+navBtn('source','Kaynaklar')+navBtn('live','Canlı TV')+'</div></div>';
+  $t('ihtv-tBan').innerHTML='<div class="ihtv-channel"><span class="ihtv-kicker">KAYNAK</span><div>HDMI</div></div>'+
+    '<div class="ihtv-bi"><div class="ihtv-bt">'+esc(item.label)+'</div></div>'+
+    '<div class="ihtv-bside"><div class="ihtv-bk">'+navBtn('source','Kaynaklar')+navBtn('live','Canlı TV')+'</div></div>';
   T.classList.add('ban');clearTimeout(TV.bt);TV.bt=setTimeout(()=>{T.classList.remove('ban')},5000)}
 
 /* ---------- Kurulum / hata ekranı ---------- */
@@ -660,8 +691,8 @@ function showSetup(kind){
   it.splice(Math.max(0,it.length-1),0,['Kaynaklar (HDMI)',openSources]);
   TV.sitems=it;TV.ssel=0;TV.stitle=t;TV.stext=p;setMode('setup')}
 function renderSetup(){
-  $t('tSetup').innerHTML='<div class="t-sbx">'+panelHead('TV KURULUMU',esc(TV.stitle),'',navBtn('back','Geri'))+'<p>'+esc(TV.stext).replace(/\n/g,'<br>')+'</p>'+TV.sitems.map((a,i)=>'<div class="t-sbn'+(i===TV.ssel?' sel':'')+'" onclick="TVUI.setup('+i+')">'+esc(a[0])+'</div>').join('')+'</div>';
-  ensureVisible($t('tSetup'))}
+  $t('ihtv-tSetup').innerHTML='<div class="ihtv-sbx">'+panelHead('TV KURULUMU',esc(TV.stitle),'',navBtn('back','Geri'))+'<p>'+esc(TV.stext).replace(/\n/g,'<br>')+'</p>'+TV.sitems.map((a,i)=>'<div class="ihtv-sbn'+(i===TV.ssel?' sel':'')+'" onclick="TVUI.setup('+i+')">'+esc(a[0])+'</div>').join('')+'</div>';
+  ensureVisible($t('ihtv-tSetup'))}
 async function grant(){
   let ok=false;try{if(await adbReady()){await N('adb',{c:'pm grant com.ihlauncher.tv android.permission.READ_TV_LISTINGS'});ok=true}}catch(e){}
   if(ok){load();return}N('tvPerm');tip('İzin penceresi açılıyor…')}
@@ -720,37 +751,37 @@ function tune(c){
 function step(d){const L=TV.list.some(c=>c.key===TV.curKey)?TV.list:TV.vis;if(!L.length)return;let i=L.findIndex(c=>c.key===TV.curKey);i=i<0?0:(i+d+L.length)%L.length;tune(L[i])}
 function recall(){const c=TV.all.find(q=>q.key===TV.prevKey&&!X().hide[q.key]);if(c)tune(c)}
 function showClock(){
-  const e=$t('tClk'),T=$t('tv');if(!e||!T)return;
+  const e=$t('ihtv-tClk'),T=$t('tv');if(!e||!T)return;
   const d=new Date();
-  e.innerHTML='<div class="t-ckt">'+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+'</div><div class="t-ckd">'+d.toLocaleDateString('tr-TR',{weekday:'long'})+'</div><div class="t-ckm">'+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</div>';
+  e.innerHTML='<div class="ihtv-ckt">'+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+'</div><div class="ihtv-ckd">'+d.toLocaleDateString('tr-TR',{weekday:'long'})+'</div><div class="ihtv-ckm">'+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</div>';
   T.classList.add('clk');clearTimeout(TV.ct);TV.ct=setTimeout(()=>T.classList.remove('clk'),3000)}
 function banner(){
   const c=curCh(),T=$t('tv');if(!c||!T)return;const nn=nowNext(c),n=nn.now,x=nn.next,k=col(c),fv=X().fav[c.key];
   T.style.setProperty('--c1',k.c1);T.style.setProperty('--c2',k.c2);
-  $t('tBan').innerHTML='<div class="t-channel"><span class="t-kicker">KANAL</span><div class="t-bn">'+(c.n||'')+'</div></div><div class="t-bi"><div class="t-bc"><span class="t-live">'+(c.radio?'RADYO':'CANLI')+'</span><span class="t-bname">'+esc(c.dn)+'</span>'+(isHd(c)?'<span class="t-hd">HD</span>':'')+(fv?'<span class="t-fv">★</span>':'')+(TV.muted?'<span class="t-mu">Sessiz</span>':'')+'</div>'+
-   '<div class="t-bt">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div>'+
-   (n?'<div class="t-bp"><i style="width:'+pct(n)+'%"></i></div><div class="t-bm"><span>'+fmt(n.s)+'</span><span>'+fmt(n.e)+'</span></div>':'')+
-   '</div><div class="t-bside">'+(x?'<div class="t-bx"><span class="t-kicker">SIRADA · '+fmt(x.s)+'</span><div>'+esc(x.t)+'</div></div>':'')+
-   '<div class="t-bk">'+navBtn('ok','Kanallar')+navBtn('guide','Rehber')+navBtn('source','Kaynaklar')+navBtn('blue','Seçenekler')+'</div></div>';
+  $t('ihtv-tBan').innerHTML='<div class="ihtv-channel"><span class="ihtv-kicker">KANAL</span><div class="ihtv-bn">'+(c.n||'')+'</div></div><div class="ihtv-bi"><div class="ihtv-bc"><span class="ihtv-live">'+(c.radio?'RADYO':'CANLI')+'</span><span class="ihtv-bname">'+esc(c.dn)+'</span>'+(isHd(c)?'<span class="ihtv-hd">HD</span>':'')+(fv?'<span class="ihtv-fv">★</span>':'')+(TV.muted?'<span class="ihtv-mu">Sessiz</span>':'')+'</div>'+
+   '<div class="ihtv-bt">'+esc(n?n.t:(c.radio?'Radyo yayını':'Program bilgisi yok'))+'</div>'+
+   (n?'<div class="ihtv-bp"><i style="width:'+pct(n)+'%"></i></div><div class="ihtv-bm"><span>'+fmt(n.s)+'</span><span>'+fmt(n.e)+'</span></div>':'')+
+   '</div><div class="ihtv-bside">'+(x?'<div class="ihtv-bx"><span class="ihtv-kicker">SIRADA · '+fmt(x.s)+'</span><div>'+esc(x.t)+'</div></div>':'')+
+   '<div class="ihtv-bk">'+navBtn('ok','Kanallar')+navBtn('guide','Rehber')+navBtn('source','Kaynaklar ▶')+navBtn('blue','Seçenekler')+'</div></div>';
   T.classList.add('ban');clearTimeout(TV.bt);TV.bt=setTimeout(()=>T.classList.remove('ban'),5500)}
 function sig(){
   const T=$t('tv');if(!T)return;T.classList.toggle('vid',TV.vid);
-  const e=$t('tStat');if(!e)return;
+  const e=$t('ihtv-tStat');if(!e)return;
   const hd=TV.mode==='hdmi',show=!TV.vid&&((TV.mode==='watch'&&TV.tuned)||hd);
   let h='';
-  if(TV.fail){h='<div class="t-sx">Görüntü gelmedi</div><div class="t-ss">'+(hd?'HDMI cihazını ve kabloyu kontrol et. Başka bir giriş seçmek için Kaynak tuşuna bas.':'Sinyal yok olabilir ya da cihaz uygulama içi oynatmaya izin vermiyor.<br>Mavi tuş › Seçenekler › “Sistem TV uygulamasında aç” / “Tanı”')+'</div>'}
-  else h=(TV.reason===1||TV.reason===3?'<div class="t-sp"></div>':'')+'<div class="t-sx">'+esc(hd?(TV.reason===1?'HDMI açılıyor…':'HDMI sinyali bekleniyor…'):(REASON[TV.reason]||'Kanal ayarlanıyor…'))+'</div>';
+  if(TV.fail){h='<div class="ihtv-sx">Görüntü gelmedi</div><div class="ihtv-ss">'+(hd?'HDMI cihazını ve kabloyu kontrol et. Başka bir giriş seçmek için Kaynak tuşuna bas.':'Sinyal yok olabilir ya da cihaz uygulama içi oynatmaya izin vermiyor.<br>Mavi tuş › Seçenekler › “Sistem TV uygulamasında aç” / “Tanı”')+'</div>'}
+  else h=(TV.reason===1||TV.reason===3?'<div class="ihtv-sp"></div>':'')+'<div class="ihtv-sx">'+esc(hd?(TV.reason===1?'HDMI açılıyor…':'HDMI sinyali bekleniyor…'):(REASON[TV.reason]||'Kanal ayarlanıyor…'))+'</div>';
   e.innerHTML=h;e.classList.toggle('show',show)}
 function commitNum(){
   clearTimeout(TV.nt);if(!TV.num)return;
-  const v=parseInt(TV.num,10),b=$t('tNum');TV.num='';b.classList.remove('show');
+  const v=parseInt(TV.num,10),b=$t('ihtv-tNum');TV.num='';b.classList.remove('show');
   const c=TV.vis.find(x=>x.n===v);
   if(c){tune(c);const m=TV.mode;
     if(m==='list'||m==='guide'||m==='opts'){setMode('watch');banner()}
     else if(m!=='watch'){TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===c.key));render()}}
   else tip('Kanal bulunamadı: '+v)}
 function digit(n){
-  TV.num=(TV.num+n).slice(-4);const b=$t('tNum');b.textContent=TV.num;b.classList.add('show');clearTimeout(TV.nt);
+  TV.num=(TV.num+n).slice(-4);const b=$t('ihtv-tNum');b.textContent=TV.num;b.classList.add('show');clearTimeout(TV.nt);
   /* yazılan sayıyla başlayan daha uzun numaralı kanal yoksa beklemeden geç */
   const more=TV.vis.some(x=>{const s=String(x.n);return s.length>TV.num.length&&s.indexOf(TV.num)===0});
   TV.nt=setTimeout(commitNum,more?1500:350)}
@@ -804,10 +835,10 @@ function open(sourcesOnly){
   TV.on=true;document.body.classList.add('tvon');$t('tv').className='';N('tvMode',{on:true});N('tvRect',{x:0,y:0,w:0,h:0});
   setMode('watch');clock();if(sourcesOnly===true){openSources();TV.srcBack='cold'}else load()}
 function close(){
-  if(!TV.on)return;if(TV.move)endMove(false);TV.on=false;TV.hdmi=null;++TV.hdmiSeq;++TV.srcReq;TV.tuned=false;TV.vid=false;TV.num='';TV.fail='';clearTimeout(TV.tt);clearTimeout(TV.bt);clearTimeout(TV.ct);clearTimeout(TV.nt);clearTimeout(TV.tpt);{const T0=$t('tv');if(T0)T0.classList.remove('clk','ban');$t('tNum').classList.remove('show');$t('tTip').classList.remove('show')}
+  if(!TV.on)return;if(TV.move)endMove(false);TV.on=false;TV.hdmi=null;++TV.hdmiSeq;++TV.srcReq;TV.tuned=false;TV.vid=false;TV.num='';TV.fail='';clearTimeout(TV.tt);clearTimeout(TV.bt);clearTimeout(TV.ct);clearTimeout(TV.nt);clearTimeout(TV.tpt);{const T0=$t('tv');if(T0)T0.classList.remove('clk','ban');$t('ihtv-tNum').classList.remove('show');$t('ihtv-tTip').classList.remove('show')}
   document.body.classList.remove('tvon');stopTv();N('tvMode',{on:false});stripRender();
   setTimeout(()=>{if(TV.on||layer())return;const b=document.querySelector('body[data-theme=studio] #studio-tv')||document.querySelector('.topbar [data-tvbtn]');if(b)focusEl(b)},60)}
-function clock(){const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});['lClk','gClk'].forEach(i=>{const e=$t(i);if(e)e.textContent=t})}
+function clock(){const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});['ihtv-lClk','ihtv-gClk'].forEach(i=>{const e=$t(i);if(e)e.textContent=t})}
 setInterval(()=>{if(!TV.on)return;clock();if(TV.mode!=='setup')refresh()},20000);
 
 /* ---------- Tuşlar ---------- */
@@ -836,7 +867,7 @@ function onKey(e){
   try{act(n,e.repeat)}catch(err){console.error(err)}}
 function act(n,rep){
   const m=TV.mode,dg=/^[0-9]$/.test(n);
-  if(n==='source'){if(!rep)openSources();return}
+  if(n==='source'){if(!rep&&m!=='source')openSources();return}
   if(n==='live'){returnToTv();return}
   if(m==='hdmi'){if(n==='ok'||n==='menu'||n==='blue')openSources();else if(n==='info'||n==='right')hdmiBanner();return}
   if(m==='source'){
@@ -850,15 +881,22 @@ function act(n,rep){
   if(n==='ok'&&TV.num&&NUMM.indexOf(m)>=0){commitNum();return}
   if(m==='watch'){
     if(n==='up'||n==='chup')step(1);else if(n==='down'||n==='chdn')step(-1);
-    else if(n==='left')recall();else if(n==='right'||n==='info'||n==='play')banner();
+    else if(n==='left')recall();else if(n==='info'||n==='play')banner();
+    else if(n==='right'||n==='menu'){if(!rep)openSources()}
     else if(n==='ok'){TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===TV.curKey));setMode('list')}
     else if(n==='red'){const c=curCh();if(c){editFav(c);banner()}}
     else if(n==='green'){TV.sel=Math.max(0,TV.list.findIndex(q=>q.key===TV.curKey));setMode('edit')}
     else if(n==='yellow'||n==='guide')openGuide();
-    else if(n==='blue'||n==='menu'){TV.osel=0;TV.otop=0;setMode('opts')}
+    else if(n==='blue'){TV.osel=0;TV.otop=0;setMode('opts')}
     return}
   if(m==='list'||m==='edit'){
     const ed=m==='edit';
+    if(!ed&&n==='menu'){if(!rep)openSources();return}
+    if(!ed&&TV.listHead){
+      if(n==='ok'){if(!rep)openSources();return}
+      if(n==='down'||n==='chdn'||n==='up'||n==='chup'){TV.listHead=false;render();return}
+    }
+    if(!ed&&n==='up'&&TV.sel===0){TV.listHead=true;render();return}
     if(ed&&TV.multi){const c=selCh();
       if(n==='up')moveSel(-1);else if(n==='down')moveSel(1);else if(n==='chup')moveSel(-VIS);else if(n==='chdn')moveSel(VIS);
       else if(n==='ok'){if(c){mSel(c);moveSel(1)}}
@@ -908,13 +946,14 @@ window.TVUI={open,close,strip:stripToggle,play:playKey,sources:openSources,sourc
 window.__tvPerm=()=>{if(TV.on)load()};
 /* Kumanda donanım tuşları (Kotlin dispatchKeyEvent'ten): CH+/CH-, TV, Kaynak (kare içinde ok), Rehber, Bilgi */
 window.__hwkey=function(code){
+  code=Number(code);
   if(window.__hdmiOn&&window.__hdmiOn()){if(code===178||code===170)window.__hdmiExit();else return}
   if($('#dlg').classList.contains('show')||$('#modal').classList.contains('show'))return;
-  if(code===178){openSources();return}
+  if(code===178){if(TV.mode!=='source'||!TV.on)openSources();return}
   if(code===170){if(!TV.on)open();else if(TV.hdmi||TV.mode==='source')returnToTv();else if(TV.mode==='watch')banner();return}
-  const n={166:'chup',167:'chdn',172:'guide',165:'info'}[code];if(!n)return;
+  const n={19:'up',20:'down',21:'left',22:'right',23:'ok',66:'ok',82:'menu',166:'chup',167:'chdn',172:'guide',165:'info'}[code];if(!n)return;
   if(!TV.on){
-    if(n==='info')return;
+    if(n!=='chup'&&n!=='chdn'&&n!=='guide')return;
     open();if(n==='guide')setTimeout(()=>{if(TV.on&&TV.mode==='watch')act('guide')},1200);return}
   try{act(n,false)}catch(e){console.error(e)}};
 window.__tvEv=(t,d)=>{if(!TV.on){if(window.__hdmiEv)window.__hdmiEv(t,d);return}TV.last=t+':'+d;if(t==='video'){TV.vid=true;TV.fail='';clearTimeout(TV.tt)}else if(t==='novideo'){TV.vid=false;TV.reason=+d}else{TV.vid=false;TV.fail=t;clearTimeout(TV.tt)}sig()};
