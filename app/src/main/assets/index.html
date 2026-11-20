@@ -12,10 +12,6 @@ body.hdmion .bg,body.hdmion .topbar,body.hdmion #content,body.hdmion #dock{visib
 html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--t1);overflow:hidden;user-select:none;-webkit-font-smoothing:antialiased}
 [data-theme]{--t1:#F6F4FA;--t2:#BDB9C8;--t3:#7E7A8E;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.13);--stroke:rgba(255,255,255,.10);--sep:rgba(255,255,255,.09);--shadow:rgba(0,0,0,.55)}
-[data-theme=cosmic]{--bg:#030814;--panel:#0A1422;--panel-a:rgba(10,20,34,.84)}
-[data-theme=oneui]{--bg:#0D1117;--panel:#191E2A;--panel-a:rgba(25,30,42,.75)}
-[data-theme=ocean]{--bg:#051318;--panel:#0E2128;--panel-a:rgba(14,33,40,.80)}
-[data-theme=wine]{--bg:#12080F;--panel:#22111B;--panel-a:rgba(34,17,27,.80)}
 .bg{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1;background-size:cover;background-position:center}
 .bg.def{background:var(--bg)}
 .bg.wp:after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(rgba(0,0,0,.16),rgba(0,0,0,.4))}
@@ -133,7 +129,7 @@ body[data-lb=focus] .tl2{visibility:hidden}body[data-lb=focus] .tile:focus .tl2{
 .toast.show{transform:translateX(-50%) translateY(0)}
 #ti{font-weight:700}#ti.ok{color:var(--ok)}#ti.bad{color:var(--bad)}#ti.warn{color:var(--warn)}
 .ts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.to{padding:12px;border-radius:20px;background:var(--glass);text-align:center;font-size:15px}.to.on{box-shadow:inset 0 0 0 2px var(--accent)}.to:focus{box-shadow:var(--fr)}
-.pv{display:block;height:64px;border-radius:12px;margin:0 0 10px;box-shadow:inset 0 0 0 1px var(--stroke)}.pv.oneui{background:#0D1117}.pv.ocean{background:#051318}.pv.wine{background:#12080F}
+.pv{display:block;height:64px;border-radius:12px;margin:0 0 10px;box-shadow:inset 0 0 0 1px var(--stroke)}.pv.safir{background:linear-gradient(125deg,#06142a 22%,#0d5d6e 62%,#3fe0d0)}
 .acs{display:flex;gap:10px;flex-wrap:wrap}.ac{width:88px;height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}.ac.on{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--t1)}.ac:focus{box-shadow:0 0 0 3px var(--panel),0 0 0 6px var(--focus)}
 .wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.wi{background-size:cover;background-position:center}.wi{aspect-ratio:16/9;border-radius:18px;position:relative;overflow:hidden}.wi.on{box-shadow:0 0 0 3px var(--accent)}.wi:focus{box-shadow:var(--fr)}
 .wi b{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;padding:5px;border-radius:10px;font-size:12px;text-align:center;font-weight:500}
@@ -319,31 +315,6 @@ body.lite .tile:focus .iw{filter:none}
 body.lite .tile,body.lite .card,body.lite .ditem,body.lite .btn,body.lite .chip{transition:none!important}
 body.lite .dki,body.lite .gm-i{transition:none!important}
 
-/* ===== Kozmik Cam teması: buzlu cam paneller, buz mavisi neon, yıldızlı gece ===== */
-body[data-theme=cosmic]{--focus:#7FE9FF;--fr:0 0 0 3px #7FE9FF,0 0 34px 8px rgba(92,230,255,.45);--fs:1.04;--gl:linear-gradient(160deg,rgba(235,245,255,.27),rgba(190,215,235,.10) 55%,rgba(205,228,245,.19))}
-body[data-theme=cosmic] #clock{font-family:"Courier New",monospace;font-weight:700;letter-spacing:.06em;color:#6FE8FF;text-shadow:0 0 6px rgba(92,230,255,.9),0 0 18px rgba(92,230,255,.55)}
-body[data-theme=cosmic] #date{color:#C9D9E6}
-body[data-theme=cosmic][data-top=pill] .topbar,body[data-theme=cosmic][data-top=wide] .tr{background:var(--gl);border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34),inset 0 1px 0 rgba(255,255,255,.5),0 10px 28px rgba(0,0,0,.35)}
-body[data-theme=cosmic] .tr .ib,body[data-theme=cosmic] .tr .wifi,body[data-theme=cosmic] .tr .search{background:transparent;color:#DCEAF4;border-radius:14px}
-body[data-theme=cosmic] .tr .wifi{color:#6FE8FF}
-body[data-theme=cosmic] .tr .ib:focus,body[data-theme=cosmic] .tr .wifi:focus,body[data-theme=cosmic] .tr .search:focus{background:rgba(92,230,255,.18);box-shadow:0 0 0 2px #7FE9FF,0 0 18px rgba(92,230,255,.55);filter:none}
-body[data-theme=cosmic] .rt,body[data-theme=cosmic] .sec{color:#DCEAF4;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-body[data-theme=cosmic] .card,body[data-theme=cosmic][data-dock=on] #grid{border-radius:20px;background:var(--gl);box-shadow:inset 0 0 0 1px rgba(255,255,255,.34),inset 0 1px 0 rgba(255,255,255,.5),0 14px 34px rgba(0,0,0,.35)}
-body:not(.lite)[data-theme=cosmic] .card,body:not(.lite)[data-theme=cosmic][data-dock=on] #grid{backdrop-filter:blur(var(--bl)) saturate(1.2);-webkit-backdrop-filter:blur(var(--bl)) saturate(1.2)}
-body[data-theme=cosmic] .card:focus{transform:scale(calc(var(--fs) - .02));box-shadow:var(--fr),inset 0 1px 0 rgba(255,255,255,.5)}
-body[data-theme=cosmic] .tile{border-radius:18px}
-body[data-theme=cosmic] .tile:focus{background:rgba(255,255,255,.14);box-shadow:var(--fr)}
-body[data-theme=cosmic] .tile .ico,body[data-theme=cosmic] .tile .fi{background:linear-gradient(160deg,rgba(255,255,255,.30),rgba(255,255,255,.10));box-shadow:inset 0 0 0 1px rgba(255,255,255,.3),0 6px 14px rgba(0,0,0,.3)}
-body[data-theme=cosmic] .bar i{background:linear-gradient(90deg,#38C6EE,#8FEBFF)}
-body[data-theme=cosmic] .side,body[data-theme=cosmic] #modal .modal{background:linear-gradient(180deg,rgba(225,238,250,.20),rgba(190,212,235,.09));border-left:1px solid rgba(255,255,255,.38);border-radius:26px 0 0 26px;box-shadow:-18px 0 50px rgba(0,0,0,.4),inset 1px 0 0 rgba(255,255,255,.22)}
-body:not(.lite)[data-theme=cosmic] .side,body:not(.lite)[data-theme=cosmic] #modal .modal{backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2)}
-body.lite[data-theme=cosmic] .side,body.lite[data-theme=cosmic] #modal .modal{background:#1B2938}
-body[data-theme=cosmic] .pt{color:#9AEBFF;text-shadow:0 0 16px rgba(92,230,255,.5)}
-body[data-theme=cosmic] .pi{border-radius:14px;background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.30)}
-body[data-theme=cosmic] .pi:focus{box-shadow:var(--fr);background:rgba(255,255,255,.18)}
-body[data-theme=cosmic] .btn.b,body[data-theme=cosmic] .chip.on{background:linear-gradient(180deg,#43D9F8,#1597C4);color:#021018;box-shadow:0 0 14px rgba(92,230,255,.35)}
-body[data-theme=cosmic] .tog.on{background:#1FB6E6}
-body[data-theme=cosmic] .toast,body[data-theme=cosmic] .dlgbox,body[data-theme=cosmic] #hdBar{border:1px solid rgba(255,255,255,.3);box-shadow:0 0 22px rgba(92,230,255,.22)}
 </style>
 <link rel="stylesheet" href="tv.css">
 <style id="studio-style">
@@ -439,8 +410,72 @@ body.tvon :is(.topbar,#content,#dock){pointer-events:none}
 @media(prefers-reduced-motion:reduce){
  body[data-theme=studio] :is(.card,.tile,.side,.modal,.st-btn){transition:none;animation:none}
 }
+
+/* ===== Safir teması: Stüdyo yapısı + mavi/su yeşili kaplama ===== */
+body[data-theme=studio][data-skin=safir]{--bg:#0d1819;--panel:#18282c;--panel-a:#18282cf2;--t1:#f4fbff;--t2:#bcced8;--t3:#9ab0be;--glass:#ffffff0d;--glass2:#ffffff18;--stroke:#c7eaff26}
+body[data-skin=safir] .pv.studio{background:linear-gradient(125deg,#192e39 24%,#47798e 64%,#9299ce)}
+body[data-theme=studio][data-skin=safir] .bg.def{background:radial-gradient(ellipse at 80% 0%,#182a35 0%,transparent 53%),var(--bg)}
+body[data-theme=studio][data-skin=safir] .bg.wp:after{background:linear-gradient(#0d181960,#0d1819dc 65%,#0d1819)}
+body[data-theme=studio][data-skin=safir][data-top=wide] .topbar{background:linear-gradient(#0f1b1ffc 63%,#0f1b1f00)}
+body[data-theme=studio][data-skin=safir][data-top=pill] .topbar{background:#1d3138f5}
+body[data-theme=studio][data-skin=safir][data-top=wide] .tr{background:#1d2d33;border:1px solid #c9e8ff25}
+body[data-theme=studio][data-skin=safir] .tr :is(.ib,.wifi){background:#283c45;color:#e7f3ff}
+body[data-theme=studio][data-skin=safir] .tr :is(.ib,.wifi):focus{outline:2px solid #dff2ff}
+body[data-skin=safir] .st-hero{background:linear-gradient(105deg,#172b33,#1f3a44 52%,#263f53);border:1px solid #aadbfe35;box-shadow:0 16px 50px #03070a4d}
+body[data-skin=safir] .st-art{color:#b6e1ff}
+body[data-skin=safir] .st-hero:after{background:linear-gradient(90deg,#172b34 6%,#172b34ef 31%,#192f3a00 75%)}
+body[data-skin=safir] .st-kicker{color:#c4e2fb}
+body[data-skin=safir] .st-kicker:before{background:#bcdfff;box-shadow:0 0 14px #86c7ff}
+body[data-skin=safir] .st-title{color:#f4faff}
+body[data-skin=safir] .st-desc{color:#d4e3f0}
+body[data-skin=safir] .st-btn{border:1px solid #cce9ff42;background:#1a2d37e8;color:#eff6ff}
+body[data-skin=safir] .st-btn:hover{border-color:#d9efff;background:#344558;color:#ffffff}
+body[data-skin=safir] .st-btn:focus{outline:2px solid #ffffff}
+body[data-theme=studio][data-skin=safir] #inRow .hd{background:linear-gradient(135deg,#21343eef,#192a31f5);border:1px solid #c3e6ff42}
+body[data-theme=studio][data-skin=safir] .hd:not(.on):not(.off) .l:before{background:#e86887}
+body[data-theme=studio][data-skin=safir] .wg:not(.addw),body[data-theme=studio][data-skin=safir][data-dock=on] #grid{background:#1c2d34;box-shadow:inset 0 0 0 1px #c9e9ff26}
+body[data-theme=studio][data-skin=safir] .card.addw{border:1px dashed #8aaac978;background:#16262b;color:#d3e5f8}
+body[data-skin=safir] .studio-rail-controls button{border:1px solid #aadbfe40;background:#1f313a;color:#e5f2ff}
+body[data-skin=safir] .studio-rail-controls button[aria-disabled=true]{color:#99a8b6;background:#152327}
+body[data-skin=safir] .studio-rail-controls button:focus{outline:2px solid #e2f1ff}
+body[data-theme=studio][data-skin=safir] #inRow .hd:focus,body[data-theme=studio][data-skin=safir] .card:not(.tvc):focus,body[data-theme=studio][data-skin=safir] .tile:focus{outline:2px solid #dff2ff}
+body[data-theme=studio][data-skin=safir] .side,body[data-theme=studio][data-skin=safir] #modal .modal{background:linear-gradient(150deg,#20333f,#17272b 72%);border-left:1px solid #c9e9ff30}
+body[data-theme=studio][data-skin=safir] .dlgbox{background:#1c2d35}
+body[data-theme=studio][data-skin=safir] .bg.def{background:radial-gradient(ellipse 70% 60% at 88% -8%,#0d4b57 0%,transparent 60%),radial-gradient(ellipse 60% 55% at 0% 105%,#12306a 0%,transparent 60%),#050b16}
+body[data-theme=studio][data-skin=safir] .st-hero{background:linear-gradient(108deg,#06142a,#0a2540 55%,#0b3f4f);border:1px solid #7fe9dc38;box-shadow:0 18px 56px #01060e99,inset 0 1px 0 #ffffff1c}
+body[data-theme=studio][data-skin=safir] .st-hero:after{background:linear-gradient(90deg,#06142a 6%,#06142af0 30%,#0a254000 78%)}
+body[data-theme=studio][data-skin=safir] .st-art:not(.st-art2){display:none}
+body[data-theme=studio][data-skin=safir] .st-art2{display:block}
+.st-art2{display:none}
+body[data-theme=studio][data-skin=safir] .st-kicker{color:#9ff2e6}
+body[data-theme=studio][data-skin=safir] .st-kicker:before{background:#3fe0d0;box-shadow:0 0 14px #3fe0d0}
+body[data-theme=studio][data-skin=safir] .st-title{background:linear-gradient(95deg,#ffffff,#c4f8ef 58%,#8fd0ff);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+body[data-theme=studio][data-skin=safir] .st-btn{background:#0b2238e8;border-color:#7fe9dc40;color:#eafffb}
+body[data-theme=studio][data-skin=safir] .st-btn.st-main{background:var(--accent);color:var(--onacc);border-color:transparent;box-shadow:0 6px 22px #3fe0d040}
+body[data-theme=studio][data-skin=safir] .st-btn:hover{background:#14425a;border-color:#bff9f0;color:#fff}
+body[data-theme=studio][data-skin=safir] .st-btn:focus{outline:2px solid #d6fff8;outline-offset:3px;box-shadow:0 0 28px #3fe0d066}
+body[data-theme=studio][data-skin=safir] #clock{color:#eafffb}
+body[data-theme=studio][data-skin=safir] #date{color:#8fb7c8}
+body[data-theme=studio][data-skin=safir] :is(.card:not(.tvc),.tile,#inRow .hd):focus{outline:2px solid #c8fbf4;outline-offset:2px;box-shadow:0 0 0 4px #3fe0d033,0 0 32px #3fe0d055}
+body[data-theme=studio][data-skin=safir] :is(.card:not(.tvc),.tile){border-radius:18px}
+body[data-theme=studio][data-skin=safir] #row-tv[data-tv-design] .tvc{background:#0c2236;border-color:#5fd6e060;border-radius:15px}
+body[data-theme=studio][data-skin=safir] #row-tv[data-tv-design] .tvc:is(:focus-visible,:hover,.sel,.on){outline-color:#d6fff8}
+body[data-theme=studio][data-skin=safir] #row-tv[data-tv-design] :is(.tvc-n,.tvc-pg){color:#a9c9d6}
+body[data-theme=studio][data-skin=safir] #row-tv[data-tv-design] .tvc-bar{background:#1c4660}
+body[data-theme=studio][data-skin=safir]{--bg:#060d1a;--panel:#0e1b2e;--panel-a:#0e1b2ef2;--t1:#f2fbff;--t2:#b7cfe0;--t3:#8fb0c6;--glass:#ffffff0d;--glass2:#ffffff18;--stroke:#9fe6ff26}
+body[data-theme=studio][data-skin=safir][data-top=wide] .topbar{background:linear-gradient(#050d1afc 63%,#050d1a00)}
+body[data-theme=studio][data-skin=safir][data-top=pill] .topbar{background:#0b1a2cf5}
+body[data-theme=studio][data-skin=safir][data-top=wide] .tr{background:#0c1c2e;border:1px solid #9fe6ff2a}
+body[data-theme=studio][data-skin=safir] .tr :is(.ib,.wifi){background:#142a40;color:#e8f6ff}
+body[data-theme=studio][data-skin=safir] .tr :is(.ib,.wifi):focus{outline:2px solid #d6fff8}
+body[data-theme=studio][data-skin=safir] .side,body[data-theme=studio][data-skin=safir] #modal .modal{background:linear-gradient(150deg,#0f2036,#08121f 72%);border-left:1px solid #7fe9dc30}
+body[data-theme=studio][data-skin=safir] .dlgbox{background:#0c1b2d;border:1px solid var(--stroke)}
+@media(max-width:680px) and (orientation:portrait){
+ body[data-theme=studio][data-skin=safir][data-top] .topbar{background:#06111f}
+ body[data-skin=safir] .st-hero:after{background:linear-gradient(0deg,#06142a 19%,#06142af5 44%,#0a25401a 100%)}
+}
 </style></head>
-<body data-theme="oneui">
+<body data-theme="studio">
 <div id="splash"><div class="sp-in"><svg viewBox="0 0 108 108" width="132" height="132"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><rect x="6" y="6" width="96" height="96" rx="28" fill="url(#spg)"/><path d="M44,36L44,72L75,54z" fill="#fff"/></svg><div class="sp-n">ihlauncher</div><div class="sp-l"><i></i></div></div></div>
 <script>
 (function(){var P=Array.prototype,def=function(o,n,f){if(!o[n])Object.defineProperty(o,n,{value:f,configurable:true,writable:true})};
@@ -501,6 +536,20 @@ window.addEventListener('unhandledrejection',function(e){window.__rep('Promise: 
     </g>
     <g fill="#e3cffb"><circle cx="810" cy="73" r="3"/><circle cx="448" cy="267" r="3"/><circle cx="735" cy="318" r="2"/><path d="M767 147v12m-6-6h12M405 94v8m-4-4h8" stroke="#e3cffb" opacity=".7"/></g>
    </svg>
+   <svg class="st-art st-art2" viewBox="0 0 880 385" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+     <linearGradient id="sfA" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3fe0d0" stop-opacity="0"/><stop offset=".35" stop-color="#3fe0d0" stop-opacity=".8"/><stop offset=".72" stop-color="#4a8dff" stop-opacity=".7"/><stop offset="1" stop-color="#8b6dff" stop-opacity="0"/></linearGradient>
+     <linearGradient id="sfB" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#58f0c8" stop-opacity="0"/><stop offset=".4" stop-color="#2fb7e8" stop-opacity=".65"/><stop offset=".8" stop-color="#7a5cff" stop-opacity=".55"/><stop offset="1" stop-color="#7a5cff" stop-opacity="0"/></linearGradient>
+     <filter id="sfBlur" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="13"/></filter>
+     <mask id="sfMoon"><rect width="880" height="385" fill="#fff"/><circle cx="776" cy="74" r="25" fill="#000"/></mask>
+     <pattern id="sfStars" width="150" height="110" patternUnits="userSpaceOnUse"><circle cx="12" cy="20" r="1" fill="#bfeff0"/><circle cx="78" cy="52" r=".7" fill="#ffe9b0"/><circle cx="130" cy="95" r="1" fill="#9fd4ff"/><circle cx="48" cy="88" r=".6" fill="#bfeff0"/></pattern>
+    </defs>
+    <path fill="url(#sfStars)" opacity=".65" d="M0 0h880v385H0z"/>
+    <g filter="url(#sfBlur)"><path d="M250 300C340 140 430 90 560 130S760 90 880 40V120C760 170 680 190 560 215S340 330 250 300Z" fill="url(#sfA)"/><path d="M330 340C420 210 500 170 610 200S780 160 880 120V190C780 240 700 260 600 280S420 380 330 340Z" fill="url(#sfB)" opacity=".85"/></g>
+    <g fill="none" stroke="url(#sfA)" stroke-width="1.2" opacity=".6"><path d="M250 300C340 140 430 90 560 130S760 90 880 40"/><path d="M330 340C420 210 500 170 610 200S780 160 880 120"/></g>
+    <circle cx="764" cy="80" r="25" fill="#ffe9b0" mask="url(#sfMoon)"/>
+    <path d="M0 385V338C90 308 160 340 250 318S400 288 480 322 640 306 720 326 820 310 880 322V385Z" fill="#030c18" opacity=".88"/>
+   </svg>
    <div class="st-copy">
     <div class="st-kicker">İHLAUNCHER / STÜDYO</div>
     <h1 class="st-title" id="studio-title">Ana ekran</h1>
@@ -533,22 +582,19 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const q=s=>esc(JSON.stringify(String(s)));   /* HTML attribute içine güvenli JS string */
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'};
-const THEMES={studio:'Stüdyo',cosmic:'Kozmik Cam',oneui:'One UI',ocean:'Okyanus',wine:'Şarap'};
-const ACC={blue:['#3B82F6','Mavi'],cyan:['#4DD8FF','Buz mavisi'],teal:['#27BDAE','Turkuaz'],green:['#4DB862','Yeşil'],orange:['#FF9A3D','Turuncu'],pink:['#EE6A9B','Pembe'],purple:['#9A7DFF','Mor'],lavender:['#D0B9FF','Lavanta']};
+const THEMES={studio:'Stüdyo',safir:'Safir'};
+const ACC={blue:['#3B82F6','Mavi'],aqua:['#3FE0D0','Su yeşili'],cyan:['#4DD8FF','Buz mavisi'],teal:['#27BDAE','Turkuaz'],green:['#4DB862','Yeşil'],orange:['#FF9A3D','Turuncu'],pink:['#EE6A9B','Pembe'],purple:['#9A7DFF','Mor'],lavender:['#D0B9FF','Lavanta']};
 const SIZES={s:['Küçük',72],m:['Orta',86],l:['Büyük',100],xl:['Çok büyük',116]};
 const ISH={sq:'Squircle (One UI)',ci:'Daire',rd:'Yuvarlak kare',sh:'Köşeli kare',or:'Orijinal'},ILB={always:'Hep görünsün',focus:'Sadece seçilince',off:'Gizli'};
 const BLR={0:['Kapalı',0],1:['Hafif',12],2:['Orta',22],3:['Güçlü',34]},TOPS={pill:'Yüzen hap',wide:'Geniş'},FXS={scale:'Büyüt',glow:'Parlama',ring:'Halka',lift:'Yüksel'},TLS={icon:'Simge',banner:'Banner'},IDL={0:'Kapalı',20:'20 sn',45:'45 sn',90:'90 sn'};
 const LOOKS={
  studio:{n:'Stüdyo',d:'Lavanta vurgulu koyu ana ekran, yörünge çizimi ve Canlı TV, kaynak ve uygulama kısayolları',v:{theme:'studio',accent:'lavender',tileStyle:'icon',topStyle:'wide',blur:1,focusFx:'ring',dock:true,wall:'',icLabel:'always',icShape:'sq',iconSize:'m'}},
- cosmic:{n:'Kozmik Cam',d:'Kutup ışıklı yıldızlı gece, buzlu cam paneller, buz mavisi neon parlama ve dijital saat',v:{theme:'cosmic',accent:'cyan',tileStyle:'icon',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:aurora',icLabel:'focus',icShape:'sq',iconSize:'l'}},
- calm:{n:'Sakin',d:'Gün doğumu manzarası, cam panel içinde simgeler, adlar sadece odakta',v:{theme:'oneui',accent:'blue',tileStyle:'icon',topStyle:'pill',blur:2,focusFx:'ring',dock:true,wall:'scene:dawn',icLabel:'focus',icShape:'sq',iconSize:'l'}},
- aurora:{n:'Aurora',d:'Kuzey ışıkları ve buzlu göl, okyanus tonlu derin cam, turkuaz parlama, büyük net simgeler',v:{theme:'ocean',accent:'teal',tileStyle:'icon',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:nordic',icLabel:'focus',icShape:'sq',iconSize:'l'}},
- dusk:{n:'Alacakaranlık',d:'Mor-turuncu gökyüzü, şarap tonlu cam, pembe vurgu, büyük net simgeler',v:{theme:'wine',accent:'pink',tileStyle:'icon',topStyle:'pill',blur:3,focusFx:'glow',dock:true,wall:'scene:twilight',icLabel:'focus',icShape:'sq',iconSize:'l'}}};
+ safir:{n:'Safir',d:'Derin safir mavisi gece, kutup ışığı çizimi, su yeşili vurgu ve parlayan odak; Canlı TV, kaynak ve uygulama kısayolları',v:{theme:'safir',accent:'aqua',tileStyle:'icon',topStyle:'wide',blur:2,focusFx:'glow',dock:true,wall:'',icLabel:'always',icShape:'sq',iconSize:'m'}}};
 const ROT={0:'Kapalı',30:'30 dk',60:'1 saat',1440:'Her gün'};
 const LK=[['theme',()=>Object.keys(THEMES)],['accent',()=>Object.keys(ACC)],['icShape',()=>Object.keys(ISH)],['icLabel',()=>Object.keys(ILB)],['iconSize',()=>Object.keys(SIZES)],['tileStyle',()=>Object.keys(TLS)],['topStyle',()=>Object.keys(TOPS)],['blur',()=>Object.keys(BLR)],['focusFx',()=>Object.keys(FXS)],['dock',()=>['0','1']],['idle',()=>Object.keys(IDL)],['rot',()=>Object.keys(ROT)],['wall',()=>['','auto'].concat(Object.keys(SCN).map(k=>'scene:'+k))]];
 const CH=(o,cur,fn)=>'<div class="chips">'+Object.keys(o).map(k=>'<div class="chip'+(String(cur)===String(k)?' on':'')+'" onclick="'+fn+'(\''+k+'\')">'+(Array.isArray(o[k])?o[k][0]:o[k])+'</div>').join('')+'</div>';
 const ROWS={in:'Giriş Kaynakları',tv:'Canlı TV',wg:'Kartlar',fav:'Favoriler',apps:'Tüm Uygulamalar'},ROWI={in:'',tv:'',wg:'',fav:'',apps:''};
-const DEF={fav:[],hidden:[],order:[],folders:{},theme:'oneui',accent:'teal',icShape:'sq',icLabel:'focus',wall:'auto',blur:1,tileStyle:'icon',topStyle:'pill',focusFx:'ring',dock:true,idle:90,lite:'auto',liteAuto:false,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
+const DEF={fav:[],hidden:[],order:[],folders:{},theme:'studio',accent:'lavender',icShape:'sq',icLabel:'focus',wall:'auto',blur:1,tileStyle:'icon',topStyle:'pill',focusFx:'ring',dock:true,idle:90,lite:'auto',liteAuto:false,bootApps:[],hist:[],cecNames:{},inOrder:[],showHidden:false,keymap:{},keyNames:{},labels:{},
  rmlog:{},updRepo:'ishakcic/ihlauncher',updMode:'ask',updSkip:'',updAt:0,dbUrl:'',dbRemote:null,seen:[],newApps:{},unusedAt:0,autoBackup:{on:false,days:7,last:0},quickBar:true,colorKeys:{red:'voice',green:'notif',yellow:'search',blue:'settings'},iconSize:'l',auto:{on:false,h:12,bg:false,last:0},rows:[{id:'in',on:true},{id:'tv',on:true},{id:'wg',on:true},{id:'fav',on:true},{id:'apps',on:true}],widgets:[{id:'w1',t:'sys'},{id:'w2',t:'storage'},{id:'w3',t:'net'}],wseq:3};
 let S=JSON.parse(JSON.stringify(DEF));
 if(typeof Native==='undefined'){window.Native={sync:()=>'{}',call:(id,m)=>setTimeout(()=>window.__res(id,m==='apps'?'[]':'{}'),10)}}
@@ -560,7 +606,7 @@ function saveNow(){clearTimeout(svT);Native.sync('setState',JSON.stringify({s:JS
 let svT;function save(){clearTimeout(svT);svT=setTimeout(()=>Native.sync('setState',JSON.stringify({s:JSON.stringify(S)})),250)}
 function load(){const s=NS('getState');if(s&&typeof s==='object'&&!s.error)Object.assign(S,s);
  ['nightAuto','nightOn','clock','removed'].forEach(k=>delete S[k]);              /* eski sürüm alanları */
- const FRESH=!S.themeV&&!S.v3&&!S.v5&&!S.v6;if(!S.themeV){S.theme='oneui';S.accent='blue';S.themeV=2}if(!THEMES[S.theme])S.theme='oneui';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3){const w=S.wall;Object.assign(S,LOOKS.calm.v);if(w&&!/^scene:/.test(w))S.wall=w;S.v3=1}if(!S.v5)S.v5=1;if(!S.v6)S.v6=1;if(FRESH)Object.assign(S,{theme:'oneui',accent:'teal',icShape:'sq',icLabel:'focus',iconSize:'l',tileStyle:'icon',topStyle:'pill',blur:1,focusFx:'ring',dock:true,idle:90,rot:0,wall:'auto'});if(!S.cosV){const w=S.wall;Object.assign(S,LOOKS.cosmic.v);S.cosV=1}S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
+ const FRESH=!S.themeV&&!S.v3&&!S.v5&&!S.v6;if(!S.themeV){S.theme='studio';S.accent='lavender';S.themeV=2}if(!THEMES[S.theme])S.theme='studio';if(!ISH[S.icShape])S.icShape='sq';if(!ILB[S.icLabel])S.icLabel='always';if(!SIZES[S.iconSize])S.iconSize='m';S.blur=S.blur===true?2:(+S.blur||0);if(!BLR[S.blur])S.blur=0;if(!TOPS[S.topStyle])S.topStyle='wide';if(!FXS[S.focusFx])S.focusFx='scale';if(!TLS[S.tileStyle])S.tileStyle='icon';if(!(S.idle in IDL))S.idle=0;S.rot=+S.rot||0;if(!(S.rot in ROT))S.rot=0;if(!S.v4){if(!S.updRepo)S.updRepo='ishakcic/ihlauncher';S.v4=1}if(!['off','ask','auto'].includes(S.updMode))S.updMode='ask';if(!S.v3)S.v3=1;if(!S.v5)S.v5=1;if(!S.v6)S.v6=1;if(FRESH)Object.assign(S,{theme:'studio',accent:'lavender',icShape:'sq',icLabel:'focus',iconSize:'l',tileStyle:'icon',topStyle:'pill',blur:1,focusFx:'ring',dock:true,idle:90,rot:0,wall:'auto'});S.auto=Object.assign({on:false,h:12,bg:false,last:0},S.auto||{});S.colorKeys=Object.assign({},DEF.colorKeys,S.colorKeys||{});S.autoBackup=Object.assign({on:false,days:7,last:0},S.autoBackup||{});if(!Array.isArray(S.seen))S.seen=[];if(!S.newApps||typeof S.newApps!=='object')S.newApps={};if(!ACC[S.accent])S.accent='blue';
  for(const k of ['keymap','keyNames','cecNames','folders','labels','rmlog'])S[k]=S[k]||{};S.docks=Array.isArray(S.docks)?S.docks:[];
  for(const k of ['fav','hidden','order','bootApps','hist','inOrder','widgets'])if(!Array.isArray(S[k]))S[k]=JSON.parse(JSON.stringify(DEF[k]));
  if(!Array.isArray(S.rows))S.rows=[];S.rows=S.rows.filter(r=>ROWS[r.id]);
@@ -577,7 +623,7 @@ const lumOf=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16&255)+.587*(n>
 function buildClip(){if($('#clipSvg'))return;const n=5,N=96,p=[];for(let k=0;k<N;k++){const t=k/N*2*Math.PI,c=Math.cos(t),sn=Math.sin(t);p.push((.5+.5*Math.sign(c)*Math.pow(Math.abs(c),2/n)).toFixed(4)+' '+(.5+.5*Math.sign(sn)*Math.pow(Math.abs(sn),2/n)).toFixed(4))}
  document.body.insertAdjacentHTML('beforeend','<svg id="clipSvg" width="0" height="0" style="position:absolute"><defs><clipPath id="clipSq" clipPathUnits="objectBoundingBox"><path d="M'+p.join('L')+'Z"/></clipPath></defs></svg>')}
 window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{if(typeof applyTheme==='function'&&typeof S!=='undefined')applyTheme()},200)});
-function applyTheme(){applyLite();buildClip();const d=document.body.dataset;d.theme=S.theme;d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
+function applyTheme(){applyLite();buildClip();const d=document.body.dataset;d.theme=(S.theme==='safir'?'studio':S.theme);d.skin=S.theme;{const kk=document.querySelector('.st-kicker');if(kk)kk.textContent='İHLAUNCHER / '+String(THEMES[S.theme]||'').toLocaleUpperCase('tr-TR')}d.ish=S.icShape;d.lb=S.icLabel;const a=ACC[S.accent][0],r=document.documentElement.style;r.setProperty('--accent',a);r.setProperty('--accent-soft',hexA(a,.22));r.setProperty('--onacc',lumOf(a)>.62?'#111':'#fff');const kz=innerHeight<540?.72:1;r.setProperty('--isz',Math.round(SIZES[S.iconSize][1]*kz)+'px');const bw=Math.round(({s:150,m:180,l:210,xl:240}[S.iconSize]||180)*kz);r.setProperty('--bw',bw+'px');r.setProperty('--bh',Math.round(bw*.5625)+'px');r.setProperty('--bl',BLR[S.blur][1]+'px');d.blur=S.blur;d.top=S.topStyle;d.fx=S.focusFx;d.dock=S.dock?'on':'off';document.body.classList.toggle('hasw',!!wallCss(S.wall))}
 /* ===== Saat ===== */
 function tick(){const n=new Date(),t=n.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),d=n.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
  $('#clock').textContent=t;$('#date').textContent=d;setB('time',t);setB('date2',d)}
@@ -700,7 +746,7 @@ window.__back=function(){if(MV){mvEnd(false);return true}if($('#dock').classList
  const c=$('#content');if($('#q').value){$('#q').value='';renderGrid();return true}
  if(c.scrollTop>10){c.scrollTo({top:0});const f=$('#favRow .card,#grid .tile');if(f)focusEl(f)}
  return true};
-function homeFocus(){return (S.theme==='studio'&&$('#studio-tv'))||$('#favRow .card,#grid .tile')}
+function homeFocus(){return ((S.theme==='studio'||S.theme==='safir')&&$('#studio-tv'))||$('#favRow .card,#grid .tile')}
 window.__home=function(){hdExit();closeDlg();closeModal();closePanels();$('#content').scrollTo({top:0});const f=homeFocus();if(f)focusEl(f)};
 function openPanel(n){closePanels();opener=document.activeElement;panel=n;$('#'+n+'Panel').classList.add('open');if(n==='notif')loadNotifs();else renderSettings();setTimeout(focusFirst,80)}
 function closePanels(){const had=panel;$$('.side').forEach(s=>s.classList.remove('open'));panel=null;if(had&&opener&&opener.isConnected)try{opener.focus({preventScroll:true})}catch(e){}}
@@ -945,7 +991,7 @@ const apBar=t=>'<div class="aptabs">'+APT.map(x=>'<div class="aptab'+(x[0]===t?'
 function apGo(t){keepNext();({look:lookView,theme:openTheme,icons:iconSettings,wall:openWall})[t]()}
 function openTheme(){curView='theme';mset('Görünüm',apBar('theme')+'<div class="sec">Tema</div><div class="ts">'+Object.keys(THEMES).map(k=>'<div class="to'+(S.theme===k?' on':'')+'" onclick="setTheme(\''+k+'\')"><i class="pv '+k+'"></i>'+THEMES[k]+'</div>').join('')+'</div>'+
  '<div class="sec">Vurgu rengi</div><div class="acs">'+Object.keys(ACC).map(k=>'<div class="ac'+(S.accent===k?' on':'')+'" style="background:'+ACC[k][0]+'" onclick="setAccent(\''+k+'\')">'+ACC[k][1]+'</div>').join('')+'</div>',null)}
-function setTheme(t){S.theme=t;applyTheme();save();keepNext();openTheme();toast('🎨','Tema: '+THEMES[t])}
+function setTheme(t){S.theme=t;if(t==='safir'&&S.accent==='lavender')S.accent='aqua';else if(t==='studio'&&S.accent==='aqua')S.accent='lavender';applyTheme();save();keepNext();openTheme();toast('🎨','Tema: '+THEMES[t])}
 function setAccent(a){S.accent=a;applyTheme();save();keepNext();openTheme()}
 function applyPreset(k){const p=LOOKS[k];if(!p)return;Object.assign(S,p.v);save();applyTheme();applyWall();renderAll();toast('✅',p.n+' görünümü uygulandı');keepNext();lookView()}
 function setLook(key,v){S[key]=(key==='blur'||key==='idle')?+v:(key==='dock'?v==='1':v);save();applyTheme();if(key==='tileStyle'||key==='dock')renderAll();bump();keepNext();lookView()}

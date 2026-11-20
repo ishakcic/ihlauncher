@@ -13,8 +13,8 @@ android {
         applicationId = "com.ihlauncher.tv"
         minSdk = 24
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.2.7"
+        versionCode = 12
+        versionName = "1.2.8"
     }
     // Stable signing: so in-app updates (same signature required) work on every build.
     if (stableKs != null) {
